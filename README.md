@@ -1,0 +1,228 @@
+# NST Pak Manager
+
+App homebrew per Nintendo Switch (Atmosphère) che scarica file `.pak` da una
+cartella remota e li installa come mod di **Crash Bandicoot N. Sane Trilogy**,
+con backup e ripristino.
+
+Per ogni file scaricato scegli quale `.pak` originale del gioco deve sostituire:
+il file remoto può chiamarsi come vuoi (es. `MioLivello_v2.pak`) e viene
+installato con il nome dell'originale (es. `L101_NSanityBeach.pak`).
+
+## Come funziona il backup
+
+I file originali del gioco stanno dentro il gioco stesso e **non vengono mai
+toccati**. Atmosphère (LayeredFS) carica al loro posto i file che trova in:
+
+```
+sdmc:/atmosphere/contents/0100D1B006744000/romfs/archives/
+```
+
+L'app scrive lì il file scaricato con il nome dell'originale scelto. Se in quella
+cartella c'era già un file con quel nome (per esempio una mod installata a mano),
+prima lo sposta in:
+
+```
+sdmc:/switch/nst-pak-manager/backup/0100D1B006744000/
+```
+
+**Ripristina** toglie il file installato dall'app e rimette quello salvato. Se
+non c'era nulla da salvare, togliere il file basta: il gioco torna a usare il
+suo originale.
+
+Altre garanzie:
+- il download va prima in un file `.part`: se si interrompe o fallisce, i file
+  esistenti restano come prima;
+- prima di installare controlla dimensione e firma del file (`IGA\x1A`), così
+  una pagina di errore o un link sbagliato non finisce nella cartella del gioco;
+- reinstallare un file già installato dall'app non sovrascrive il backup
+  originale;
+- lo stato (installazioni e abbinamenti scelti) è salvato in
+  `sdmc:/switch/nst-pak-manager/state-0100D1B006744000.json`.
+
+## Installazione sulla Switch
+
+1. Compila l'app (vedi sotto) e copia `nst-pak-manager.nro` in
+   `sdmc:/switch/nst-pak-manager/`.
+2. Avvia l'app dall'Homebrew Menu. Al primo avvio crea
+   `sdmc:/switch/nst-pak-manager/config.json` di esempio.
+3. Modifica `config.json` dal PC (o via FTP) con le tue sorgenti.
+4. Crea `originali.txt` (vedi sotto) e copialo nella stessa cartella. Poi riavvia.
+
+**Chiudi Crash prima di installare o ripristinare.** Se il gioco è aperto in
+background l'app mostra un avviso.
+
+## Elenco degli originali (`originali.txt`)
+
+Serve per proporti i nomi dei `.pak` del gioco quando scegli cosa sostituire. Si
+crea una volta dal dump della RomFS (in Eden: tasto destro sul gioco → *Dump
+RomFS*):
+
+```
+python tools/list_originals.py "<cartella del dump>"
+```
+
+Copia il file `originali.txt` creato in `sdmc:/switch/nst-pak-manager/`. È un
+semplice file di testo, un nome per riga: puoi anche scriverlo o correggerlo a
+mano. Senza questo file l'app funziona lo stesso, ma il nome va scritto con la
+tastiera.
+
+## Scegliere l'originale da sostituire
+
+Nella scheda REMOTI premi **A** su un file: si apre l'elenco degli originali.
+
+- il cursore parte dall'originale suggerito, segnato con `*`: quello scelto
+  l'ultima volta per lo stesso file, oppure il campo `target` del manifest,
+  oppure lo stesso nome se è tra gli originali;
+- **Y** apre la tastiera per cercare (es. `jungle`), **X** toglie il filtro;
+- la prima voce permette di scrivere il nome a mano, la seconda di tenere il
+  nome del file scaricato;
+- accanto agli originali vedi `ora: <file>` se li hai già sostituiti con l'app,
+  oppure `mod esterna` se nella cartella c'è un file messo a mano (finirà nel backup).
+
+Il file scelto appare come `MioLivello_v2.pak -> L101_NSanityBeach.pak`. Premi
+di nuovo **A** per toglierlo dalla selezione. Se assegni un originale già
+assegnato a un altro file, l'abbinamento precedente viene tolto, così due file
+non finiscono mai sullo stesso nome. **Y** nella scheda REMOTI seleziona in un
+colpo tutti i file che hanno un suggerimento.
+
+## Sorgenti
+
+`config.json` può contenere più sorgenti; nell'app si cambia con il tasto `-`.
+
+### Cartella web (`"type": "http"`)
+
+Va bene qualsiasi indirizzo che mostri l'elenco dei file (link ai `.pak`), oppure
+un `manifest.json`.
+
+Il modo più semplice è il PC di casa. Nella cartella con i `.pak`:
+
+```
+python -m http.server 8000
+```
+
+e nella config metti l'indirizzo IP del PC (su Windows lo trovi con `ipconfig`):
+
+```json
+{ "name": "PC di casa", "type": "http", "url": "http://192.168.1.50:8000/" }
+```
+
+Se Windows chiede il permesso del firewall, consenti l'accesso sulla rete privata.
+
+Per un hosting che non mostra l'elenco della cartella, genera un manifest con
+`python tools/make_manifest.py <cartella>`, caricalo insieme ai `.pak` e usa il
+suo URL:
+
+```json
+{ "name": "Hosting", "type": "http", "url": "https://esempio.it/pak/manifest.json" }
+```
+
+Formato del manifest (`url`, `size` e `target` facoltativi; `url` può essere
+relativo; `target` è l'originale proposto per quel file):
+
+```json
+{ "files": [ { "name": "MioLivello_v2.pak", "size": 123456789, "target": "L101_NSanityBeach.pak" },
+             { "name": "update.pak", "url": "https://altro.sito/update.pak" } ] }
+```
+
+### Google Drive (`"type": "gdrive"`)
+
+1. In Drive: tasto destro sulla cartella con i `.pak` → **Condividi** → Accesso
+   generale: **Chiunque abbia il link** (Visualizzatore).
+2. In [Google Cloud Console](https://console.cloud.google.com/): crea un progetto,
+   apri **API e servizi → Libreria** e abilita **Google Drive API**.
+3. **API e servizi → Credenziali → Crea credenziali → Chiave API**. Conviene
+   limitare la chiave alla sola Google Drive API.
+4. Nella config:
+
+```json
+{
+  "name": "Google Drive",
+  "type": "gdrive",
+  "folder": "https://drive.google.com/drive/folders/ID_DELLA_CARTELLA",
+  "api_key": "LA_TUA_CHIAVE_API"
+}
+```
+
+La chiave dà accesso solo ai file condivisi pubblicamente, ma chi la conosce può
+leggere quella cartella: non pubblicarla.
+
+### Opzioni avanzate
+
+| Campo       | Default                                          | A cosa serve |
+|-------------|--------------------------------------------------|--------------|
+| `title_id`  | `0100D1B006744000`                               | Gioco di destinazione |
+| `mod_dir`   | `/atmosphere/contents/{title_id}/romfs/archives` | Cartella in cui installare |
+| `ca_file`   | `cacert.pem` nella cartella dell'app (se esiste) | Certificati HTTPS aggiuntivi |
+
+Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
+<https://curl.se/docs/caextract.html> e mettilo in `sdmc:/switch/nst-pak-manager/`.
+
+## Comandi
+
+| Tasto | Scheda REMOTI | Scheda INSTALLATI |
+|---|---|---|
+| Su / Giù | sposta il cursore | sposta il cursore |
+| Sinistra / Destra | pagina precedente / successiva | idem |
+| A | scegli l'originale da sostituire / togli dalla selezione | seleziona / deseleziona |
+| Y | seleziona i file con un suggerimento / azzera | seleziona tutto / niente |
+| X | installa i selezionati (o sceglie per quello sotto il cursore) | ripristina i selezionati |
+| ZR | ricarica l'elenco (e `originali.txt`) | — |
+| L / R | vai a REMOTI / INSTALLATI | |
+| - | cambia sorgente | |
+| + | esci | |
+| B (durante il download) | annulla | |
+
+Nella scheda REMOTI **I** indica un file già installato dall'app, con tra
+parentesi l'originale che sostituisce. Nella scheda INSTALLATI ogni riga mostra
+`originale <- file scaricato`.
+
+## Compilare
+
+### Con GitHub Actions (niente da installare)
+
+1. Crea un repository su GitHub (anche privato) e carica questa cartella.
+2. Nella scheda **Actions** parte il workflow *Build*: esegue i test e compila.
+3. Scarica l'artifact **nst-pak-manager-sd** e copia il contenuto nella radice
+   della SD.
+
+### In locale
+
+Installa [devkitPro](https://devkitpro.org/wiki/Getting_Started) con il pacchetto
+*Switch development* e la libreria curl:
+
+```
+dkp-pacman -S switch-dev switch-curl
+make
+```
+
+(su Windows i comandi vanno nella shell MSYS2 di devkitPro, con `pacman` al
+posto di `dkp-pacman`).
+
+### Test della logica su PC
+
+```
+sh tests/run_tests.sh
+```
+
+Compila il codice di download/installazione/backup per Linux (serve
+`libcurl4-openssl-dev`) e lo prova contro un server locale che simula cartella
+web, manifest e API di Google Drive.
+
+Si può provare anche l'interfaccia sul PC, con un `switch.h` finto che legge i
+tasti da uno scenario e stampa le schermate:
+
+```
+python tests/ui_sim/ui_sim.py tests/ui_sim/scenari/completo.txt --config tests/ui_sim/sim_config.json
+```
+
+## Struttura
+
+```
+source/main.cpp   interfaccia (console libnx, solo Switch)
+source/core.*     configurazione, sorgenti, installazione, backup, ripristino
+source/net.*      download con libcurl
+source/util.*     file, percorsi, URL
+source/cJSON.*    parser JSON (MIT, vedi cJSON.LICENSE)
+tests/            test su PC (tests/ui_sim: interfaccia simulata)
+tools/            list_originals.py, make_manifest.py
+```

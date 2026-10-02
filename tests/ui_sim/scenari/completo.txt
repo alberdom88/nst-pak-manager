@@ -1,0 +1,20 @@
+# senza originali.txt: la scelta propone "stesso nome"
+. SNAP
+A . SNAP
+A . SNAP
+DOWN DOWN A A . SNAP
+X . SNAP
+A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+A . SNAP
+# scheda installati, poi sorgente Google Drive: Y propone gli abbinamenti ricordati
+R . SNAP
+MINUS . SNAP
+DOWN A L Y . SNAP
+# ripristina update.pak
+R DOWN X . SNAP
+A . SNAP
+A . SNAP
+# gioco aperto in background: avviso
+GAME L ZR . SNAP
+X . SNAP
+B . PLUS .

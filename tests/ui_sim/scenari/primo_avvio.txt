@@ -1,0 +1,2 @@
+# nessun config.json: l'app ne crea uno di esempio
+. SNAP PLUS .

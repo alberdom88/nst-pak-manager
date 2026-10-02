@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-core:
+    name: Test logica (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+      - run: sh tests/run_tests.sh
+
+  build-nro:
+    name: Compila .nro (devkitPro)
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compila
+        run: make -j"$(nproc)"
+      - name: Prepara cartella per la SD
+        run: |
+          mkdir -p sd/switch/nst-pak-manager
+          cp nst-pak-manager.nro sd/switch/nst-pak-manager/
+          cp sdcard/switch/nst-pak-manager/config.example.json sd/switch/nst-pak-manager/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nst-pak-manager-sd
+          path: sd
