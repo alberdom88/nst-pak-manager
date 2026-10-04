@@ -1,0 +1,4763 @@
+{
+"versione_script": 1,
+"switch": {
+"archivi": 166,
+"versione_archivio": {
+"12": 166
+},
+"radici": {
+"temporary/mack/data/nx/output/": 29644
+},
+"igz": 25023,
+"igz_piattaforma": {
+"2": 25023
+},
+"pool": {
+"Default": 50072,
+"Image": 5110,
+"Vertex": 3055,
+"ShaderBinary": 83,
+"Geometry": 2
+},
+"hkx": {
+"hk_2014.1.0-r1 regole 08010101": 861
+},
+"errori": {},
+"tipi": {
+"ActorInput": {
+"96": 168
+},
+"ActorInputCommand": {
+"120": 168
+},
+"CAIAggroRule": {
+"48": 1
+},
+"CAIAggroRuleList": {
+"40": 1
+},
+"CAIAggroRuleTable": {
+"72": 1
+},
+"CAIAggroRuleTableList": {
+"40": 1
+},
+"CAIAggroTargetComponentData": {
+"64": 9
+},
+"CAIAttackCoordinatorData": {
+"32": 1
+},
+"CAIFallHandler": {
+"72": 23
+},
+"CAISystemData": {
+"104": 1
+},
+"CAITargetSourceBasic": {
+"16": 1
+},
+"CAITargetSourceList": {
+"40": 1
+},
+"CAITraversalHandlingLogic": {
+"176": 23
+},
+"CAccelerationVehicleSetting": {
+"32": 1
+},
+"CAccelerationVehicleSettingList": {
+"48": 1
+},
+"CAccoladeCharacterInfo": {
+"24": 9
+},
+"CAccoladeComponentData": {
+"24": 9
+},
+"CAccoladeData": {
+"104": 1
+},
+"CAccoladeDataList": {
+"40": 1
+},
+"CAccoladeGoalDataList": {
+"40": 1
+},
+"CAccoladeGraphGoalData": {
+"16": 1
+},
+"CAccoladeRequirementList": {
+"40": 1
+},
+"CActor": {
+"568": 168
+},
+"CActorData": {
+"280": 169
+},
+"CActorInputMap": {
+"64": 3
+},
+"CActorInputMapComponentData": {
+"24": 6
+},
+"CActorInputMapList": {
+"40": 1
+},
+"CActorTimeScale": {
+"56": 168
+},
+"CActorTimeScaleNonRefcountedList": {
+"40": 168
+},
+"CAirArcadeControllerComponentData": {
+"56": 2
+},
+"CAirBorderComponentData": {
+"32": 3
+},
+"CAirLinearVehicleHandlingComponentData": {
+"1832": 2
+},
+"CAirManeuverVehicleSetting": {
+"176": 1
+},
+"CAirTopSpeedVehicleSetting": {
+"72": 1
+},
+"CAirVehicleCamera": {
+"1408": 3
+},
+"CAirVehicleControllerComponentData": {
+"2664": 2
+},
+"CAirVehicleControllerSettings": {
+"112": 1
+},
+"CAlphaClipAttr": {
+"24": 76
+},
+"CAlphaClipBundle": {
+"32": 5566
+},
+"CAmbientAudioComponentData": {
+"48": 274
+},
+"CAmbientDiffuseGeneratorRenderPass": {
+"592": 10
+},
+"CAmbientOcclusionRenderData": {
+"24": 1
+},
+"CAmbientOcclusionRenderPass": {
+"592": 6
+},
+"CAnalogStickDirectionToVfxAnalogStickTable": {
+"64": 1
+},
+"CAnimationClip": {
+"32": 150
+},
+"CAnimationEventTimeline": {
+"40": 161
+},
+"CAnimationEventTimelineList": {
+"40": 162
+},
+"CAnimationSubStatesDataTable": {
+"64": 4
+},
+"CAnimationTimelinesComponentData": {
+"24": 184
+},
+"CArenaDriftData": {
+"120": 7
+},
+"CArenaDriftVehicleSetting": {
+"152": 1
+},
+"CArenaDriftVehicleSettingList": {
+"48": 1
+},
+"CArenaTargetingComponentData": {
+"80": 4
+},
+"CArmorVehicleSetting": {
+"24": 1
+},
+"CArmorVehicleSettingList": {
+"48": 1
+},
+"CAttackBone": {
+"48": 30
+},
+"CAttackImmunityTimestampTable": {
+"64": 489
+},
+"CAttackNumberTimestampTable": {
+"64": 489
+},
+"CAttackRegionShape": {
+"48": 30
+},
+"CAttackRegionShapeList": {
+"40": 30
+},
+"CAttributeBoostMessage": {
+"72": 1
+},
+"CAudioArchive": {
+"56": 425
+},
+"CAudioArchiveHandleList": {
+"40": 188
+},
+"CAudioArchiveList": {
+"40": 1
+},
+"CAudioBinkSettings": {
+"32": 1
+},
+"CAudioBinkSettingsList": {
+"40": 1
+},
+"CAudioFadeData": {
+"24": 1
+},
+"CAudioGraph": {
+"64": 7
+},
+"CAudioGraphDriver": {
+"48": 7
+},
+"CAudioGraphDriverList": {
+"40": 7
+},
+"CAudioGraphDriverModeEpicJump": {
+"72": 6
+},
+"CAudioGraphDriverModeFlying": {
+"88": 2
+},
+"CAudioGraphDriverModeInAir": {
+"72": 5
+},
+"CAudioGraphDriverModeList": {
+"40": 7
+},
+"CAudioGraphDriverModeRubberBurning": {
+"72": 6
+},
+"CAudioGraphDriverModeSeaExpedition": {
+"72": 1
+},
+"CAudioGraphDriverModeSurfaceAccel": {
+"144": 5
+},
+"CAudioGraphDriverModeSurfaceAccelStage": {
+"32": 5
+},
+"CAudioGraphDriverModeSurfaceAccelStageList": {
+"40": 5
+},
+"CAudioGraphDriverModeSurfaceBoost": {
+"88": 4
+},
+"CAudioGraphDriverModeSurfaceBurnout": {
+"208": 1
+},
+"CAudioGraphDriverModeSurfaceDecel": {
+"64": 5
+},
+"CAudioGraphDriverModeSurfaceDrift": {
+"136": 5
+},
+"CAudioGraphDriverModeSurfaceReverse": {
+"64": 5
+},
+"CAudioGraphDriverModeSurfaceStationary": {
+"72": 5
+},
+"CAudioGraphHandleList": {
+"40": 1
+},
+"CAudioGraphList": {
+"40": 7
+},
+"CAudioGraphModule": {
+"72": 7
+},
+"CAudioGraphModuleList": {
+"40": 7
+},
+"CBaseInputTransformControllerList": {
+"40": 6
+},
+"CBaseMovementControllerList": {
+"40": 499
+},
+"CBehaviorActivatorNodeHandleList": {
+"40": 18
+},
+"CBehaviorActivatorNodeMap": {
+"64": 66
+},
+"CBehaviorClip": {
+"56": 66
+},
+"CBehaviorComponentData": {
+"56": 168
+},
+"CBehaviorEventFilterData": {
+"24": 168
+},
+"CBehaviorEventFilterItemData": {
+"40": 164
+},
+"CBehaviorEventFilterTable": {
+"64": 168
+},
+"CBehaviorEventTimeline": {
+"40": 54
+},
+"CBehaviorEventTimelineList": {
+"40": 66
+},
+"CBehaviorGraphReflectionData": {
+"80": 66
+},
+"CBehaviorGraphReflectionDataEntry": {
+"32": 66
+},
+"CBehaviorGraphReflectionDataEntryList": {
+"40": 66
+},
+"CBehaviorLayer": {
+"32": 58
+},
+"CBehaviorLayerGenerator": {
+"40": 58
+},
+"CBehaviorLayerList": {
+"40": 58
+},
+"CBehaviorLogic": {
+"72": 48
+},
+"CBehaviorLogicDataTable": {
+"64": 168
+},
+"CBehaviorPhysicsCapsuleComponentData": {
+"64": 18
+},
+"CBehaviorPhysicsGenericShapeComponentData": {
+"72": 58
+},
+"CBehaviorPhysicsPencilComponentData": {
+"64": 5
+},
+"CBehaviorState": {
+"48": 67
+},
+"CBehaviorStateGroup": {
+"32": 17
+},
+"CBehaviorStateList": {
+"40": 66
+},
+"CBehaviorStateMachine": {
+"56": 66
+},
+"CBehaviorStateMachineList": {
+"40": 66
+},
+"CBehaviorSyncComponentData": {
+"32": 23
+},
+"CBlackboard": {
+"32": 11
+},
+"CBlackboardInfoTable": {
+"64": 11
+},
+"CBlackboardInfoUpdaterList": {
+"40": 11
+},
+"CBloomRenderPass": {
+"128": 9
+},
+"CBobController": {
+"120": 208
+},
+"CBoltOnMessage": {
+"64": 12
+},
+"CBoltPoint": {
+"192": 573
+},
+"CBoltPointContainerComponentData": {
+"24": 260
+},
+"CBoltPointHandleList": {
+"40": 2
+},
+"CBoltPointList": {
+"40": 263
+},
+"CBoxLightComponentData": {
+"96": 111
+},
+"CBoxShape": {
+"64": 361
+},
+"CBuoyancyComponentData": {
+"88": 20
+},
+"CBuoyancyVehicleSetting": {
+"32": 1
+},
+"CBuoyancyVehicleSettingList": {
+"48": 1
+},
+"CButtonAliasMapping": {
+"64": 1
+},
+"CButtonListenerHandler": {
+"144": 10
+},
+"CButtonListenerInstanceTable": {
+"64": 10
+},
+"CButtonMap": {
+"64": 1
+},
+"CButtonToAnalogStickDirectionTable": {
+"64": 1
+},
+"CCEAcquireCombatTargets": {
+"144": 11
+},
+"CCEAnimateBoltons": {
+"104": 2
+},
+"CCEAtkData": {
+"32": 30
+},
+"CCEAtkRegion": {
+"120": 30
+},
+"CCEAttackSpawn": {
+"88": 13
+},
+"CCEBeginAttackInputWindow": {
+"80": 8
+},
+"CCEBeginAttackTransitionWindow": {
+"80": 8
+},
+"CCEBeginJumpInputWindow": {
+"72": 2
+},
+"CCEBeginRunTransitionWindow": {
+"72": 5
+},
+"CCEBehaviorEvent": {
+"80": 12
+},
+"CCEBoltOn": {
+"104": 4
+},
+"CCECustomEvent": {
+"80": 14
+},
+"CCEDockToFirstCombatTargetActor": {
+"112": 4
+},
+"CCEEffectFile": {
+"152": 35
+},
+"CCEFootStep": {
+"80": 8
+},
+"CCEForceInvisible": {
+"80": 7
+},
+"CCEGraphEvent": {
+"80": 74
+},
+"CCEJumpDisabledWindow": {
+"80": 2
+},
+"CCEKillEffects": {
+"96": 15
+},
+"CCELockAnglesEvent": {
+"80": 7
+},
+"CCEModSound": {
+"80": 1
+},
+"CCEOrientation": {
+"80": 7
+},
+"CCEQueryCombatTargets": {
+"104": 3
+},
+"CCEScript": {
+"80": 9
+},
+"CCESetBehaviorFloatVariable": {
+"88": 1
+},
+"CCESetBehaviorIntVariable": {
+"88": 7
+},
+"CCESetFlags": {
+"88": 2
+},
+"CCESimpleEffect": {
+"112": 165
+},
+"CCESound": {
+"80": 198
+},
+"CCEStartJumpDropSlamMovement": {
+"88": 4
+},
+"CCEVariableSound": {
+"88": 4
+},
+"CCEVehicleFakeFullThrottle": {
+"88": 1
+},
+"CCRMSystemData": {
+"48": 1
+},
+"CCameraAction": {
+"56": 1
+},
+"CCameraBaseHandleList": {
+"40": 10
+},
+"CCameraBlendList": {
+"40": 77
+},
+"CCameraBox": {
+"432": 77
+},
+"CCameraBoxHandleList": {
+"40": 2
+},
+"CCameraClipSettings": {
+"24": 15
+},
+"CCameraDistanceCullSettings": {
+"32": 14
+},
+"CCameraKeyframeAnimation": {
+"48": 64
+},
+"CCameraProxyComponentData": {
+"32": 185
+},
+"CCameraScreenSafeArea": {
+"56": 167
+},
+"CCameraSystemData": {
+"32": 1
+},
+"CCameraTargetComponentData": {
+"72": 53
+},
+"CCameraTriggerVolumeComponentData": {
+"32": 6
+},
+"CCameraZoomSystem": {
+"88": 1
+},
+"CCapsuleShape": {
+"40": 54
+},
+"CCarriedEntitiesComponentData": {
+"16": 9
+},
+"CChangeCollisionPriorityHandler": {
+"80": 9
+},
+"CChangeRequestList": {
+"40": 171
+},
+"CChangeSkin2ComponentData": {
+"32": 10
+},
+"CChangeSkin2ComponentItem": {
+"24": 23
+},
+"CChangeSkin2ComponentItemHashTable": {
+"64": 25
+},
+"CChangeSkin2ShardComponentData": {
+"24": 15
+},
+"CChannelGroup": {
+"144": 1
+},
+"CChannelGroupList": {
+"40": 1
+},
+"CCharacterAttribute": {
+"24": 14
+},
+"CCharacterAttributeList": {
+"40": 13
+},
+"CCharacterAttributeMultiplier": {
+"24": 1
+},
+"CCharacterAttributeMultiplierList": {
+"40": 11
+},
+"CCharacterAttributeStringHashTable": {
+"64": 1
+},
+"CCharacterAttributes": {
+"80": 11
+},
+"CCharacterAttributesComponentData": {
+"24": 11
+},
+"CCharacterClipMap": {
+"64": 216
+},
+"CCharacterInfo": {
+"48": 2
+},
+"CCharacterInfoHashTable": {
+"64": 2
+},
+"CCharacterLookCamera": {
+"496": 1
+},
+"CCheckpoint": {
+"128": 25
+},
+"CCheckpointList": {
+"40": 116
+},
+"CCinematicBuildingProject": {
+"40": 14
+},
+"CCinematicBuildingTimelineGroup": {
+"48": 14
+},
+"CCinematicBuildingTimelineTrack": {
+"48": 14
+},
+"CClampToGroundComponentData": {
+"32": 34
+},
+"CClipController": {
+"56": 11
+},
+"CCollectibleComponentData": {
+"200": 419
+},
+"CCollectibleFilterList": {
+"40": 168
+},
+"CCollectibleSystemData": {
+"96": 1
+},
+"CCollectibleTrackerListList": {
+"40": 1
+},
+"CCollectibleTrackerSystemData": {
+"24": 1
+},
+"CCollisionMaterial": {
+"64": 2
+},
+"CCollisionMaterialHandleList": {
+"40": 11
+},
+"CCollisionMaterialSurfaceInfo": {
+"72": 2
+},
+"CCombatController": {
+"152": 11
+},
+"CCombatFxData": {
+"48": 1
+},
+"CCombatNodeEventList": {
+"40": 215
+},
+"CCombatSoundData": {
+"64": 344
+},
+"CCombatTargetDataListList": {
+"40": 168
+},
+"CCombinePostRenderPass": {
+"608": 8
+},
+"CCommonVehicleBehaviorComponentData": {
+"328": 7
+},
+"CComposeSceneRenderPass": {
+"480": 9
+},
+"CConeShape": {
+"48": 7
+},
+"CContactListenerComponentData": {
+"24": 3
+},
+"CControllerButtonCharacterMap": {
+"24": 1
+},
+"CControllerButtonCharacterMapList": {
+"40": 1
+},
+"CControllerToButtonAnalogStickTable": {
+"64": 1
+},
+"CControllerTypeToGuiInputSignalIconMaterialTable": {
+"64": 1
+},
+"CControllerVfxTable": {
+"64": 1
+},
+"CControllerVibrationData": {
+"24": 1
+},
+"CControllerVibrationDataPresetTable": {
+"64": 1
+},
+"CConversationComponentData": {
+"24": 3
+},
+"CCoreCameraController": {
+"136": 11
+},
+"CCrashBandicootBonusLivesGoalData": {
+"24": 1
+},
+"CCrashBandicootBounceData": {
+"56": 1
+},
+"CCrashBandicootBounceDataList": {
+"40": 1
+},
+"CCrashBandicootGemGoalData": {
+"24": 1
+},
+"CCrashBandicootGuiSystemData": {
+"648": 1
+},
+"CCrashBandicootKeyGoalData": {
+"24": 1
+},
+"CCrashBandicootLevelGemGoalData": {
+"24": 1
+},
+"CCrashBandicootLevelRelicGoalData": {
+"24": 1
+},
+"CCrashBandicootRelicGoalData": {
+"32": 1
+},
+"CCrashBandicootSystemData": {
+"112": 1
+},
+"CCrashDebugInitializer": {
+"16": 1
+},
+"CCrashDebugMenu": {
+"16": 1
+},
+"CCrashGameAccoladeRequirement": {
+"16": 1
+},
+"CCrashSaveSystemData": {
+"64": 1
+},
+"CCustomEvent": {
+"64": 20
+},
+"CCustomEventFloat": {
+"72": 1
+},
+"CCustomEventSpline": {
+"64": 1
+},
+"CCutsceneActionOpenUi": {
+"40": 1
+},
+"CCutsceneActor": {
+"120": 16
+},
+"CCutsceneActorData": {
+"32": 15
+},
+"CCutsceneActorList": {
+"40": 15
+},
+"CCutsceneCamera": {
+"512": 269
+},
+"CCutsceneData": {
+"48": 1
+},
+"CCutsceneDataList": {
+"40": 1
+},
+"CCutsceneStage": {
+"200": 15
+},
+"CCylinderShape": {
+"48": 111
+},
+"CDSPOverrideComponentData": {
+"40": 112
+},
+"CDamageData": {
+"208": 344
+},
+"CDeathHandlingLogic": {
+"88": 34
+},
+"CDebugHighlightColorBundle": {
+"48": 1
+},
+"CDebugRenderingData": {
+"384": 1
+},
+"CDebugSystemData": {
+"48": 1
+},
+"CDebugUpdateChannel": {
+"48": 1
+},
+"CDebugUpdateChannelList": {
+"40": 1
+},
+"CDesignerCutsceneInfo": {
+"16": 33
+},
+"CDestructibleComponentData": {
+"32": 267
+},
+"CDestructibleStage": {
+"72": 267
+},
+"CDestructibleStageList": {
+"40": 267
+},
+"CDetectCeilingHandler": {
+"96": 9
+},
+"CDetectGroundHandler": {
+"152": 11
+},
+"CDeviceClassSet": {
+"24": 50
+},
+"CDialogBoxInfo": {
+"184": 2
+},
+"CDifficultySpecificFloat": {
+"32": 4
+},
+"CDifficultySpecificInt": {
+"32": 1
+},
+"CDifficultySpecificRangedFloat": {
+"48": 1
+},
+"CDirectionLocalToWorldNode": {
+"48": 1
+},
+"CDirectionWorldToLocalNode": {
+"48": 12
+},
+"CDisableForCutsceneComponentData": {
+"32": 1
+},
+"CDisableJumpHandler": {
+"72": 9
+},
+"CDisablePlayerAttacksHandler": {
+"80": 4
+},
+"CDisableTimeScalingHandler": {
+"72": 9
+},
+"CDistantGeometryModelNameList": {
+"40": 137
+},
+"CDotNetCombatNodeEvent": {
+"32": 9
+},
+"CDotNetEntityComponentData_1": {
+"32": 376
+},
+"CDspCompressor": {
+"72": 1
+},
+"CDspDistortion": {
+"48": 1
+},
+"CDspDistortionOverride": {
+"32": 4
+},
+"CDspFlange": {
+"72": 1
+},
+"CDspFlangeOverride": {
+"48": 1
+},
+"CDspHighPassSimple": {
+"48": 1
+},
+"CDspHighPassSimpleOverride": {
+"32": 1
+},
+"CDspList": {
+"40": 1
+},
+"CDspLowPassSimple": {
+"48": 1
+},
+"CDspLowPassSimpleOverride": {
+"32": 1
+},
+"CDspOverrideSet": {
+"48": 6
+},
+"CDspParamEq": {
+"64": 1
+},
+"CDspParamEqParamEqCompressor": {
+"120": 1
+},
+"CDspParamEqParamEqCompressorOverride": {
+"72": 7
+},
+"CDspSfxReverb": {
+"152": 1
+},
+"CDspSfxReverbOverride": {
+"88": 7
+},
+"CDurabilityVehicleSetting": {
+"24": 1
+},
+"CDurabilityVehicleSettingList": {
+"48": 1
+},
+"CDynamicCheckpointComponentData": {
+"56": 165
+},
+"CDynamicClipEntity": {
+"224": 169
+},
+"CDynamicClipEntityData": {
+"128": 169
+},
+"CEGuiMenuSoundList": {
+"40": 2
+},
+"CEdcInfo": {
+"24": 11
+},
+"CEnableRequestManager": {
+"48": 489
+},
+"CEntity": {
+"144": 935
+},
+"CEntityBolt": {
+"48": 938
+},
+"CEntityComponentDataList": {
+"40": 7
+},
+"CEntityData": {
+"56": 938
+},
+"CEntityHandleGuiMaterialHashTable": {
+"64": 1
+},
+"CEntityHandleList": {
+"40": 188
+},
+"CEntityMessage": {
+"56": 94
+},
+"CEntityPoolComponentData": {
+"40": 7
+},
+"CEntityTag": {
+"24": 16
+},
+"CEntityTagSet": {
+"64": 538
+},
+"CFadeInPresetData": {
+"24": 1
+},
+"CFadeInPresetList": {
+"40": 1
+},
+"CFadeOutPresetData": {
+"32": 1
+},
+"CFadeOutPresetList": {
+"40": 1
+},
+"CFadeSequencePresetData": {
+"48": 1
+},
+"CFadeSequencePresetList": {
+"40": 1
+},
+"CFallSpeedModifier": {
+"232": 4
+},
+"CFallSpeedModifierList": {
+"40": 4
+},
+"CFieldCamera": {
+"336": 16
+},
+"CFilterAllies": {
+"16": 7
+},
+"CFilterByAIAwarenessRadius": {
+"16": 1
+},
+"CFilterByAngleRange": {
+"32": 5
+},
+"CFilterByClosest": {
+"16": 4
+},
+"CFilterByComponent": {
+"24": 4
+},
+"CFilterByDistance": {
+"24": 9
+},
+"CFilterByEntityFlags": {
+"24": 5
+},
+"CFilterByFlag": {
+"24": 3
+},
+"CFilterByHealthRemaining": {
+"24": 1
+},
+"CFilterByHeroes": {
+"16": 5
+},
+"CFilterByInvulnerability": {
+"24": 13
+},
+"CFilterByLineOfSight": {
+"16": 4
+},
+"CFilterByTags": {
+"24": 46
+},
+"CFilterByTeam": {
+"24": 2
+},
+"CFilterByVerticalRange": {
+"32": 5
+},
+"CFilterByVision": {
+"48": 8
+},
+"CFilterEntities": {
+"32": 194
+},
+"CFilterMethodList": {
+"40": 198
+},
+"CFilterMethodTable": {
+"64": 194
+},
+"CFilterOnScreen": {
+"16": 4
+},
+"CFilterOpponents": {
+"16": 15
+},
+"CFilterTargetable": {
+"16": 141
+},
+"CFilterVisible": {
+"16": 1
+},
+"CFireBehaviorEventMessage": {
+"64": 24
+},
+"CFixedCamera": {
+"432": 10
+},
+"CFootIKHandler": {
+"80": 4
+},
+"CForwardLitRenderPassData": {
+"384": 116
+},
+"CFxMaterialRedirectTable": {
+"48": 451
+},
+"CFxaaRenderPass": {
+"592": 6
+},
+"CGameBoolVariable": {
+"40": 2
+},
+"CGameEntity": {
+"224": 500
+},
+"CGameEntityData": {
+"128": 507
+},
+"CGameEntityHandleList": {
+"40": 78
+},
+"CGameFloatVariable": {
+"40": 1
+},
+"CGameIntVariable": {
+"40": 1
+},
+"CGameSoundClass": {
+"96": 1
+},
+"CGameSoundClassData": {
+"64": 1
+},
+"CGameSoundClassList": {
+"40": 1
+},
+"CGameSoundMusicEventBeatData": {
+"24": 1
+},
+"CGameSoundMusicEventBeatDataList": {
+"40": 1
+},
+"CGameSoundMusicEventPattern": {
+"40": 1
+},
+"CGameSoundMusicEventPatternList": {
+"40": 1
+},
+"CGameSoundMusicSettings": {
+"120": 202
+},
+"CGameSoundSystemDataConfig": {
+"224": 1
+},
+"CGameStringVariable": {
+"48": 1
+},
+"CGameVariableHandleList": {
+"40": 1
+},
+"CGatedMusicComponentData": {
+"32": 3
+},
+"CGlobalPlatformStrings": {
+"1592": 2
+},
+"CGlobalRenderData": {
+"32": 1
+},
+"CGlobalTuningData": {
+"488": 1
+},
+"CGlobalWindData": {
+"64": 116
+},
+"CGraphicsSkinInfo": {
+"96": 345
+},
+"CGroundDetectorComponentData": {
+"32": 23
+},
+"CGroundLocomotionHandler": {
+"176": 11
+},
+"CGuiActionTogglePause": {
+"48": 2
+},
+"CGuiBehaviorAnimatedTypedText": {
+"80": 1
+},
+"CGuiBehaviorBossHealthBar": {
+"64": 1
+},
+"CGuiBehaviorButtonLegend": {
+"88": 1
+},
+"CGuiBehaviorButtonLegendItem": {
+"80": 1
+},
+"CGuiBehaviorButtonText": {
+"40": 2
+},
+"CGuiBehaviorContentDeploymentDownloadScreen": {
+"160": 1
+},
+"CGuiBehaviorCrashContinueGameButton": {
+"256": 1
+},
+"CGuiBehaviorCrashDialogBox": {
+"352": 2
+},
+"CGuiBehaviorCrashNavigationItem": {
+"312": 1
+},
+"CGuiBehaviorCrashNewGameButton": {
+"232": 1
+},
+"CGuiBehaviorCrashSaveMenu": {
+"384": 1
+},
+"CGuiBehaviorCrashSaveSlotOption": {
+"296": 1
+},
+"CGuiBehaviorDamageNumber": {
+"168": 1
+},
+"CGuiBehaviorDialogBox": {
+"272": 1
+},
+"CGuiBehaviorDialogBoxOption": {
+"168": 4
+},
+"CGuiBehaviorGameVariableToggleOption": {
+"224": 1
+},
+"CGuiBehaviorHint": {
+"88": 1
+},
+"CGuiBehaviorInfoMessage": {
+"104": 1
+},
+"CGuiBehaviorJoinGame": {
+"64": 1
+},
+"CGuiBehaviorLanguageItem": {
+"32": 1
+},
+"CGuiBehaviorLegalScreen": {
+"168": 1
+},
+"CGuiBehaviorNavigationItem": {
+"240": 6
+},
+"CGuiBehaviorOnlineInvitation": {
+"224": 1
+},
+"CGuiBehaviorPauseMenuOptionRestart": {
+"240": 1
+},
+"CGuiBehaviorPauseMenuOptionResume": {
+"200": 1
+},
+"CGuiBehaviorPlayerHudHealthBarScale": {
+"96": 2
+},
+"CGuiBehaviorPlayerHudLevelText": {
+"32": 2
+},
+"CGuiBehaviorPlayerWidgetSmall": {
+"120": 1
+},
+"CGuiBehaviorResetOptionsToDefaults": {
+"184": 1
+},
+"CGuiBehaviorSetPrimaryController": {
+"256": 1
+},
+"CGuiBehaviorSoundVolumeOption": {
+"232": 1
+},
+"CGuiBehaviorSubtitles": {
+"72": 1
+},
+"CGuiBehaviorSwapMaterialsByGame": {
+"40": 4
+},
+"CGuiBehaviorTimer": {
+"160": 2
+},
+"CGuiBehaviorTouchSimulateButton": {
+"24": 1
+},
+"CGuiBehaviorVoiceChatHud": {
+"40": 1
+},
+"CGuiButtonLegendButtonList": {
+"40": 1
+},
+"CGuiButtonLegendTable": {
+"64": 5
+},
+"CGuiCrashSaveSlotAnimations": {
+"144": 1
+},
+"CGuiCrashSaveSlotOperationLoad": {
+"152": 1
+},
+"CGuiCrashSoundContainer": {
+"48": 2
+},
+"CGuiEventBossHealthBarFade": {
+"32": 1
+},
+"CGuiEventBossHealthBarShake": {
+"24": 1
+},
+"CGuiEventPlayerHudShake": {
+"24": 2
+},
+"CGuiInputSignalToIconMaterialTable": {
+"64": 2
+},
+"CGuiIntroFlowComponentData": {
+"16": 1
+},
+"CGuiLicenseAgreementData": {
+"24": 12
+},
+"CGuiListItemConverterButtonLegend": {
+"16": 1
+},
+"CGuiListItemConverterPauseMenu": {
+"16": 1
+},
+"CGuiListItemPopulatorButtonLegend": {
+"24": 1
+},
+"CGuiListItemPopulatorLanguages": {
+"112": 1
+},
+"CGuiListItemPopulatorPauseMenu": {
+"32": 1
+},
+"CGuiMenuSoundTable": {
+"64": 4
+},
+"CGuiRenderPass": {
+"464": 5
+},
+"CGuiRenderTargetDisplay": {
+"56": 1
+},
+"CGuiSaveSlotOperationDelete": {
+"112": 1
+},
+"CGuiSaveSlotOperationList": {
+"40": 1
+},
+"CGuiSaveSlotOperationSave": {
+"112": 1
+},
+"CGuiScreenSpaceTimerAddTimeNode": {
+"24": 1
+},
+"CGuiScreenSpaceTimerPauseNode": {
+"24": 1
+},
+"CGuiScreenSpaceTimerStartNode": {
+"24": 3
+},
+"CGuiSoundContainer": {
+"32": 2
+},
+"CGuiSoundEventTable": {
+"64": 2
+},
+"CGuiWorldSpaceTimerAddTimeNode": {
+"24": 1
+},
+"CGuiWorldSpaceTimerPauseNode": {
+"24": 1
+},
+"CGuiWorldSpaceTimerStartNode": {
+"24": 2
+},
+"CHavokBallAndSocketConstraintData": {
+"32": 2
+},
+"CHavokLimitedHingeConstraintData": {
+"48": 2
+},
+"CHavokLinearCastQueryParameters": {
+"32": 8
+},
+"CHavokModelShape": {
+"24": 86
+},
+"CHavokPrismaticConstraintData": {
+"48": 252
+},
+"CHavokQuerySourceData": {
+"32": 1
+},
+"CHavokStiffSpringConstraintData": {
+"40": 1
+},
+"CHeadTrackingHandler": {
+"96": 51
+},
+"CHeadTrackingTargetList": {
+"40": 51
+},
+"CHeroShadowData": {
+"24": 1
+},
+"CImGuiRenderPass": {
+"464": 1
+},
+"CInputSystemData": {
+"24": 1
+},
+"CInputTransformComponentData": {
+"24": 6
+},
+"CInputVehicleSettings": {
+"24": 1
+},
+"CInteractionComponentData": {
+"48": 3
+},
+"CInteractionComponentDataList": {
+"40": 1
+},
+"CInteractionData": {
+"224": 3
+},
+"CInterruptManagerComponentData": {
+"16": 9
+},
+"CIridescentMaterialFeature": {
+"312": 946
+},
+"CIridescentParametersBundle": {
+"192": 318
+},
+"CJuiceDomain": {
+"40": 6
+},
+"CJumpAssistComponentData": {
+"24": 9
+},
+"CKnockawayFlightData": {
+"32": 11
+},
+"CKnockawayLandData": {
+"24": 11
+},
+"CLandVehicleCamera": {
+"912": 4
+},
+"CLandVehicleControllerSettings": {
+"120": 1
+},
+"CLanguageAnimationTagTable": {
+"64": 2
+},
+"CLatchableComponentData": {
+"24": 3
+},
+"CLevelBorder": {
+"40": 103
+},
+"CLevelBorderComponentData": {
+"56": 103
+},
+"CLevelBorderWaypointListList": {
+"40": 103
+},
+"CLevelConfirmationDialogBoxHandler": {
+"80": 1
+},
+"CLevelGoalList": {
+"40": 116
+},
+"CLinearDriftData": {
+"128": 7
+},
+"CLinearDriftVehicleSetting": {
+"224": 1
+},
+"CLinearDriftVehicleSettingList": {
+"48": 1
+},
+"CLinearVehicleComponentData": {
+"544": 2
+},
+"CLinearVehicleSplineMover": {
+"72": 8
+},
+"CLoadAllHeroesAction": {
+"96": 1
+},
+"CLoadHeroesAction": {
+"96": 1
+},
+"CLocalShadowInfluenceConstantBundle": {
+"32": 6
+},
+"CLocalizedLine": {
+"32": 2
+},
+"CLoopingMultiIntensityVfxComponentData": {
+"112": 1
+},
+"CLoopingVfxComponentData": {
+"72": 104
+},
+"CMaintainTargetHeadingController": {
+"104": 11
+},
+"CManeuverVehicleSetting": {
+"80": 1
+},
+"CManeuverVehicleSettingList": {
+"48": 1
+},
+"CManualCameraController": {
+"104": 11
+},
+"CMapToEnemyTable": {
+"64": 1
+},
+"CMaterialHandleTableInfo": {
+"48": 3061
+},
+"CMaterialOverrideCombinerComponentData": {
+"16": 11
+},
+"CMinigameData": {
+"56": 1
+},
+"CMinigameDataList": {
+"40": 1
+},
+"CMobileComposeSceneRenderPass": {
+"608": 3
+},
+"CMobileSceneRenderPass": {
+"960": 4
+},
+"CMod": {
+"80": 3
+},
+"CModList": {
+"40": 3
+},
+"CModSoundData": {
+"128": 1
+},
+"CModSoundDataList": {
+"40": 7
+},
+"CModSoundEventData": {
+"40": 1
+},
+"CModVfxData": {
+"56": 1
+},
+"CModVfxDataList": {
+"40": 1
+},
+"CModelAnimation": {
+"24": 105
+},
+"CModelAnimationDatabase": {
+"56": 173
+},
+"CModelAnimationHashTable": {
+"64": 105
+},
+"CModelComponentData": {
+"32": 296
+},
+"CModelInfo": {
+"24": 260
+},
+"CModelPath": {
+"24": 40
+},
+"CModifyVehicleStatsComponentData": {
+"32": 3
+},
+"CModsComponentData": {
+"32": 3
+},
+"CMorphingCollisionComponentData": {
+"16": 4
+},
+"CMotionBlurData": {
+"24": 116
+},
+"CMotorcycleCamera": {
+"576": 4
+},
+"CMotorcycleDetectGroundHandler": {
+"112": 4
+},
+"CMotorcycleLandEntityMessage": {
+"56": 4
+},
+"CMotorcycleLeftGroundEntityMessage": {
+"56": 4
+},
+"CMountControllerComponentData": {
+"56": 8
+},
+"CMoveToOffsetController": {
+"80": 2
+},
+"CMovementControllerComponentData": {
+"32": 499
+},
+"CMultiIntensityVfxManagerComponentData": {
+"24": 1
+},
+"CMultipleSkillUpgradeFilter": {
+"24": 3
+},
+"CMultipleVehicleModeFilter": {
+"24": 3
+},
+"CMusicMix": {
+"32": 51
+},
+"CMusicSyncComponentData": {
+"16": 2
+},
+"CNavMeshBuildData": {
+"32": 113
+},
+"CNavMeshBuildDataList": {
+"40": 114
+},
+"CNavMoverComponentData": {
+"48": 33
+},
+"CNavPowerSettings": {
+"80": 1
+},
+"CNavPowerSettingsList": {
+"40": 1
+},
+"CNavRepulsorComponentData": {
+"40": 3
+},
+"CNetworkAnimationReplicaComponentData": {
+"32": 4
+},
+"CNetworkAnimationStateEntryTable": {
+"96": 4
+},
+"CNetworkDisablePreTeleportActorReplicationComponentData": {
+"16": 9
+},
+"CNetworkPlayerMovingPlatformComponentData": {
+"32": 9
+},
+"CNetworkVehicleRigidbodyReplicaComponentData": {
+"56": 3
+},
+"CNullPhysicsComponentData": {
+"16": 423
+},
+"CObjectBolt": {
+"64": 938
+},
+"COcclusionBox": {
+"192": 78
+},
+"COcclusionController": {
+"72": 11
+},
+"COcclusionTrigger": {
+"96": 77
+},
+"COnGameBoolVariableChangeEventList": {
+"32": 2
+},
+"COnGameBoolVariableChangedDelegate": {
+"56": 2
+},
+"COnGameFloatVariableChangeEventList": {
+"32": 1
+},
+"COnGameFloatVariableChangedDelegate": {
+"56": 1
+},
+"COnGameIntVariableChangeEventList": {
+"32": 1
+},
+"COnGameIntVariableChangedDelegate": {
+"56": 1
+},
+"COnGameStringVariableChangedDelegate": {
+"56": 1
+},
+"COnSplineCompleteEventList": {
+"32": 192
+},
+"COpenKeyboardParams": {
+"56": 1
+},
+"COpenUiAction": {
+"56": 1
+},
+"COptionalPixelCostRenderPass": {
+"72": 2
+},
+"COptionalRenderPass": {
+"64": 3
+},
+"COptionalRenderPassEnabledDataHandleList": {
+"40": 3
+},
+"COrbitComponentData": {
+"136": 19
+},
+"COutdoorLightComponentData": {
+"80": 1
+},
+"COverrideStickDirectionComponentData": {
+"16": 6
+},
+"CPauseMenuConfiguration": {
+"112": 1
+},
+"CPauseMenuOption": {
+"88": 1
+},
+"CPauseMenuOptionList": {
+"40": 2
+},
+"CPencilShape": {
+"24": 35
+},
+"CPhysicalEntity": {
+"296": 469
+},
+"CPhysicalEntityData": {
+"144": 486
+},
+"CPhysicsBoundingBoxComponentData": {
+"64": 147
+},
+"CPhysicsBoundingSphereComponentData": {
+"64": 8
+},
+"CPhysicsGenericShapeComponentData": {
+"72": 412
+},
+"CPhysicsMotionProperties": {
+"64": 2
+},
+"CPhysicsMotionPropertiesHandleList": {
+"40": 1
+},
+"CPhysicsSystemEntityModelComponentData": {
+"64": 269
+},
+"CPixelCostAverageRenderPass": {
+"120": 3
+},
+"CPlatformAudioSettingsOverrideList": {
+"40": 425
+},
+"CPlatformControllerTable": {
+"64": 1
+},
+"CPlatformControllerToAnalogStickVfxTable": {
+"64": 1
+},
+"CPlatformControllerVfxTable": {
+"64": 1
+},
+"CPlayerAttackComponentData": {
+"32": 12
+},
+"CPlayerAttackData": {
+"152": 12
+},
+"CPlayerAttackDataTable": {
+"64": 12
+},
+"CPlayerDisableAttackMessage": {
+"64": 1
+},
+"CPlayerFollowData": {
+"24": 88
+},
+"CPlayerHudComponentData": {
+"16": 9
+},
+"CPlayerJumpComponentData": {
+"1664": 11
+},
+"CPlayerKnockawayHandler": {
+"80": 9
+},
+"CPlayerMagnetManagerComponentData": {
+"16": 9
+},
+"CPlayerMessage": {
+"64": 1
+},
+"CPlayerRespawnComponentData": {
+"16": 12
+},
+"CPlayerRespawnData": {
+"320": 1
+},
+"CPlayerRingComponentData": {
+"16": 9
+},
+"CPlayerStartEntity": {
+"176": 117
+},
+"CPlayerStartEntityData": {
+"56": 117
+},
+"CPlayerSystemData": {
+"168": 1
+},
+"CPlayerTriggerRadiusComponentData": {
+"24": 264
+},
+"CPointLightComponentData": {
+"48": 179
+},
+"CPointOfInterestComponentData": {
+"80": 33
+},
+"CPositionLocalToWorldNode": {
+"56": 35
+},
+"CPositionWorldToLocalAccessor": {
+"40": 1
+},
+"CPositionWorldToLocalNode": {
+"56": 32
+},
+"CPreRenderUpdatePass": {
+"640": 13
+},
+"CPrioritizedUpgrade": {
+"32": 3
+},
+"CPriorityDspOverrideSet": {
+"56": 4
+},
+"CProjectileComponentData": {
+"544": 55
+},
+"CProjectileSpawnData": {
+"184": 37
+},
+"CProjectiveShadowParametersBundle": {
+"128": 3
+},
+"CProjectiveShadowRenderData": {
+"48": 3
+},
+"CProjectiveShadowRenderPass": {
+"512": 3
+},
+"CProxyComponentData": {
+"16": 29
+},
+"CQueryFilter": {
+"48": 190
+},
+"CQuestConversationPresetData": {
+"24": 1
+},
+"CQuestConversationPresetDataList": {
+"40": 1
+},
+"CQuestSystemData": {
+"48": 1
+},
+"CQuestTrackList": {
+"40": 1
+},
+"CQueuedGameSoundList": {
+"40": 1
+},
+"CRailSlideHandler": {
+"72": 9
+},
+"CRailSlideTimeSettingComponentData": {
+"16": 9
+},
+"CRelativeCamera": {
+"432": 35
+},
+"CRespawnHistoryRecorderHandler": {
+"80": 9
+},
+"CReticleCollectibleAttracterComponentData": {
+"40": 3
+},
+"CReticleTargeterComponentData": {
+"352": 3
+},
+"CReticleTargeterDifficultyData": {
+"128": 3
+},
+"CRigMovementController": {
+"88": 11
+},
+"CRotationController": {
+"192": 170
+},
+"CRotationLocalToWorldAccessor": {
+"32": 3
+},
+"CRotationLocalToWorldNode": {
+"48": 4
+},
+"CRotationWorldToLocalNode": {
+"48": 17
+},
+"CRumbleData": {
+"32": 1
+},
+"CRumbleDataList": {
+"40": 1
+},
+"CScopedScheduledFunctionList": {
+"48": 6
+},
+"CScreenspaceTargetCircle": {
+"32": 4
+},
+"CScreenspaceTargetComponentData": {
+"56": 418
+},
+"CScriptTriggerEntity": {
+"256": 418
+},
+"CScriptTriggerEntityData": {
+"144": 418
+},
+"CScriptVehicleControllerComponentData": {
+"1768": 4
+},
+"CSkillUpgrade": {
+"88": 4
+},
+"CSkillUpgradeFilter": {
+"24": 8
+},
+"CSkillUpgradeFilterList": {
+"40": 4
+},
+"CSkillUpgradeList": {
+"40": 4
+},
+"CSkillsUpgradeComponentData": {
+"40": 8
+},
+"CSkillsUpgradePath": {
+"40": 4
+},
+"CSkillsUpgradePathList": {
+"40": 4
+},
+"CSkyGradientGeneratorRenderPass": {
+"592": 10
+},
+"CSkyRenderPassData": {
+"128": 116
+},
+"CSkyboxModelsHashTable": {
+"64": 116
+},
+"CSlider": {
+"136": 170
+},
+"CSliderData": {
+"64": 1
+},
+"CSlipperySlopeMoverComponentData": {
+"16": 4
+},
+"CSmokeAction": {
+"120": 1
+},
+"CSmokeActionBaseList": {
+"56": 1
+},
+"CSmokeTestDataTable": {
+"64": 1
+},
+"CSortEntitiesByData": {
+"16": 4
+},
+"CSortEntitiesByWeightedVision": {
+"24": 8
+},
+"CSound": {
+"224": 423
+},
+"CSoundAttenuateOnUse": {
+"40": 9
+},
+"CSoundBankListComponentData": {
+"24": 168
+},
+"CSoundEntityCollectorComponentData": {
+"40": 9
+},
+"CSoundEventData": {
+"80": 198
+},
+"CSoundGroup": {
+"48": 1
+},
+"CSoundHandleList": {
+"40": 2
+},
+"CSoundHandleOrName": {
+"32": 67
+},
+"CSoundHandleOrNameList": {
+"40": 75
+},
+"CSoundInstanceHandleList": {
+"40": 423
+},
+"CSoundList": {
+"40": 425
+},
+"CSoundSample": {
+"32": 6265
+},
+"CSoundUpdateMethodList": {
+"40": 198
+},
+"CSoundUpdatePitchByVelocity": {
+"56": 1
+},
+"CSoundUpdateTaskList": {
+"40": 1
+},
+"CSoundUpdateVolumeByVelocity": {
+"56": 1
+},
+"CSpeakerVolumes": {
+"48": 235
+},
+"CSphereShape": {
+"32": 159
+},
+"CSplineCamera": {
+"592": 147
+},
+"CSplineCameraData": {
+"112": 151
+},
+"CSplineCameraTriggerComponentData": {
+"40": 2
+},
+"CSplineComponentData": {
+"32": 472
+},
+"CSplineConstantVelocityMover": {
+"40": 154
+},
+"CSplineController": {
+"272": 192
+},
+"CSplineConvergeWithinLocalOffsetAttachBehavior": {
+"64": 7
+},
+"CSplineEvent": {
+"40": 64
+},
+"CSplineGraphEvent": {
+"32": 8
+},
+"CSplineHandler": {
+"72": 9
+},
+"CSplineInputTransformController": {
+"32": 6
+},
+"CSplineKeyframedRotationMover": {
+"128": 108
+},
+"CSplineKeyframedVelocityMover": {
+"40": 78
+},
+"CSplineLaneAttachBehavior": {
+"32": 8
+},
+"CSplineLaneKeyframe": {
+"32": 68
+},
+"CSplineLaneMoverComponentData": {
+"152": 55
+},
+"CSplineLinearConvergeAttachBehavior": {
+"40": 22
+},
+"CSplineLooseConstantVelocityMover": {
+"56": 8
+},
+"CSplineMarker": {
+"32": 22
+},
+"CSplineOffsetAttachBehavior": {
+"32": 6
+},
+"CSplineOffsetData": {
+"40": 12
+},
+"CSplineRelativeAttachBehavior": {
+"80": 28
+},
+"CSplineRotationKeyframe": {
+"48": 239
+},
+"CSplineSnapAttachBehavior": {
+"16": 165
+},
+"CSplineTangentConvergeMover": {
+"128": 3
+},
+"CSplineTangentRotationMover": {
+"128": 45
+},
+"CSplineTimeBasedMover": {
+"64": 131
+},
+"CSplineVelocityKeyframe": {
+"24": 67
+},
+"CStackCamera": {
+"464": 11
+},
+"CStackCameraControllerList": {
+"40": 11
+},
+"CStaticCollisionComponentData": {
+"32": 289
+},
+"CStaticCollisionHashInstanceIdHashTable": {
+"64": 116
+},
+"CStaticComponentData": {
+"32": 289
+},
+"CStaticMaterialOverrideCombinerComponentData": {
+"16": 1
+},
+"CStaticVfxComponentData": {
+"48": 114
+},
+"CStatisticData": {
+"24": 85
+},
+"CStringPauseMenuConfigurationHashTable": {
+"64": 1
+},
+"CSubSound": {
+"64": 424
+},
+"CSubSoundList": {
+"40": 423
+},
+"CSystemData": {
+"328": 1
+},
+"CSystemInitializerList": {
+"40": 1
+},
+"CTakeHitData": {
+"24": 41
+},
+"CTakeHitImmunityHandler": {
+"88": 34
+},
+"CTakeHitLogic": {
+"80": 32
+},
+"CTargetLockReticleComponentData": {
+"48": 2
+},
+"CTargetableComponentData": {
+"40": 3
+},
+"CTargetableFlagEnableStack": {
+"72": 168
+},
+"CTiledDeferredRenderPass": {
+"912": 6
+},
+"CTimeScaleEnableStack": {
+"72": 168
+},
+"CTimer": {
+"32": 317
+},
+"CTintSphereComponentData": {
+"56": 191
+},
+"CTopSpeedVehicleSetting": {
+"48": 1
+},
+"CTopSpeedVehicleSettingList": {
+"48": 1
+},
+"CTractionVehicleSetting": {
+"32": 1
+},
+"CTractionVehicleSettingList": {
+"48": 1
+},
+"CTrajectoryAlignmentHandler": {
+"80": 9
+},
+"CTraversalPath": {
+"40": 9
+},
+"CTraversalPathList": {
+"40": 9
+},
+"CTreeInfo": {
+"48": 6
+},
+"CTreeParameters2": {
+"24": 6
+},
+"CTriggerVolumeBoxComponentData": {
+"88": 246
+},
+"CTriggerVolumeCapsuleComponentData": {
+"96": 12
+},
+"CTriggerVolumeConeComponentData": {
+"104": 3
+},
+"CTriggerVolumeCylinderComponentData": {
+"96": 244
+},
+"CTriggerVolumeModelComponentData": {
+"80": 6
+},
+"CTriggerVolumeSphereComponentData": {
+"72": 74
+},
+"CTurningHandler": {
+"112": 28
+},
+"CUIDebugMenuList": {
+"40": 1
+},
+"CUIDialogBoxOption": {
+"112": 2
+},
+"CUpgradeableFloat": {
+"24": 3
+},
+"CUpgradeableInt": {
+"24": 344
+},
+"CUpgradeableIntTable": {
+"64": 3
+},
+"CUpgradeableModel": {
+"32": 43
+},
+"CUpgradeableProjectileExplodeRadius": {
+"24": 55
+},
+"CUpgradeableProjectileLifeTime": {
+"24": 55
+},
+"CUpgradeableProjectileMaxRange": {
+"24": 55
+},
+"CUpgradeableProjectileSpeed": {
+"24": 55
+},
+"CUpgradeableSound": {
+"32": 344
+},
+"CUpgradeableVfx": {
+"32": 81
+},
+"CUpgradeableVfxData": {
+"32": 81
+},
+"CUpgradeableVfxTable": {
+"64": 38
+},
+"CVehicleAudioComponentData": {
+"112": 7
+},
+"CVehicleBoostControllerComponentData": {
+"128": 3
+},
+"CVehicleBoostData": {
+"104": 5
+},
+"CVehicleCameraPanCollision": {
+"48": 7
+},
+"CVehicleCameraZoomCollision": {
+"48": 7
+},
+"CVehicleCollisionCriteriaComponentData": {
+"24": 3
+},
+"CVehicleCollisionDriftMassModList": {
+"40": 1
+},
+"CVehicleCollisionExtraResponseAirLevelBorder": {
+"72": 2
+},
+"CVehicleCollisionExtraResponseAlterSpeed": {
+"72": 1
+},
+"CVehicleCollisionExtraResponseArenaKnockaway": {
+"48": 1
+},
+"CVehicleCollisionExtraResponseBounce": {
+"72": 3
+},
+"CVehicleCollisionExtraResponseDamage": {
+"32": 4
+},
+"CVehicleCollisionExtraResponseMaintainSpeed": {
+"72": 5
+},
+"CVehicleCollisionReactionData": {
+"24": 1
+},
+"CVehicleCollisionReactionDataList": {
+"40": 1
+},
+"CVehicleCollisionResponse": {
+"72": 5
+},
+"CVehicleCollisionResponseCriteria": {
+"184": 5
+},
+"CVehicleCollisionResponseCriteriaList": {
+"40": 1
+},
+"CVehicleCollisionResponseCriteriaTable": {
+"64": 3
+},
+"CVehicleCollisionSpeedMassMod": {
+"24": 1
+},
+"CVehicleCollisionSpeedMassModList": {
+"40": 1
+},
+"CVehicleComponentData": {
+"264": 7
+},
+"CVehicleCustomizationColorSchemeDataTable": {
+"64": 1
+},
+"CVehicleGroundCorrectionComponentData": {
+"24": 3
+},
+"CVehicleHornComponentData": {
+"48": 3
+},
+"CVehicleLevelBorderHelperComponentData": {
+"32": 2
+},
+"CVehicleModVfxComponentData": {
+"40": 3
+},
+"CVehicleModVisibilityComponentData": {
+"24": 3
+},
+"CVehicleModeFilter": {
+"24": 3
+},
+"CVehicleModeFilterList": {
+"40": 3
+},
+"CVehicleModeVfxData": {
+"24": 1
+},
+"CVehicleModeVfxDataList": {
+"40": 3
+},
+"CVehicleModeVfxDataListList": {
+"40": 3
+},
+"CVehiclePersonalizationBoostItem": {
+"72": 1
+},
+"CVehiclePersonalizationBoostItemList": {
+"48": 1
+},
+"CVehiclePersonalizationColorSchemeItem": {
+"72": 1
+},
+"CVehiclePersonalizationColorSchemeItemList": {
+"48": 1
+},
+"CVehiclePersonalizationNeonItemList": {
+"48": 1
+},
+"CVehiclePersonalizationSetItemList": {
+"48": 1
+},
+"CVehiclePersonalizationTauntItemList": {
+"48": 1
+},
+"CVehiclePersonalizationTopperItem": {
+"64": 1
+},
+"CVehiclePersonalizationTopperItemList": {
+"48": 1
+},
+"CVehicleRampComponentData": {
+"96": 4
+},
+"CVehicleRiderComponentData": {
+"32": 3
+},
+"CVehicleRiderData": {
+"144": 3
+},
+"CVehicleSectionArena": {
+"80": 5
+},
+"CVehicleSectionExpedition": {
+"88": 3
+},
+"CVehicleShieldComponentData": {
+"104": 3
+},
+"CVehicleStats": {
+"56": 4
+},
+"CVehicleStatsComponentData": {
+"24": 3
+},
+"CVehicleStatsList": {
+"40": 1
+},
+"CVehicleSwapData": {
+"40": 1
+},
+"CVehicleSystemData": {
+"336": 1
+},
+"CVehicleTransitionComponentData": {
+"248": 7
+},
+"CVehicleTutorialComponentData": {
+"32": 1
+},
+"CVehicleUpgrade": {
+"40": 3
+},
+"CVehicleUpgradeComponentData": {
+"32": 3
+},
+"CVehicleUpgradeList": {
+"40": 3
+},
+"CVehicleUpgradePath": {
+"32": 3
+},
+"CVehicleVfxHandler": {
+"80": 1
+},
+"CVehicleVfxHandlerData": {
+"40": 1
+},
+"CVehicleVfxHandlerDataList": {
+"40": 1
+},
+"CVehicleWeightComponentData": {
+"24": 3
+},
+"CVelocityController": {
+"80": 21
+},
+"CVertexWibbleParametersBundle": {
+"80": 98
+},
+"CVfxBlendedCombinerMaterial": {
+"608": 3
+},
+"CVfxBudget": {
+"296": 1
+},
+"CVfxDrawBoxLightOperator": {
+"480": 6
+},
+"CVfxDrawCameraShakeOperator": {
+"144": 78
+},
+"CVfxDrawDebrisOperator": {
+"104": 58
+},
+"CVfxDrawEntityFadeOperator": {
+"24": 16
+},
+"CVfxDrawEntityMaterialOverrideOperator": {
+"40": 10
+},
+"CVfxDrawEntityTintOperator": {
+"304": 48
+},
+"CVfxDrawForceFeedbackOperator": {
+"200": 42
+},
+"CVfxDrawModelOperator": {
+"80": 248
+},
+"CVfxDrawPointForceOperator": {
+"432": 55
+},
+"CVfxDrawPointLightOperator": {
+"24": 202
+},
+"CVfxDrawSoundOperator": {
+"88": 285
+},
+"CVfxDrawTintSphereOperator": {
+"208": 47
+},
+"CVfxDrawVisualDataOperator": {
+"128": 2
+},
+"CVfxEffectDotNetHandle": {
+"24": 35
+},
+"CVfxEnvironmentColorOperator": {
+"24": 5
+},
+"CVfxFont": {
+"48": 5
+},
+"CVfxLitLiquidMaterial": {
+"304": 27
+},
+"CVfxLitSmokeMaterial": {
+"288": 1
+},
+"CVfxMaterial": {
+"272": 10
+},
+"CVfxPhysicsCapsuleShape": {
+"16": 1
+},
+"CVfxPhysicsShapeOperator": {
+"104": 28
+},
+"CVfxPhysicsSphereShape": {
+"16": 33
+},
+"CVfxRaycastOperator": {
+"64": 18
+},
+"CVfxRimMaterial": {
+"304": 2
+},
+"CVfxSimpleAlphaThresholdMaterial": {
+"272": 5
+},
+"CVfxSpawnLayers": {
+"16": 1
+},
+"CVfxTextComponentData": {
+"80": 254
+},
+"CVfxTwoLayerMaterial": {
+"400": 3
+},
+"CVfxVehicleMaterialCollisionSpawnRateData": {
+"120": 4
+},
+"CVisemePlayerComponentData": {
+"24": 4
+},
+"CVisualDataBoxComponentData": {
+"80": 336
+},
+"CVisualDataGroup": {
+"1280": 370
+},
+"CVscBehaviorStateEventOnEnterByNameDelegator": {
+"40": 63
+},
+"CVscBehaviorStateEventOnEnterDelegator": {
+"40": 8
+},
+"CVscBehaviorStateEventOnEnterGroupDelegator": {
+"40": 24
+},
+"CVscBehaviorStateEventOnExitByNameDelegator": {
+"40": 60
+},
+"CVscBehaviorStateEventOnExitDelegator": {
+"40": 2
+},
+"CVscBehaviorStateEventOnExitGroupDelegator": {
+"40": 22
+},
+"CVscComponentData": {
+"32": 766
+},
+"CVscComponentDataAccessor": {
+"16": 781
+},
+"CVscComponentEntityAccessor": {
+"16": 837
+},
+"CVscComponentEntityMessageDelegator": {
+"48": 796
+},
+"CVscComponentEntityToComponentAccessor": {
+"32": 35
+},
+"CVscComponentSendEntityMessageNode": {
+"80": 660
+},
+"CVscComponentUpdaterAccessor": {
+"24": 555
+},
+"CVscEntityToPlayerNodeAccessor": {
+"24": 62
+},
+"CVscPlayerNodeToEntityAccessor": {
+"24": 81
+},
+"CWarningIndicatorComponentData": {
+"48": 2
+},
+"CWaterDetectorComponentData": {
+"24": 1
+},
+"CWaterSimulationSettings": {
+"32": 1
+},
+"CWaterSimulationSettingsList": {
+"40": 1
+},
+"CWaterVehicleComponentData": {
+"2936": 1
+},
+"CWaterVehicleControllerSettings": {
+"120": 1
+},
+"CWaterVehicleExpeditionComponentData": {
+"208": 1
+},
+"CWavePoolComponentData": {
+"168": 4
+},
+"CWaypoint": {
+"40": 55
+},
+"CWaypointHandleList": {
+"40": 22
+},
+"CWaypointList": {
+"40": 117
+},
+"CWaypointMoverComponentData": {
+"96": 9
+},
+"CWeightVehicleSetting": {
+"40": 1
+},
+"CWeightVehicleSettingList": {
+"48": 1
+},
+"CWeightedSound": {
+"40": 6
+},
+"CWeightedSoundList": {
+"40": 6
+},
+"CWind2": {
+"272": 6
+},
+"CWindParameters2": {
+"1368": 6
+},
+"CWindShaderConstantBundle": {
+"336": 6
+},
+"CWorldData": {
+"56": 116
+},
+"CWorldEntity": {
+"216": 116
+},
+"CWorldEntityData": {
+"184": 116
+},
+"CWorldVisualData": {
+"144": 116
+},
+"CWorldVisualDataGroup": {
+"1280": 116
+},
+"CXButtonStringTable": {
+"64": 1
+},
+"CZoneInfo": {
+"400": 116
+},
+"CZoneInfoDynamicDifficultyDataList": {
+"40": 1
+},
+"CZoneInfoHandleList": {
+"40": 2
+},
+"CZoneInfoSave": {
+"168": 116
+},
+"Color": {
+"16": 1
+},
+"CutsceneActionApplyIBLCubemap": {
+"40": 2
+},
+"CutsceneActionApplyVisualData": {
+"40": 28
+},
+"CutsceneActionDisableLights": {
+"32": 31
+},
+"CutsceneActionEnableLights": {
+"32": 33
+},
+"CutsceneActionKillVFX": {
+"48": 56
+},
+"CutsceneActionPlayAnimation": {
+"96": 64
+},
+"CutsceneActionPlayCamera": {
+"48": 64
+},
+"CutsceneActionPlayCameraList": {
+"40": 15
+},
+"CutsceneActionPlaySound": {
+"40": 26
+},
+"CutsceneActionPlayVO": {
+"40": 33
+},
+"CutsceneActionRemoveIBLCubemap": {
+"24": 2
+},
+"CutsceneActionRemoveVisualData": {
+"32": 27
+},
+"CutsceneActionSetVisibility": {
+"40": 64
+},
+"CutsceneActionSpawnVFX": {
+"104": 64
+},
+"Dictionary_2": {
+"80": 1
+},
+"EFlagsWrapper": {
+"16": 3
+},
+"EFlagsWrapperList": {
+"40": 3
+},
+"JuiceActionKeyframe": {
+"40": 190
+},
+"JuiceActionTrack": {
+"48": 393
+},
+"JuiceAnimation": {
+"72": 15
+},
+"JuiceAnimationList": {
+"40": 15
+},
+"JuiceBezierKeyframe": {
+"40": 48
+},
+"JuiceFieldTrack": {
+"72": 54
+},
+"JuiceFieldValueList": {
+"40": 15
+},
+"JuiceFloatKeyframe": {
+"24": 54
+},
+"JuiceObjectTrack": {
+"56": 64
+},
+"JuiceScene": {
+"112": 15
+},
+"JuiceVisualList": {
+"40": 16
+},
+"List_1": {
+"56": 33
+},
+"Object": {
+"32": 359
+},
+"OcclusionBoxList": {
+"40": 77
+},
+"RangedFloat": {
+"24": 352
+},
+"SpeedVfxSpec": {
+"24": 1
+},
+"SpeedVfxSpecList": {
+"40": 1
+},
+"Vector3": {
+"24": 356
+},
+"igAABox": {
+"40": 13
+},
+"igAddDependencyAttribute": {
+"16": 700
+},
+"igAddDependencyItemsAttribute": {
+"16": 1
+},
+"igAlphaBlendFunctionAttr": {
+"32": 1
+},
+"igAlphaBlendStateAttr": {
+"24": 1
+},
+"igAlphaFunctionAttr": {
+"32": 71
+},
+"igAlphaStateAttr": {
+"24": 73
+},
+"igAnimatedMorphWeights": {
+"80": 2
+},
+"igAnimatedMorphWeightsTransform": {
+"48": 2
+},
+"igAnimatedTransform": {
+"112": 224
+},
+"igAnimatedTransformSource": {
+"112": 583
+},
+"igAnimation2Generic": {
+"56": 2
+},
+"igAnimation2Info": {
+"48": 2
+},
+"igAnimation2List": {
+"40": 2
+},
+"igAnimationBinding2": {
+"64": 2
+},
+"igAnimationBinding2List": {
+"40": 2
+},
+"igAnimationTransitionList": {
+"40": 2
+},
+"igAppearanceInfo": {
+"48": 1
+},
+"igAtmosphericsConstantBundle": {
+"144": 8
+},
+"igAttrList": {
+"40": 99
+},
+"igBaseRenderPass": {
+"352": 1
+},
+"igBitmapFont": {
+"176": 8
+},
+"igBlendFunctionAttr": {
+"56": 82
+},
+"igBlendStateAttr": {
+"24": 89
+},
+"igBoolMetaField": {
+"64": 516
+},
+"igCachedAttrList": {
+"64": 71
+},
+"igCachedAttrListList": {
+"40": 74
+},
+"igCascadeShadowParametersBundle": {
+"288": 6
+},
+"igCascadeShadowRenderData": {
+"96": 1
+},
+"igCascadeShadowRenderPass": {
+"1280": 6
+},
+"igCharMetrics": {
+"64": 8
+},
+"igCharMetricsList": {
+"40": 8
+},
+"igCheckerboardConstantBundle": {
+"32": 1
+},
+"igCheckerboardResolvePass": {
+"608": 1
+},
+"igCinematicAnimationInstanceList": {
+"40": 15
+},
+"igColorMaskAttr": {
+"32": 11
+},
+"igComponentDataTable": {
+"64": 1403
+},
+"igComponentList": {
+"40": 1389
+},
+"igCullFaceAttr": {
+"24": 73
+},
+"igCustomMaterialAnimation": {
+"48": 59
+},
+"igCustomMaterialAnimationList": {
+"40": 59
+},
+"igDebugTokenAttr": {
+"32": 5
+},
+"igDecalAttr": {
+"32": 72
+},
+"igDepthBoundsStateAttr": {
+"32": 1
+},
+"igDepthFunctionAttr": {
+"24": 1
+},
+"igDepthStateAttr": {
+"24": 72
+},
+"igDepthWriteStateAttr": {
+"24": 74
+},
+"igDynamicMetaObject": {
+"152": 568
+},
+"igEntity": {
+"72": 573
+},
+"igEntityBolt": {
+"24": 1
+},
+"igEntityData": {
+"32": 573
+},
+"igEntityHandleList": {
+"40": 150
+},
+"igEntityList": {
+"40": 435
+},
+"igEntityTransform": {
+"128": 924
+},
+"igEnumMetaField": {
+"72": 215
+},
+"igEnumVscActionNodeHashTable": {
+"64": 94
+},
+"igFloatList": {
+"40": 68
+},
+"igFloatMetaField": {
+"64": 531
+},
+"igForwardLitRenderPass": {
+"512": 12
+},
+"igForwardLitRenderPassData": {
+"128": 1
+},
+"igFullScreenRenderPass": {
+"576": 13
+},
+"igFxMaterialHandleList": {
+"40": 451
+},
+"igGfxShaderConstant": {
+"88": 79
+},
+"igGfxShaderConstantList": {
+"40": 83
+},
+"igGraphicsBlendStateBundle": {
+"72": 153
+},
+"igGraphicsDepthStateBundle": {
+"48": 113
+},
+"igGraphicsEffect": {
+"80": 83
+},
+"igGraphicsGeometryShader": {
+"56": 1
+},
+"igGraphicsIndexBuffer": {
+"48": 3055
+},
+"igGraphicsMaterial": {
+"96": 5614
+},
+"igGraphicsMaterialAnimation": {
+"48": 488
+},
+"igGraphicsMaterialAnimationList": {
+"40": 488
+},
+"igGraphicsObjectSet": {
+"40": 5697
+},
+"igGraphicsPixelShader": {
+"56": 83
+},
+"igGraphicsRasterizerStateBundle": {
+"64": 667
+},
+"igGraphicsRenderTargetMask": {
+"48": 680
+},
+"igGraphicsSamplerStateBundle": {
+"72": 5604
+},
+"igGraphicsShaderConstant": {
+"32": 5668
+},
+"igGraphicsShaderList": {
+"40": 51
+},
+"igGraphicsShaderVariant": {
+"64": 51
+},
+"igGraphicsStencilStateBundle": {
+"88": 773
+},
+"igGraphicsTexture": {
+"56": 5604
+},
+"igGraphicsVertexBuffer": {
+"56": 3055
+},
+"igGraphicsVertexShader": {
+"72": 78
+},
+"igGroup": {
+"64": 1
+},
+"igGuiActionKeyframe": {
+"32": 17
+},
+"igGuiActionOpenProject": {
+"72": 1
+},
+"igGuiActionPlayAnimation": {
+"104": 13
+},
+"igGuiActionPlaySound": {
+"48": 17
+},
+"igGuiActionPopProject": {
+"40": 2
+},
+"igGuiActionSetFocus": {
+"56": 3
+},
+"igGuiActionSortToFront": {
+"48": 1
+},
+"igGuiActionTable": {
+"40": 9
+},
+"igGuiActionTrack": {
+"24": 17
+},
+"igGuiAnimation": {
+"40": 45
+},
+"igGuiAnimationCategory": {
+"24": 21
+},
+"igGuiAnimationTable": {
+"64": 45
+},
+"igGuiAnimationTag": {
+"24": 46
+},
+"igGuiAssetList": {
+"40": 55
+},
+"igGuiBehaviorList": {
+"40": 49
+},
+"igGuiComposition": {
+"48": 55
+},
+"igGuiEffect": {
+"88": 20
+},
+"igGuiEventActionTable": {
+"64": 8
+},
+"igGuiEventEffectSpawned": {
+"32": 20
+},
+"igGuiEventFocusInputPressed": {
+"40": 2
+},
+"igGuiEventListVisibleUpdate": {
+"48": 2
+},
+"igGuiEventPlaceableGainFocus": {
+"32": 2
+},
+"igGuiEventPlaceableGainHover": {
+"40": 2
+},
+"igGuiEventPlaceableLoseFocus": {
+"32": 2
+},
+"igGuiEventPlaceableLoseHover": {
+"40": 2
+},
+"igGuiEventProjectGainFocus": {
+"24": 1
+},
+"igGuiEventProjectLoad": {
+"24": 4
+},
+"igGuiFilmStrip": {
+"88": 2
+},
+"igGuiFloatKeyframe": {
+"48": 18
+},
+"igGuiFloatLinearKeyframe": {
+"32": 41
+},
+"igGuiFloatTrack": {
+"48": 41
+},
+"igGuiInstanceMap": {
+"64": 55
+},
+"igGuiKeyframeList": {
+"40": 45
+},
+"igGuiList": {
+"832": 2
+},
+"igGuiListItemList": {
+"40": 2
+},
+"igGuiNineSlice": {
+"144": 5
+},
+"igGuiNullAsset": {
+"32": 23
+},
+"igGuiPlaceable": {
+"272": 55
+},
+"igGuiPlaceableHandleList": {
+"40": 1
+},
+"igGuiPlaceableTable": {
+"40": 52
+},
+"igGuiProject": {
+"232": 42
+},
+"igGuiSharedAssetProject": {
+"232": 13
+},
+"igGuiSprite": {
+"64": 38
+},
+"igGuiText": {
+"176": 46
+},
+"igGuiTrackList": {
+"40": 45
+},
+"igGuiVec2LinearKeyframe": {
+"32": 5
+},
+"igGuiVec2Track": {
+"48": 5
+},
+"igGuiVec3Keyframe": {
+"72": 31
+},
+"igGuiVec3LinearKeyframe": {
+"40": 31
+},
+"igGuiVec3Track": {
+"48": 39
+},
+"igGuiVec4Keyframe": {
+"80": 3
+},
+"igGuiVec4LinearKeyframe": {
+"48": 13
+},
+"igGuiVec4Track": {
+"48": 14
+},
+"igGuiVscBehavior": {
+"40": 34
+},
+"igGuiVscEventDelegator": {
+"48": 67
+},
+"igGuiVscMessageEntryPointNode": {
+"88": 67
+},
+"igGuiVscPlaceableAccessor": {
+"16": 94
+},
+"igGuiVscSendEventNode": {
+"88": 74
+},
+"igGuiVscUpdaterAccessor": {
+"24": 41
+},
+"igHandleMetaField": {
+"80": 882
+},
+"igImage2": {
+"88": 5118
+},
+"igImageInputData": {
+"56": 10
+},
+"igImageInputDataList": {
+"40": 17
+},
+"igIndexBuffer": {
+"88": 3055
+},
+"igIntFloatHashTable": {
+"64": 1
+},
+"igIntList": {
+"40": 262
+},
+"igIntListList": {
+"40": 168
+},
+"igIntMetaField": {
+"64": 317
+},
+"igKerningPairHashTable": {
+"64": 8
+},
+"igLanguageList": {
+"40": 1
+},
+"igLightingStateAttr": {
+"24": 2
+},
+"igListenerRelativeVelocityFrameReference": {
+"40": 38
+},
+"igLocalizedInfo": {
+"40": 429
+},
+"igLocalizedString": {
+"24": 116
+},
+"igLocalizedStringList": {
+"40": 15
+},
+"igMaterial": {
+"24": 1
+},
+"igMemoryCommandStream": {
+"88": 5696
+},
+"igMemoryCommandStreamList": {
+"40": 83
+},
+"igModelData": {
+"208": 3061
+},
+"igModelDrawCallData": {
+"160": 3055
+},
+"igModelInfo": {
+"48": 2716
+},
+"igNameList": {
+"40": 24926
+},
+"igNamedObject": {
+"24": 344
+},
+"igNetReplicateAttribute": {
+"72": 6
+},
+"igNetSyncOnJipAttribute": {
+"16": 770
+},
+"igNodeList": {
+"40": 1
+},
+"igNonRefCountedGuiAnimationTagList": {
+"40": 2
+},
+"igNonRefCountedNodeList": {
+"40": 1
+},
+"igObject": {
+"16": 1
+},
+"igObjectList": {
+"40": 25023
+},
+"igObjectRefMetaField": {
+"80": 1018
+},
+"igOutdoorLightConstantBundle": {
+"80": 6
+},
+"igParallaxRenderData": {
+"16": 1
+},
+"igPitchApplicator": {
+"24": 39
+},
+"igPlane": {
+"32": 373
+},
+"igPlatformRenderPass": {
+"64": 6
+},
+"igPlatformRenderPassMap": {
+"64": 6
+},
+"igPlatformRenderTarget": {
+"232": 8
+},
+"igPlatformRenderTargetMap": {
+"64": 8
+},
+"igPolygonModeAttr": {
+"24": 2
+},
+"igPrefabComponentData": {
+"24": 221
+},
+"igQuaternionfList": {
+"40": 2
+},
+"igRay": {
+"40": 1
+},
+"igRenderCamera": {
+"256": 3
+},
+"igRenderDirectionalLight": {
+"96": 1
+},
+"igRenderPass": {
+"56": 16
+},
+"igRenderPassList": {
+"40": 18
+},
+"igRenderTarget": {
+"224": 13
+},
+"igRenderTargetCustomDataList": {
+"40": 17
+},
+"igRenderTargetInputData": {
+"72": 13
+},
+"igRenderTargetInputDataList": {
+"40": 17
+},
+"igRenderTargetList": {
+"40": 13
+},
+"igRenderTargetOutputData": {
+"112": 13
+},
+"igRenderTraversalJobWeights": {
+"24": 1
+},
+"igRendererInfo": {
+"200": 1
+},
+"igSceneRenderPass": {
+"464": 15
+},
+"igShaderBuffer": {
+"48": 83
+},
+"igShaderConstantBool": {
+"32": 71
+},
+"igShaderConstantDataList": {
+"40": 71
+},
+"igShaderConstantFloat": {
+"32": 71
+},
+"igShaderConstantValueBool": {
+"32": 5248
+},
+"igShaderConstantValueFloat": {
+"32": 5203
+},
+"igShaderConstantValueInt": {
+"32": 29
+},
+"igShaderConstantValueList": {
+"48": 5259
+},
+"igShaderConstantValueVector": {
+"48": 1942
+},
+"igShaderConstantVector": {
+"48": 35
+},
+"igShaderParametersAttr": {
+"32": 71
+},
+"igSkeleton2": {
+"48": 347
+},
+"igSkeleton2Info": {
+"48": 2
+},
+"igSkeleton2List": {
+"40": 2
+},
+"igSkeletonBone": {
+"48": 347
+},
+"igSkeletonBoneList": {
+"40": 347
+},
+"igSortDepthOffsetAttr": {
+"24": 14
+},
+"igSoundUpdateLinearDoppler": {
+"48": 38
+},
+"igSoundUpdateMethodList": {
+"40": 423
+},
+"igSoundUpdateMethodPitchByVelocity": {
+"48": 2
+},
+"igSpline2": {
+"112": 472
+},
+"igSplineControlPoint2": {
+"56": 472
+},
+"igSplineControlPoint2List": {
+"40": 472
+},
+"igSplineEventList": {
+"40": 472
+},
+"igSplineEventTrack": {
+"80": 472
+},
+"igSplineFloatKeyframeList": {
+"40": 95
+},
+"igSplineFloatKeyframeTrack": {
+"80": 95
+},
+"igSplineFloatKeyframeTrackTable": {
+"64": 472
+},
+"igSplineRotationKeyframeList": {
+"40": 279
+},
+"igSplineRotationKeyframeTrack": {
+"80": 279
+},
+"igSplineRotationKeyframeTrackTable": {
+"64": 472
+},
+"igSplineVec3fKeyframeList": {
+"40": 70
+},
+"igSplineVec3fKeyframeTrack": {
+"80": 70
+},
+"igSplineVec3fKeyframeTrackTable": {
+"64": 472
+},
+"igStencilFunctionAttr": {
+"48": 5
+},
+"igStencilStateAttr": {
+"24": 5
+},
+"igStreamingChunkInfo": {
+"64": 165
+},
+"igStringFloatHashTable": {
+"64": 1
+},
+"igStringInsensitiveStringHashTable": {
+"64": 3061
+},
+"igStringIntHashTable": {
+"64": 509
+},
+"igStringMetaField": {
+"72": 320
+},
+"igStringRefList": {
+"40": 161
+},
+"igStringRefListList": {
+"40": 2
+},
+"igStringStringHashTable": {
+"64": 79
+},
+"igTextureAttr2": {
+"96": 79
+},
+"igTextureBindAttr2": {
+"40": 79
+},
+"igTextureMatrixAttr": {
+"112": 26
+},
+"igTextureSamplerSource": {
+"40": 74
+},
+"igTextureSamplerSourceList": {
+"40": 83
+},
+"igTransferRenderPass": {
+"160": 1
+},
+"igTransformSequence2": {
+"104": 2
+},
+"igTransformSource2List": {
+"40": 2
+},
+"igTransformSource3": {
+"112": 746
+},
+"igUnsignedIntIntHashTable": {
+"64": 66
+},
+"igUnsignedIntList": {
+"40": 83
+},
+"igUpdateableList": {
+"40": 55
+},
+"igUpdater": {
+"24": 55
+},
+"igVec2fList": {
+"40": 2
+},
+"igVec2fMetaField": {
+"64": 18
+},
+"igVec3fList": {
+"40": 70
+},
+"igVec3fMetaField": {
+"64": 262
+},
+"igVec4ucMetaField": {
+"64": 2
+},
+"igVelocityFrameReference": {
+"32": 2
+},
+"igVertexBlenderDefault": {
+"16": 346
+},
+"igVertexBuffer": {
+"96": 3055
+},
+"igVertexData": {
+"24": 78
+},
+"igVertexDataList": {
+"40": 78
+},
+"igVertexFormat": {
+"128": 3055
+},
+"igVfxAccelerateCurveOperator": {
+"280": 64
+},
+"igVfxAccelerateDirectionSpeedCurveOperator": {
+"144": 1
+},
+"igVfxAccelerateDirectionSpeedRangeOperator": {
+"64": 1
+},
+"igVfxAccelerateDragAerodynamicCurveOperator": {
+"112": 6
+},
+"igVfxAccelerateDragAerodynamicOperator": {
+"24": 2
+},
+"igVfxAccelerateDragCurveOperator": {
+"112": 141
+},
+"igVfxAccelerateDragOperator": {
+"24": 146
+},
+"igVfxAccelerateDragRangeOperator": {
+"32": 121
+},
+"igVfxAccelerateGravityOperator": {
+"24": 385
+},
+"igVfxAccelerateOperator": {
+"48": 74
+},
+"igVfxAccelerateRangeOperator": {
+"48": 50
+},
+"igVfxAccelerateRangedRampOperator": {
+"72": 21
+},
+"igVfxAlignBillboardOperator": {
+"48": 779
+},
+"igVfxAlignDualOperator": {
+"24": 374
+},
+"igVfxAlignLineBillboardOperator": {
+"24": 62
+},
+"igVfxAlignSingleOperator": {
+"48": 184
+},
+"igVfxAlphaCurveOperator": {
+"112": 788
+},
+"igVfxAlphaOperator": {
+"24": 47
+},
+"igVfxAnimatedFrame": {
+"288": 754
+},
+"igVfxBoxSpawnLocationData": {
+"88": 9
+},
+"igVfxCameraFadeOperator": {
+"24": 57
+},
+"igVfxCameraFadeShrinkOperator": {
+"24": 13
+},
+"igVfxCameraShrinkOperator": {
+"24": 21
+},
+"igVfxColorCurveFixedAlphaOperator": {
+"320": 199
+},
+"igVfxColorCurveOperator": {
+"400": 762
+},
+"igVfxColorOperator": {
+"48": 828
+},
+"igVfxColorRangeOperator": {
+"64": 3
+},
+"igVfxColorRangedRampOperator": {
+"96": 54
+},
+"igVfxColorValueFixedOperator": {
+"32": 11
+},
+"igVfxCommitOperator": {
+"16": 934
+},
+"igVfxCurveInputByAngleOperator": {
+"32": 1
+},
+"igVfxCurveInputByDistanceOperator": {
+"32": 17
+},
+"igVfxCurveInputByFieldOfViewOperator": {
+"32": 4
+},
+"igVfxCurveInputByVelocityOperator": {
+"32": 32
+},
+"igVfxCurveInputLoadParameterOperator": {
+"24": 24
+},
+"igVfxCurveInputRandomOperator": {
+"24": 58
+},
+"igVfxCurveInputRemapOperator": {
+"112": 15
+},
+"igVfxCurveInputStepOperator": {
+"32": 4
+},
+"igVfxCylindricalSpawnLocationData": {
+"96": 76
+},
+"igVfxDebugData": {
+"72": 1
+},
+"igVfxDrawBezierAdvancedOperator": {
+"832": 16
+},
+"igVfxDrawBezierOperator": {
+"288": 66
+},
+"igVfxDrawCylinderOperator": {
+"408": 62
+},
+"igVfxDrawDeathEffectOperator": {
+"32": 8
+},
+"igVfxDrawDebugFrameOperator": {
+"32": 179
+},
+"igVfxDrawDecalOperator": {
+"64": 105
+},
+"igVfxDrawGradientSpriteOperator": {
+"448": 6
+},
+"igVfxDrawIntervalPrimitiveOperator": {
+"32": 6
+},
+"igVfxDrawLineOperator": {
+"240": 16
+},
+"igVfxDrawModelOperator": {
+"64": 112
+},
+"igVfxDrawSpriteOperator": {
+"64": 1105
+},
+"igVfxDrawSubEffectOperator": {
+"48": 140
+},
+"igVfxDrawTrailOperator": {
+"560": 120
+},
+"igVfxEffect": {
+"80": 1569
+},
+"igVfxOperatorPrimitiveData": {
+"112": 1539
+},
+"igVfxOrbitAxisAngleCurveDistanceCurveOperator": {
+"224": 40
+},
+"igVfxOrbitEulerCurveRadiusCurveOperator": {
+"376": 20
+},
+"igVfxOrientationInvertOperator": {
+"24": 2
+},
+"igVfxOrientationLoadOperator": {
+"24": 10
+},
+"igVfxPoseBlendOperator": {
+"112": 62
+},
+"igVfxPoseLoadOperator": {
+"24": 3
+},
+"igVfxPosePlacedPrimitiveRotateFixedRotationsOperator": {
+"88": 125
+},
+"igVfxPosePlacedPrimitiveRotateOperator": {
+"256": 78
+},
+"igVfxPoseSpawnLocationOperator": {
+"40": 346
+},
+"igVfxRangedCurveSpawnCountData": {
+"112": 1165
+},
+"igVfxRangedCurveSpawnRateData": {
+"112": 771
+},
+"igVfxRotateAxisAngleCurveOperator": {
+"144": 528
+},
+"igVfxRotateAxisAngleOperator": {
+"64": 127
+},
+"igVfxRotateAxisAngleRangeOperator": {
+"64": 386
+},
+"igVfxRotateAxisAngleRangedRampOperator": {
+"64": 18
+},
+"igVfxRotateEulerCurveOperator": {
+"280": 60
+},
+"igVfxRotateEulerOperator": {
+"48": 25
+},
+"igVfxRotateEulerRangeOperator": {
+"48": 1
+},
+"igVfxRotateRandomOperator": {
+"24": 216
+},
+"igVfxSizeCurveOperator": {
+"280": 478
+},
+"igVfxSizeCurveXYFixedOperator": {
+"120": 11
+},
+"igVfxSizeCurveXZFixedOperator": {
+"120": 64
+},
+"igVfxSizeCurveYZFixedOperator": {
+"120": 912
+},
+"igVfxSizeLoadOperator": {
+"24": 3
+},
+"igVfxSizeOperator": {
+"32": 981
+},
+"igVfxSizeRangeOperator": {
+"48": 151
+},
+"igVfxSizeRangedRampOperator": {
+"72": 130
+},
+"igVfxSizeScaleOperator": {
+"24": 24
+},
+"igVfxSpawnLocationData": {
+"64": 211
+},
+"igVfxSphericalSpawnLocationData": {
+"96": 153
+},
+"igVfxSpinAxisRateCurveOperator": {
+"144": 1
+},
+"igVfxSpinAxisRateOperator": {
+"64": 5
+},
+"igVfxSpinAxisRateRangeOperator": {
+"64": 1
+},
+"igVfxSpinCurveOperator": {
+"288": 2
+},
+"igVfxSpinOperator": {
+"48": 1
+},
+"igVfxSpinRangeOperator": {
+"56": 48
+},
+"igVfxStackOperatorList": {
+"40": 1539
+},
+"igVfxTextureMacroOperator": {
+"208": 9
+},
+"igVfxTextureTransformFilmstripOperator": {
+"120": 42
+},
+"igVfxTextureTransformRotateCurveOperator": {
+"120": 30
+},
+"igVfxTextureTransformScaleCurveOperator": {
+"208": 11
+},
+"igVfxTextureTransformSimpleOperator": {
+"24": 119
+},
+"igVfxTextureTransformTranslateCurveOperator": {
+"200": 25
+},
+"igVfxTrackChangeOperator": {
+"24": 414
+},
+"igVfxTrackCopyDetailedOperator": {
+"24": 29
+},
+"igVfxTrackCopyOperator": {
+"24": 330
+},
+"igVfxTranslateApplyBoltSizeOperator": {
+"24": 8
+},
+"igVfxTranslateCurveOperator": {
+"280": 452
+},
+"igVfxTranslateDistanceCurveOperator": {
+"144": 59
+},
+"igVfxTranslateDistanceOperator": {
+"64": 28
+},
+"igVfxTranslateDistanceRangeOperator": {
+"64": 43
+},
+"igVfxTranslateOperator": {
+"48": 633
+},
+"igVfxTranslatePivotCurveOperator": {
+"280": 55
+},
+"igVfxTranslatePivotOperator": {
+"32": 249
+},
+"igVfxTranslatePivotRangeOperator": {
+"48": 3
+},
+"igVfxTranslatePivotRangedRampOperator": {
+"72": 5
+},
+"igVfxTranslateRangeOperator": {
+"48": 381
+},
+"igVfxTranslateRangedRampOperator": {
+"72": 4
+},
+"igVfxVelocityCurveOperator": {
+"288": 139
+},
+"igVfxVelocityDirectionSpeedCurveOperator": {
+"144": 5
+},
+"igVfxVelocityDirectionSpeedOperator": {
+"64": 1
+},
+"igVfxVelocityDirectionSpeedRangeOperator": {
+"64": 9
+},
+"igVfxVelocityInstantaneousOperator": {
+"24": 11
+},
+"igVfxVelocityLoadCurveOperator": {
+"112": 35
+},
+"igVfxVelocityLoadOperator": {
+"24": 30
+},
+"igVfxVelocityLoadRangeOperator": {
+"32": 28
+},
+"igVfxVelocityOperator": {
+"48": 119
+},
+"igVfxVelocityRangeOperator": {
+"56": 508
+},
+"igVfxVelocityRangedRampOperator": {
+"80": 2
+},
+"igVibrationClip": {
+"56": 1
+},
+"igViewportAttr": {
+"48": 6
+},
+"igVscAbsFloatAccessor": {
+"24": 21
+},
+"igVscAbsFloatNode": {
+"40": 16
+},
+"igVscAbsIntNode": {
+"40": 2
+},
+"igVscAccessListAtIndexNode": {
+"24": 26
+},
+"igVscAccessListFirstNode": {
+"24": 32
+},
+"igVscAccessListHelper": {
+"64": 75
+},
+"igVscAccessListLastNode": {
+"24": 4
+},
+"igVscAccessListRandomNode": {
+"24": 18
+},
+"igVscAccessorList": {
+"40": 896
+},
+"igVscActionNodeList": {
+"40": 450
+},
+"igVscAddFloatAccessor": {
+"32": 50
+},
+"igVscAddFloatIntAccessor": {
+"32": 2
+},
+"igVscAddFloatNode": {
+"48": 78
+},
+"igVscAddIntAccessor": {
+"32": 7
+},
+"igVscAddIntFloatNode": {
+"48": 2
+},
+"igVscAddIntNode": {
+"48": 77
+},
+"igVscAddTimeToTimerNode": {
+"24": 3
+},
+"igVscAddToListNode": {
+"24": 54
+},
+"igVscAddVec2fNode": {
+"48": 2
+},
+"igVscAddVec3fAccessor": {
+"32": 12
+},
+"igVscAddVec3fNode": {
+"48": 89
+},
+"igVscAngleBetweenVec3fNode": {
+"48": 8
+},
+"igVscAnglesToDirectionNode": {
+"40": 4
+},
+"igVscArcCosNode": {
+"40": 1
+},
+"igVscAssignNode": {
+"40": 665
+},
+"igVscAxisToRotationNode": {
+"72": 4
+},
+"igVscBoolFieldAccessor": {
+"24": 447
+},
+"igVscBoolMacroAccessor": {
+"32": 5
+},
+"igVscCheckGateNode": {
+"24": 298
+},
+"igVscClampFloatNode": {
+"56": 37
+},
+"igVscClampIntNode": {
+"56": 9
+},
+"igVscClampVec2fNode": {
+"56": 1
+},
+"igVscClampVec3fNode": {
+"56": 1
+},
+"igVscCloseGateNode": {
+"24": 117
+},
+"igVscColorFieldAccessor": {
+"24": 1
+},
+"igVscCompareBoolNode": {
+"48": 24
+},
+"igVscCompareFloatNode": {
+"80": 193
+},
+"igVscCompareIntNode": {
+"80": 178
+},
+"igVscCompareNode": {
+"48": 43
+},
+"igVscCompareObjectNode": {
+"48": 191
+},
+"igVscCompareStringNode": {
+"56": 88
+},
+"igVscConstBoolAccessor": {
+"16": 655
+},
+"igVscConstColorAccessor": {
+"24": 2
+},
+"igVscConstEnumAccessor": {
+"24": 316
+},
+"igVscConstFloatAccessor": {
+"24": 497
+},
+"igVscConstIntAccessor": {
+"24": 259
+},
+"igVscConstObjectAccessor": {
+"24": 594
+},
+"igVscConstStringAccessor": {
+"24": 353
+},
+"igVscConstVec2fAccessor": {
+"24": 2
+},
+"igVscConstVec3fAccessor": {
+"32": 100
+},
+"igVscCppActionNode": {
+"64": 846
+},
+"igVscCppCompoundActionNode": {
+"32": 346
+},
+"igVscCppCompoundNode": {
+"56": 343
+},
+"igVscCrossVec3fNode": {
+"48": 2
+},
+"igVscDataMetaObject": {
+"160": 921
+},
+"igVscDecrementIntCounterNode": {
+"24": 5
+},
+"igVscDelegatorList": {
+"40": 973
+},
+"igVscDirectionToAnglesAccessor": {
+"32": 6
+},
+"igVscDirectionToAnglesNode": {
+"48": 31
+},
+"igVscDirectionVec3fNode": {
+"56": 41
+},
+"igVscDistanceBetweenVec3fAccessor": {
+"32": 4
+},
+"igVscDistanceBetweenVec3fNode": {
+"48": 62
+},
+"igVscDistanceVec3fNode": {
+"48": 2
+},
+"igVscDivideFloatAccessor": {
+"32": 7
+},
+"igVscDivideFloatIntNode": {
+"48": 3
+},
+"igVscDivideFloatNode": {
+"48": 45
+},
+"igVscDivideIntFloatAccessor": {
+"32": 2
+},
+"igVscDivideIntFloatNode": {
+"48": 2
+},
+"igVscDivideIntNode": {
+"48": 12
+},
+"igVscDivideVec2fScalarNode": {
+"48": 1
+},
+"igVscDivideVec3fScalarNode": {
+"48": 2
+},
+"igVscDotVec3fAccessor": {
+"32": 1
+},
+"igVscDotVec3fNode": {
+"48": 15
+},
+"igVscEmptyListNode": {
+"24": 27
+},
+"igVscEntryPointNode": {
+"56": 814
+},
+"igVscEntryPointNodeList": {
+"40": 953
+},
+"igVscEnum": {
+"104": 98
+},
+"igVscEnumFieldAccessor": {
+"24": 133
+},
+"igVscEnumMacroAccessor": {
+"32": 4
+},
+"igVscEnumToIntAccessor": {
+"24": 92
+},
+"igVscFloatFieldAccessor": {
+"24": 356
+},
+"igVscFloatMacroAccessor": {
+"32": 3
+},
+"igVscFloatToIntAccessor": {
+"24": 29
+},
+"igVscFloorFloatAccessor": {
+"24": 1
+},
+"igVscFloorFloatNode": {
+"40": 2
+},
+"igVscForEachInListHelper": {
+"80": 124
+},
+"igVscForEachInListNextNode": {
+"24": 124
+},
+"igVscForEachInListResetNode": {
+"24": 63
+},
+"igVscFormatStringNode": {
+"120": 24
+},
+"igVscGateHelper": {
+"56": 300
+},
+"igVscGetListSizeNode": {
+"40": 83
+},
+"igVscGetRandomBoolNode": {
+"40": 8
+},
+"igVscGetRandomFloatNode": {
+"56": 42
+},
+"igVscGetRandomIntNode": {
+"56": 22
+},
+"igVscGetRandomVec3fNode": {
+"40": 1
+},
+"igVscGetRandomVec3fRangedNode": {
+"56": 7
+},
+"igVscGuiPlaceableToGuiProjectAccessor": {
+"24": 24
+},
+"igVscGuiProjectToGuiPlaceableAccessor": {
+"24": 27
+},
+"igVscHiddenSequenceNode": {
+"176": 167
+},
+"igVscHorizontalDistanceVec3fNode": {
+"48": 6
+},
+"igVscIncrementIntCounterNode": {
+"24": 30
+},
+"igVscIndexedVec2fFloatAccessor": {
+"32": 13
+},
+"igVscIndexedVec3fFloatAccessor": {
+"32": 136
+},
+"igVscIndirectBoolFieldAccessor": {
+"32": 230
+},
+"igVscIndirectBoolPropertyAccessor": {
+"40": 204
+},
+"igVscIndirectColorFieldAccessor": {
+"32": 1
+},
+"igVscIndirectEnumFieldAccessor": {
+"32": 115
+},
+"igVscIndirectEnumPropertyAccessor": {
+"40": 46
+},
+"igVscIndirectFloatFieldAccessor": {
+"32": 440
+},
+"igVscIndirectFloatPropertyAccessor": {
+"40": 73
+},
+"igVscIndirectIntFieldAccessor": {
+"32": 60
+},
+"igVscIndirectIntPropertyAccessor": {
+"40": 60
+},
+"igVscIndirectObjectFieldAccessor": {
+"32": 688
+},
+"igVscIndirectObjectPropertyAccessor": {
+"40": 383
+},
+"igVscIndirectStringFieldAccessor": {
+"32": 252
+},
+"igVscIndirectStringPropertyAccessor": {
+"40": 106
+},
+"igVscIndirectVec2fFieldAccessor": {
+"32": 6
+},
+"igVscIndirectVec2fPropertyAccessor": {
+"40": 1
+},
+"igVscIndirectVec3fFieldAccessor": {
+"32": 63
+},
+"igVscIndirectVec3fPropertyAccessor": {
+"40": 358
+},
+"igVscIntCounterHelper": {
+"104": 31
+},
+"igVscIntFieldAccessor": {
+"24": 289
+},
+"igVscIntMacroAccessor": {
+"32": 4
+},
+"igVscIntToEnumAccessor": {
+"24": 8
+},
+"igVscIntToFloatAccessor": {
+"24": 35
+},
+"igVscIsInListNode": {
+"72": 15
+},
+"igVscIsStringEqualToStringNode": {
+"48": 1
+},
+"igVscLengthVec2fNode": {
+"40": 2
+},
+"igVscLengthVec3fNode": {
+"40": 5
+},
+"igVscLerpFloatNode": {
+"56": 10
+},
+"igVscLerpLoopedNode": {
+"72": 4
+},
+"igVscLerpVec2fNode": {
+"56": 1
+},
+"igVscLerpVec3fNode": {
+"56": 12
+},
+"igVscLocalizedStringToStringAccessor": {
+"24": 19
+},
+"igVscLogNode": {
+"56": 55
+},
+"igVscLogicCheckANDNode": {
+"64": 4
+},
+"igVscLogicCheckORNode": {
+"64": 5
+},
+"igVscLogicalANDAccessor": {
+"32": 16
+},
+"igVscLogicalANDNode": {
+"48": 3
+},
+"igVscLogicalNOTAccessor": {
+"24": 15
+},
+"igVscLogicalNOTNode": {
+"40": 3
+},
+"igVscLogicalORAccessor": {
+"32": 14
+},
+"igVscLogicalORNode": {
+"48": 1
+},
+"igVscMacroCallNode": {
+"56": 31
+},
+"igVscMacroExitNode": {
+"24": 6
+},
+"igVscMapToRangeFloatNode": {
+"80": 25
+},
+"igVscMaxFloatNode": {
+"48": 4
+},
+"igVscMaxIntNode": {
+"48": 1
+},
+"igVscMessageEntryPointNode": {
+"80": 796
+},
+"igVscMetaFunctionDelegator": {
+"48": 278
+},
+"igVscMetaObject": {
+"200": 1018
+},
+"igVscMethod": {
+"24": 953
+},
+"igVscMethodList": {
+"40": 694
+},
+"igVscMinFloatNode": {
+"48": 5
+},
+"igVscMinIntNode": {
+"48": 2
+},
+"igVscModifyListByIndexHelper": {
+"80": 4
+},
+"igVscModifyListByIndexInsertNode": {
+"24": 1
+},
+"igVscModifyListByIndexRemoveNode": {
+"24": 3
+},
+"igVscModifyListHelper": {
+"72": 59
+},
+"igVscModulusNode": {
+"48": 11
+},
+"igVscMultipleBoolAccessor": {
+"40": 2
+},
+"igVscMultipleFloatAccessor": {
+"40": 4
+},
+"igVscMultipleStringAccessor": {
+"40": 1
+},
+"igVscMultiplyFloatAccessor": {
+"32": 67
+},
+"igVscMultiplyFloatIntAccessor": {
+"32": 1
+},
+"igVscMultiplyFloatIntNode": {
+"48": 1
+},
+"igVscMultiplyFloatNode": {
+"48": 50
+},
+"igVscMultiplyIntFloatNode": {
+"48": 14
+},
+"igVscMultiplyIntNode": {
+"48": 10
+},
+"igVscMultiplyScalarVec2fNode": {
+"48": 1
+},
+"igVscMultiplyScalarVec3fAccessor": {
+"32": 4
+},
+"igVscMultiplyScalarVec3fNode": {
+"48": 30
+},
+"igVscMultiplyVec2fNode": {
+"48": 1
+},
+"igVscMultiplyVec2fScalarNode": {
+"48": 2
+},
+"igVscMultiplyVec3fNode": {
+"48": 1
+},
+"igVscMultiplyVec3fScalarAccessor": {
+"32": 4
+},
+"igVscMultiplyVec3fScalarNode": {
+"48": 40
+},
+"igVscNegateBoolAccessor": {
+"24": 2
+},
+"igVscNegateBoolNode": {
+"40": 8
+},
+"igVscNegateFloatAccessor": {
+"24": 6
+},
+"igVscNegateFloatNode": {
+"40": 8
+},
+"igVscNegateVec3fAccessor": {
+"24": 1
+},
+"igVscNegateVec3fNode": {
+"40": 7
+},
+"igVscNormalizeVec2fNode": {
+"40": 2
+},
+"igVscNormalizeVec3fAccessor": {
+"24": 2
+},
+"igVscNormalizeVec3fNode": {
+"40": 20
+},
+"igVscObjectFieldAccessor": {
+"24": 847
+},
+"igVscObjectMacroAccessor": {
+"24": 6
+},
+"igVscOnVariableChangedDelegator": {
+"32": 1
+},
+"igVscOpenGateNode": {
+"24": 226
+},
+"igVscPauseTimerNode": {
+"24": 4
+},
+"igVscPowerNode": {
+"48": 2
+},
+"igVscPrivateGraphEventAttribute": {
+"16": 450
+},
+"igVscRemoveFromListNode": {
+"24": 30
+},
+"igVscReplaceItemAtIndexInListNode": {
+"72": 2
+},
+"igVscResetIntCounterNode": {
+"24": 22
+},
+"igVscRotateVectorAnglesNode": {
+"48": 2
+},
+"igVscRoundFloatNode": {
+"40": 4
+},
+"igVscSequenceNode": {
+"176": 444
+},
+"igVscSetYawVec3fNode": {
+"56": 2
+},
+"igVscSineNode": {
+"40": 1
+},
+"igVscStartTimerNode": {
+"24": 322
+},
+"igVscStopTimerNode": {
+"24": 230
+},
+"igVscStringConverterAccessor": {
+"24": 18
+},
+"igVscStringFieldAccessor": {
+"24": 130
+},
+"igVscStringMacroAccessor": {
+"32": 2
+},
+"igVscStringToLocalizedStringAccessor": {
+"24": 13
+},
+"igVscSubtractFloatAccessor": {
+"32": 33
+},
+"igVscSubtractFloatNode": {
+"48": 58
+},
+"igVscSubtractIntAccessor": {
+"32": 13
+},
+"igVscSubtractIntNode": {
+"48": 34
+},
+"igVscSubtractVec2fNode": {
+"48": 2
+},
+"igVscSubtractVec3fAccessor": {
+"32": 5
+},
+"igVscSubtractVec3fNode": {
+"48": 21
+},
+"igVscSwitch02Node": {
+"48": 6
+},
+"igVscSwitch03Node": {
+"56": 6
+},
+"igVscSwitch04Node": {
+"64": 21
+},
+"igVscSwitch05Node": {
+"72": 2
+},
+"igVscSwitch06Node": {
+"80": 2
+},
+"igVscSwitch08Node": {
+"96": 1
+},
+"igVscSwitch09Node": {
+"104": 2
+},
+"igVscSwitch11Node": {
+"120": 1
+},
+"igVscSwitch15Node": {
+"152": 1
+},
+"igVscSwitchEnumNode": {
+"40": 89
+},
+"igVscTestBoolNode": {
+"40": 524
+},
+"igVscTestObjectNode": {
+"40": 369
+},
+"igVscThisObjectAccessor": {
+"16": 42
+},
+"igVscTimerHelper": {
+"80": 324
+},
+"igVscVec2fFieldAccessor": {
+"24": 14
+},
+"igVscVec3fFieldAccessor": {
+"24": 251
+},
+"igVscVec3fHorizontalLengthFloatAccessor": {
+"24": 3
+},
+"igVscVec3fLengthFloatAccessor": {
+"24": 4
+},
+"igVscVec3fRotationHeadingFloatAccessor": {
+"24": 9
+},
+"igVscVec3fRotationPitchFloatAccessor": {
+"24": 6
+},
+"igVscVec3fRotationRollFloatAccessor": {
+"24": 6
+},
+"igVscVec3fXFloatAccessor": {
+"24": 34
+},
+"igVscVec3fYFloatAccessor": {
+"24": 32
+},
+"igVscVec3fZFloatAccessor": {
+"24": 69
+},
+"igVscWithinRangeNode": {
+"64": 19
+},
+"igVscYawVec3fNode": {
+"48": 2
+}
+}
+}
+}

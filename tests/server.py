@@ -15,6 +15,30 @@ def pak_bytes(tag, size):
     body = (tag.encode() * (size // len(tag) + 1))[: size - 4]
     return b"IGA\x1a" + body
 
+def level_pak(game, level):
+    """.pak valido e non compresso con un livello (packages/generated/maps/...)."""
+    import struct
+    root = "temporary/mack/data/win64/output/"
+    files = [("packages/generated/maps/%s/%s/%s_pkg.igz" % (game, level, level), b"\x01ZGI" + b"P" * 300),
+             ("maps/%s/%s/%s_Terrain.igz" % (game, level, level), b"\x01ZGI" + b"T" * 900)]
+    n = len(files)
+    start = (0x38 + 20 * n + 0x7FF) & ~0x7FF
+    body, offs = b"", []
+    for _, data in files:
+        offs.append(start + len(body))
+        body += data + b"\0" * (-len(data) % 0x800)
+    names, ptr = b"", []
+    for name, _ in files:
+        ptr.append(4 * n + len(names))
+        names += (root + name).encode() + b"\0" + name.encode() + b"\0" + b"\0" * 4
+    table = struct.pack("<%dI" % n, *ptr) + names
+    head = struct.pack("<10IQ2I", 0x1A414749, 11, 20 * n, n, 0x800, 0x7FFFFFFF, 0, 0, 0, 0,
+                       start + len(body), len(table), 1)
+    toc = struct.pack("<%dI" % n, *range(n)) + b"".join(
+        struct.pack("<IiiI", offs[i], 0, len(files[i][1]), 0xFFFFFFFF) for i in range(n))
+    blob = head + toc
+    return blob + b"\0" * (start - len(blob)) + body + table
+
 DRIVE = [  # (id, name, size, mime)
     ("id1", "L101_NSanityBeach.pak", 70000, "application/octet-stream"),
     ("id2", "update.pak", 5000, "application/octet-stream"),
@@ -91,6 +115,8 @@ if __name__ == "__main__":
     for n, s in files.items():
         with open(os.path.join(ROOT, "files", n), "wb") as f:
             f.write(pak_bytes("http-" + n, s))
+    with open(os.path.join(ROOT, "files", "Custom_Level.pak"), "wb") as f:
+        f.write(level_pak("Crash1", "Custom_Level"))
     with open(os.path.join(ROOT, "files", "note.txt"), "w") as f:
         f.write("non un pak")
     manifest = {"files": [

@@ -1,0 +1,7 @@
+# Custom_Level.pak (livello creato con un nome nuovo) installato al posto di L101: l'app lo blocca
+. SNAP
+A . SNAP
+DOWN A . SNAP
+X . SNAP
+A . . . . . . . . . . . . . . . . . . . . SNAP
+A . PLUS .

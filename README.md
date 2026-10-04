@@ -49,7 +49,26 @@ Altre garanzie:
 4. Crea `originali.txt` (vedi sotto) e copialo nella stessa cartella. Poi riavvia.
 
 **Chiudi Crash prima di installare o ripristinare.** Se il gioco è aperto in
-background l'app mostra un avviso.
+background l'app mostra un avviso. Dopo l'installazione puoi avviare Crash
+direttamente dall'app (A nella schermata del risultato, oppure ZL): il gioco
+parte con i file appena installati, dal menu iniziale.
+
+### Entrare direttamente nel livello (sperimentale)
+
+Come il tasto *Play* dell'editor sul PC, l'app può far partire il gioco già dentro
+il livello installato: **Y** nella schermata del risultato, oppure **ZR** sulla
+riga del file nella scheda INSTALLATI. L'app legge dal `.pak` il nome del livello
+(per esempio `crash1/l112_roadtonowhere/l112_roadtonowhere`) e lo passa al gioco
+come argomento di avvio, `nst -om <livello>`, con il servizio di sistema `ldr:shel`
+di Atmosphère. È la stessa opzione `-om` del gioco PC: l'eseguibile Switch la
+contiene ancora.
+
+- Funziona solo su console con Atmosphère (non negli emulatori).
+- Gli argomenti restano validi per tutti gli avvii del gioco finché non riapri
+  l'app: se poi avvii Crash dal menu HOME entra di nuovo nel livello. Per tornare
+  all'avvio normale riapri l'app (all'apertura li azzera) o avvia il gioco con ZL.
+- Il formato degli argomenti si cambia in `config.json` con `launch_args`
+  (`{livello}` viene sostituito dal nome del livello).
 
 ## Elenco degli originali (`originali.txt`)
 
@@ -84,6 +103,30 @@ di nuovo **A** per toglierlo dalla selezione. Se assegni un originale già
 assegnato a un altro file, l'abbinamento precedente viene tolto, così due file
 non finiscono mai sullo stesso nome. **Y** nella scheda REMOTI seleziona in un
 colpo tutti i file che hanno un suggerimento.
+
+## Se il livello resta nero o il gioco crasha
+
+Le cause tipiche sono due. Si controllano dal PC con `tools/controlla_pak.py`,
+che confronta il tuo `.pak` con gli originali Switch del dump RomFS (indica la
+cartella del dump: lo script cerca da solo i file corrispondenti in tutti gli archivi):
+
+```
+python tools/controlla_pak.py MioLivello.pak --switch "<cartella del dump>" --come L101_NSanityBeach.pak
+```
+
+Stampa un riassunto e scrive il rapporto completo in `report_<nome>.txt`.
+
+1. **Nome interno diverso.** Un livello tiene i suoi file in cartelle con il suo
+   nome (`maps/Crash1/L101_NSanityBeach/...`). Rinominare il `.pak` non rinomina
+   il contenuto: un livello creato nell'editor come `Custom_Level` e installato
+   come `L101_NSanityBeach.pak` non viene trovato. L'app ora blocca questo caso
+   e lascia tutto com'era. Per sostituire un livello, nell'editor apri quel
+   livello originale e modificalo, così il nome interno resta giusto.
+2. **Formato PC.** I `.pak` fatti con Crash NST Maker o presi da mod per PC sono
+   nel formato della versione PC. Lo script mostra cosa cambia rispetto
+   all'originale Switch (versione dell'archivio, percorsi, compressione,
+   intestazione degli igz, formati di texture e vertici, Havok): se ci sono
+   differenze, il file va convertito prima di usarlo sulla Switch.
 
 ## Sorgenti
 
@@ -153,6 +196,7 @@ leggere quella cartella: non pubblicarla.
 | `title_id`  | `0100D1B006744000`                               | Gioco di destinazione |
 | `mod_dir`   | `/atmosphere/contents/{title_id}/romfs/archives` | Cartella in cui installare |
 | `ca_file`   | `cacert.pem` nella cartella dell'app (se esiste) | Certificati HTTPS aggiuntivi |
+| `launch_args` | `nst -om {livello}`                            | Argomenti per entrare direttamente nel livello |
 
 Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
 <https://curl.se/docs/caextract.html> e mettilo in `sdmc:/switch/nst-pak-manager/`.
@@ -166,9 +210,10 @@ Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
 | A | scegli l'originale da sostituire / togli dalla selezione | seleziona / deseleziona |
 | Y | seleziona i file con un suggerimento / azzera | seleziona tutto / niente |
 | X | installa i selezionati (o sceglie per quello sotto il cursore) | ripristina i selezionati |
-| ZR | ricarica l'elenco (e `originali.txt`) | — |
+| ZR | ricarica l'elenco (e `originali.txt`) | avvia il gioco dentro il livello di quel file |
 | L / R | vai a REMOTI / INSTALLATI | |
 | - | cambia sorgente | |
+| ZL | chiude l'app e avvia il gioco (dal menu iniziale) | |
 | + | esci | |
 | B (durante il download) | annulla | |
 
@@ -224,5 +269,5 @@ source/net.*      download con libcurl
 source/util.*     file, percorsi, URL
 source/cJSON.*    parser JSON (MIT, vedi cJSON.LICENSE)
 tests/            test su PC (tests/ui_sim: interfaccia simulata)
-tools/            list_originals.py, make_manifest.py
+tools/            controlla_pak.py, list_originals.py, make_manifest.py
 ```

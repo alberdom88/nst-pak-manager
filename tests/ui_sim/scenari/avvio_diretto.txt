@@ -1,0 +1,3 @@
+# installa un livello e lo avvia direttamente (Y dopo l'installazione)
+. SNAP A . SNAP A . SNAP X . SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+Y . SNAP

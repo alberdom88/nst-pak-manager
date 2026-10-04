@@ -1,7 +1,7 @@
 # Y: seleziona i file che hanno un originale suggerito (stesso nome in originali.txt)
 . SNAP Y . SNAP
 # "Nome con spazi.pak" non ha suggerimento: si apre la scelta, si cerca "jungle"
-DOWN A . SNAP
+DOWN DOWN A . SNAP
 Y TEXT=jungle . SNAP
 A . SNAP
 # update.pak: deseleziona, riapri la scelta e scrivi a mano un originale gia' assegnato

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <set>
 #include <string>
@@ -15,7 +16,7 @@
 #include "net.hpp"
 #include "util.hpp"
 
-#define APP_VERSION_STR "1.1.0"
+#define APP_VERSION_STR "1.4.0"
 
 static const char* ROOT = "sdmc:";
 static const int COLS = 79;  // la console e' 80x45: lasciamo libera l'ultima colonna
@@ -33,6 +34,7 @@ static const char* C_DIM = "\x1b[90m";
 static PadState g_pad;
 static bool g_exit = false;
 static bool g_pmOk = false;
+static bool g_ldrOk = false;  // ldr:shel: argomenti di avvio del gioco (avvio diretto di un livello)
 
 // ---------------------------------------------------------------- disegno
 
@@ -329,8 +331,8 @@ static void draw(App& a) {
     if (a.tab == 0)
         line(44, " A scegli originale  Y suggeriti/nessuno  X installa  ZR aggiorna", C_TITLE);
     else
-        line(44, " A seleziona  Y tutti/nessuno  X ripristina originale", C_TITLE);
-    printf("\x1b[45;1H%s L/R scheda  Sinistra/Destra pagina  - sorgente  + esci%s\x1b[K", C_TITLE, C_RESET);
+        line(44, " A seleziona  Y tutti/nessuno  X ripristina originale  ZR entra nel livello", C_TITLE);
+    printf("\x1b[45;1H%s L/R scheda  Sinistra/Destra pagina  - sorgente  ZL avvia gioco  + esci%s\x1b[K", C_TITLE, C_RESET);
 }
 
 // ---------------------------------------------------------------- scelta dell'originale
@@ -549,6 +551,81 @@ static void drawProgress(int index, int count, const std::string& label, uint64_
     line(9, "B: annulla", C_DIM);
 }
 
+// Toglie gli argomenti di avvio impostati per il gioco: si riapre normalmente
+static void clearLaunchArguments() {
+    if (g_ldrOk) ldrShellFlushArguments();
+}
+
+// Chiude l'app e avvia il gioco, cosi' carica i file appena installati.
+// keepArgs: lascia gli argomenti impostati da launchLevel (avvio diretto di un livello)
+static void launchGame(App& a, bool keepArgs = false) {
+    if (!keepArgs) clearLaunchArguments();
+    if (gameRunning()) {
+        clearLaunchArguments();
+        inform("Gioco gia' aperto",
+               {"Un gioco e' aperto in background: chiudilo dal menu HOME e poi avvialo,",
+                "altrimenti continua a usare i file di prima."},
+               C_WARN);
+        return;
+    }
+    u64 tid = strtoull(a.cfg.titleId.c_str(), nullptr, 16);
+    Result rc = appletRequestLaunchApplication(tid, NULL);
+    if (R_FAILED(rc)) {
+        clearLaunchArguments();
+        char code[16];
+        snprintf(code, sizeof(code), "0x%X", (unsigned)rc);
+        inform("Avvio non riuscito",
+               {std::string("Il sistema ha rifiutato l'avvio del gioco (errore ") + code + ").",
+                "Avvialo dal menu HOME: i file installati restano al loro posto."},
+               C_WARN);
+        return;
+    }
+    g_exit = true;  // l'app deve chiudersi perche' il gioco parta
+}
+
+// Avvia il gioco direttamente nel livello contenuto in un .pak installato (opzione -om del gioco)
+static void launchLevel(App& a, const std::string& pakName) {
+    std::vector<std::string> ids;
+    if (!pakLevelIds(a.mgr->modDir() + "/" + pakName, ids) || ids.empty()) {
+        inform("Nessun livello", {pakName + " non contiene un livello da avviare."}, C_WARN);
+        return;
+    }
+    if (!g_ldrOk) {
+        inform("Avvio diretto non disponibile",
+               {"Il servizio di sistema per gli argomenti di avvio (ldr:shel) non e' accessibile.",
+                "Avvia il gioco normalmente con ZL."},
+               C_WARN);
+        return;
+    }
+    if (gameRunning()) {
+        inform("Gioco gia' aperto", {"Un gioco e' aperto in background: chiudilo dal menu HOME e riprova."}, C_WARN);
+        return;
+    }
+    std::string args = launchArguments(a.cfg.launchArgs, ids[0]);
+    u64 tid = strtoull(a.cfg.titleId.c_str(), nullptr, 16);
+    Result rc = ldrShellSetProgramArguments(tid, args.c_str(), args.size() + 1);
+    if (R_FAILED(rc)) {
+        char code[16];
+        snprintf(code, sizeof(code), "0x%X", (unsigned)rc);
+        inform("Avvio diretto non riuscito",
+               {std::string("Il sistema ha rifiutato gli argomenti di avvio (errore ") + code + ").",
+                "Avvia il gioco normalmente con ZL."},
+               C_WARN);
+        return;
+    }
+    a.status = "Avvio diretto: " + ids[0];
+    launchGame(a, true);
+}
+
+// Primo .pak (tra quelli indicati) che contiene un livello
+static std::string firstLevelPak(App& a, const std::vector<std::string>& names) {
+    for (const std::string& name : names) {
+        std::vector<std::string> ids;
+        if (pakLevelIds(a.mgr->modDir() + "/" + name, ids) && !ids.empty()) return name;
+    }
+    return "";
+}
+
 static void installSelected(App& a) {
     if (a.pick.empty() && !a.remote.empty()) {
         const RemoteFile& f = a.remote[a.cursor[0]];
@@ -599,6 +676,7 @@ static void installSelected(App& a) {
     appletSetMediaPlaybackState(true);
     const std::string sourceName = a.cfg.sources[a.source].name;
     std::vector<std::string> report;
+    std::vector<std::string> installedNames;
     int ok = 0;
     bool stop = false;
     for (size_t i = 0; i < todo.size(); i++) {
@@ -636,6 +714,7 @@ static void installSelected(App& a) {
         std::string err;
         if (a.mgr->install(todo[i].first, todo[i].second, sourceName, cb, err)) {
             ok++;
+            installedNames.push_back(todo[i].second);
             report.push_back("OK       " + label);
         } else {
             report.push_back("ERRORE   " + label + ": " + err);
@@ -651,7 +730,22 @@ static void installSelected(App& a) {
     refreshLocal(a);
     a.status = std::to_string(ok) + " di " + std::to_string(todo.size()) + " file installati";
     a.statusColor = ok == (int)todo.size() ? C_OK : C_WARN;
-    inform("Risultato", report, ok == (int)todo.size() ? C_OK : C_WARN);
+    messageScreen("Risultato", report, ok == (int)todo.size() ? C_OK : C_WARN);
+    if (ok == 0) {
+        line(44, "A: continua", C_TITLE);
+        waitFor(HidNpadButton_A | HidNpadButton_B | HidNpadButton_Plus);
+        return;
+    }
+    std::string levelPak = firstLevelPak(a, installedNames);
+    if (levelPak.empty()) {
+        line(44, "A: avvia il gioco     B: torna all'elenco", C_TITLE);
+        if (waitFor(HidNpadButton_A | HidNpadButton_B) == HidNpadButton_A) launchGame(a);
+        return;
+    }
+    line(44, "A: avvia il gioco     Y: entra direttamente nel livello     B: torna all'elenco", C_TITLE);
+    u64 k = waitFor(HidNpadButton_A | HidNpadButton_B | HidNpadButton_Y);
+    if (k == HidNpadButton_A) launchGame(a);
+    if (k == HidNpadButton_Y) launchLevel(a, levelPak);
 }
 
 static void restoreSelected(App& a) {
@@ -794,7 +888,9 @@ static void run() {
             else restoreSelected(a);
         }
         if (k & HidNpadButton_ZR && a.tab == 0) loadRemote(a);
+        if (k & HidNpadButton_ZR && a.tab == 1 && n > 0) launchLevel(a, a.installed[cur].name);
         if (k & HidNpadButton_Minus) chooseSource(a);
+        if (k & HidNpadButton_ZL) launchGame(a);
         if (g_exit) break;
         if (dirty) {
             draw(a);
@@ -813,6 +909,8 @@ int main(int argc, char** argv) {
 
     bool socketOk = R_SUCCEEDED(socketInitializeDefault());
     g_pmOk = R_SUCCEEDED(pmdmntInitialize());
+    g_ldrOk = R_SUCCEEDED(ldrShellInitialize());
+    clearLaunchArguments();  // eventuali argomenti rimasti da un avvio diretto precedente
     if (!socketOk) {
         fatal("Rete non disponibile", {"Impossibile inizializzare la rete (socketInitializeDefault)."});
     } else if (!net::init()) {
@@ -822,6 +920,7 @@ int main(int argc, char** argv) {
         net::shutdown();
     }
 
+    if (g_ldrOk) ldrShellExit();
     if (g_pmOk) pmdmntExit();
     if (socketOk) socketExit();
     consoleExit(NULL);

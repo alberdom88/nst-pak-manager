@@ -29,6 +29,9 @@ struct Config {
     std::string titleId = "0100D1B006744000";  // Crash Bandicoot N. Sane Trilogy
     std::string modDir = "/atmosphere/contents/{title_id}/romfs/archives";
     std::string caFile;
+    // Argomenti per avviare il gioco direttamente in un livello ({livello} = crash1/l112_x/l112_x).
+    // Il primo elemento fa da nome del programma (il gioco lo salta).
+    std::string launchArgs = "nst -om {livello}";
     std::vector<SourceConfig> sources;
 };
 
@@ -50,6 +53,15 @@ std::string driveFolderId(const std::string& folderOrLink);
 // Elenco dei .pak originali del gioco: un nome per riga, righe vuote e '#' ignorate,
 // eventuali percorsi ridotti al solo nome. Ordinato, senza doppioni.
 std::vector<std::string> parseOriginals(const std::string& text);
+
+// Livelli dichiarati in un .pak su disco (file packages/generated/maps/<gioco>/<L>/<L>_pkg.igz).
+// Legge solo intestazione ed elenco dei percorsi. false se il file non si riesce a leggere.
+bool pakLevelNames(const std::string& path, std::vector<std::string>& out);
+// Come sopra, ma con l'identificativo usato dal gioco per aprire il livello
+// (<gioco>/<cartella>/<livello> in minuscolo, es. crash1/l112_roadtonowhere/l112_roadtonowhere)
+bool pakLevelIds(const std::string& path, std::vector<std::string>& out);
+// Argomenti di avvio per un livello: sostituisce {livello} nel modello
+std::string launchArguments(const std::string& pattern, const std::string& levelId);
 bool loadOriginals(const std::string& path, std::vector<std::string>& out);
 
 struct InstalledFile {

@@ -50,7 +50,7 @@ inline void load() {
         else if (t == "A") k = HidNpadButton_A; else if (t == "B") k = HidNpadButton_B;
         else if (t == "X") k = HidNpadButton_X; else if (t == "Y") k = HidNpadButton_Y;
         else if (t == "L") k = HidNpadButton_L; else if (t == "R") k = HidNpadButton_R;
-        else if (t == "ZR") k = HidNpadButton_ZR; else if (t == "PLUS") k = HidNpadButton_Plus;
+        else if (t == "ZL") k = HidNpadButton_ZL; else if (t == "ZR") k = HidNpadButton_ZR; else if (t == "PLUS") k = HidNpadButton_Plus;
         else if (t == "MINUS") k = HidNpadButton_Minus; else if (t == "UP") k = HidNpadButton_Up;
         else if (t == "DOWN") k = HidNpadButton_Down; else if (t == "LEFT") k = HidNpadButton_Left;
         else if (t == "RIGHT") k = HidNpadButton_Right;
@@ -83,11 +83,26 @@ inline bool appletMainLoop() { return sim::pos() < sim::script().size(); }
 inline AppletType appletGetAppletType() { return AppletType_LibraryApplet; }
 inline Result appletSetAutoSleepDisabled(bool) { return 0; }
 inline Result appletSetMediaPlaybackState(bool) { return 0; }
+struct AppletStorage;
+inline Result appletRequestLaunchApplication(u64 tid, AppletStorage*) {
+    printf("\x1b]EVENT avvio gioco %016llX\x07", (unsigned long long)tid);
+    return 0;
+}
 inline void* consoleInit(void*) { return nullptr; }
 inline void consoleUpdate(void*) { fflush(stdout); }
 inline void consoleExit(void*) {}
 inline Result socketInitializeDefault() { return 0; }
 inline void socketExit() {}
+inline Result ldrShellInitialize() { return 0; }
+inline void ldrShellExit() {}
+inline Result ldrShellFlushArguments() {
+    printf("\x1b]EVENT argomenti di avvio azzerati\x07");
+    return 0;
+}
+inline Result ldrShellSetProgramArguments(u64 tid, const void* args, size_t size) {
+    printf("\x1b]EVENT argomenti di avvio %016llX: '%s' (%zu byte)\x07", (unsigned long long)tid, (const char*)args, size);
+    return 0;
+}
 inline Result pmdmntInitialize() { return 0; }
 inline void pmdmntExit() {}
 inline Result pmdmntGetApplicationProcessId(u64* pid) { *pid = 1; return sim::gameOpen() ? 0 : 1; }

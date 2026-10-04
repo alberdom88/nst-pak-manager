@@ -72,6 +72,8 @@ bool parseConfig(const std::string& json, Config& cfg, std::string& err) {
     std::string modDir = jsonString(root, "mod_dir");
     if (!modDir.empty()) out.modDir = modDir;
     out.caFile = jsonString(root, "ca_file");
+    const cJSON* launch = cJSON_GetObjectItemCaseSensitive(root, "launch_args");
+    if (cJSON_IsString(launch) && launch->valuestring) out.launchArgs = launch->valuestring;
 
     const cJSON* sources = cJSON_GetObjectItemCaseSensitive(root, "sources");
     const cJSON* s;
@@ -300,6 +302,78 @@ std::vector<std::string> parseOriginals(const std::string& text) {
         return util::toLower(a) < util::toLower(b);
     });
     return out;
+}
+
+// Livelli di un .pak: per ognuno nome (L112_RoadToNowhere) e identificativo (crash1/l112_.../l112_...)
+static bool pakLevels(const std::string& path, std::vector<std::string>& names, std::vector<std::string>& ids);
+
+bool pakLevelNames(const std::string& path, std::vector<std::string>& out) {
+    std::vector<std::string> ids;
+    return pakLevels(path, out, ids);
+}
+
+bool pakLevelIds(const std::string& path, std::vector<std::string>& out) {
+    std::vector<std::string> names;
+    return pakLevels(path, names, out);
+}
+
+std::string launchArguments(const std::string& pattern, const std::string& levelId) {
+    std::string out = pattern;
+    const std::string key = "{livello}";
+    size_t pos;
+    while ((pos = out.find(key)) != std::string::npos) out.replace(pos, key.size(), levelId);
+    return out;
+}
+
+static bool pakLevels(const std::string& path, std::vector<std::string>& out, std::vector<std::string>& ids) {
+    out.clear();
+    ids.clear();
+    FILE* f = fopen(path.c_str(), "rb");
+    if (!f) return false;
+    unsigned char h[0x38];
+    bool ok = fread(h, 1, sizeof(h), f) == sizeof(h) && memcmp(h, PAK_MAGIC, 4) == 0;
+    uint32_t count = 0, tableSize = 0;
+    uint64_t tableOff = 0, fileSize = 0;
+    if (ok) {
+        memcpy(&count, h + 0x0C, 4);
+        memcpy(&tableOff, h + 0x28, 8);
+        memcpy(&tableSize, h + 0x30, 4);
+        ok = fseek(f, 0, SEEK_END) == 0;
+        long end = ftell(f);
+        fileSize = end > 0 ? (uint64_t)end : 0;
+        ok = ok && count > 0 && tableSize <= 64u * 1024 * 1024 && (uint64_t)count * 4 <= tableSize &&
+             tableOff + tableSize <= fileSize;
+    }
+    std::string table;
+    if (ok) {
+        table.resize(tableSize);
+        ok = fseek(f, (long)tableOff, SEEK_SET) == 0 && fread(&table[0], 1, tableSize, f) == tableSize;
+    }
+    fclose(f);
+    if (!ok) return false;
+
+    static const std::string prefix = "packages/generated/maps/";
+    static const std::string suffix = "_pkg.igz";
+    for (uint32_t i = 0; i < count; i++) {
+        uint32_t rel;
+        memcpy(&rel, table.data() + 4 * i, 4);
+        size_t a = rel;
+        size_t b = a < table.size() ? table.find('\0', a) : std::string::npos;  // percorso completo
+        size_t c = b == std::string::npos ? std::string::npos : table.find('\0', b + 1);  // percorso breve
+        if (c == std::string::npos) return false;
+        std::string shortPath = util::toLower(table.substr(b + 1, c - b - 1));
+        std::string original = table.substr(b + 1, c - b - 1);
+        if (shortPath.compare(0, prefix.size(), prefix) != 0 || !util::endsWithCI(shortPath, suffix)) continue;
+        std::string rest = original.substr(prefix.size());  // <gioco>/<L>/<L>_pkg.igz
+        size_t s1 = rest.find('/');
+        size_t s2 = s1 == std::string::npos ? s1 : rest.find('/', s1 + 1);
+        if (s2 == std::string::npos || rest.find('/', s2 + 1) != std::string::npos) continue;
+        std::string file = rest.substr(s2 + 1);
+        std::string level = file.substr(0, file.size() - suffix.size());
+        out.push_back(level);
+        ids.push_back(util::toLower(rest.substr(0, s2 + 1) + level));
+    }
+    return true;
 }
 
 bool loadOriginals(const std::string& path, std::vector<std::string>& out) {
@@ -596,6 +670,19 @@ bool Manager::install(const RemoteFile& file, const std::string& target, const s
         util::removeFile(tmp);
         err = "il file scaricato non e' un .pak valido (link non diretto o pagina di errore?)";
         return false;
+    }
+    // Un livello si trova solo con il suo nome: rinominare il .pak non rinomina i file che contiene
+    std::vector<std::string> levels;
+    if (pakLevelNames(tmp, levels) && !levels.empty()) {
+        std::string want = util::toLower(target.substr(0, target.size() - 4));
+        bool match = false;
+        for (const std::string& l : levels) match = match || util::toLower(l) == want;
+        if (!match) {
+            util::removeFile(tmp);
+            err = "dentro c'e' il livello '" + levels[0] + "', non '" + target.substr(0, target.size() - 4) +
+                  "': con questo nome il gioco non lo trova (schermo nero o crash). Nessuna modifica fatta.";
+            return false;
+        }
     }
 
     // 2. Mette da parte il file esistente

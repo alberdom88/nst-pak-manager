@@ -1,6 +1,6 @@
 # senza originali.txt: la scelta propone "stesso nome"
 . SNAP
-A . SNAP
+DOWN A . SNAP
 A . SNAP
 DOWN DOWN A A . SNAP
 X . SNAP

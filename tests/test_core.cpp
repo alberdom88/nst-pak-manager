@@ -88,6 +88,9 @@ int main(int argc, char** argv) {
         CHECK(!parseConfig("{ rotto", c, err));
         CHECK(parseConfig("{\"title_id\":\"0100d1b006744000\",\"sources\":[{\"url\":\"http://a/\"}]}", c, err));
         CHECK(c.titleId == "0100D1B006744000" && c.sources[0].type == "http" && c.sources[0].name == "http://a/");
+        CHECK(c.launchArgs == "nst -om {livello}");
+        CHECK(parseConfig("{\"launch_args\":\"x -om {livello}\",\"sources\":[{\"url\":\"http://a/\"}]}", c, err));
+        CHECK(c.launchArgs == "x -om {livello}");
     }
 
     // ---------- elenco degli originali
@@ -108,9 +111,10 @@ int main(int argc, char** argv) {
     httpSrc.type = "http";
     httpSrc.url = base + "/files/";
     CHECK(listSource(httpSrc, httpList, err));
-    CHECK(httpList.size() == 3);
-    CHECK(httpList.size() == 3 && httpList[0].name == "L101_NSanityBeach.pak" &&
-          httpList[1].name == "Nome con spazi.pak" && httpList[2].name == "update.pak");
+    CHECK(httpList.size() == 4);
+    CHECK(httpList.size() == 4 && httpList[0].name == "Custom_Level.pak" &&
+          httpList[1].name == "L101_NSanityBeach.pak" && httpList[2].name == "Nome con spazi.pak" &&
+          httpList[3].name == "update.pak");
     CHECK(byName(httpList, "Nome con spazi.pak") &&
           byName(httpList, "Nome con spazi.pak")->url == base + "/files/Nome%20con%20spazi.pak");
     CHECK(byName(httpList, "update.pak") && byName(httpList, "update.pak")->sizeKnown &&
@@ -305,6 +309,31 @@ int main(int argc, char** argv) {
         Manager m4(sd, cfg);
         CHECK(m4.load(err, warn) && !warn.empty() && m4.installed().empty());
         CHECK(util::fileExists(state + ".corrotto"));
+    }
+
+    // livello con un nome interno diverso dal nome di destinazione
+    {
+        const RemoteFile* custom = byName(httpList, "Custom_Level.pak");
+        CHECK(custom != nullptr);
+        std::string l101 = m.modDir() + "/L101_NSanityBeach.pak";
+        bool hadL101 = util::fileExists(l101);
+        std::string beforeL101 = slurp(l101);
+        CHECK(!m.install(*custom, "L101_NSanityBeach.pak", "PC", noProgress, err));
+        CHECK(err.find("Custom_Level") != std::string::npos && err.find("Nessuna modifica") != std::string::npos);
+        CHECK(util::fileExists(l101) == hadL101 && slurp(l101) == beforeL101);
+        CHECK(!util::fileExists(l101 + ".part"));
+        CHECK(m.install(*custom, "custom_level.PAK", "PC", noProgress, err));  // stesso livello: OK
+        std::vector<std::string> lv;
+        CHECK(pakLevelNames(m.modDir() + "/custom_level.PAK", lv) && lv.size() == 1 && lv[0] == "Custom_Level");
+        CHECK(pakLevelNames(updDest, lv) == false || lv.empty());  // file senza elenco valido: nessun livello
+        std::vector<std::string> ids;
+        CHECK(pakLevelIds(m.modDir() + "/custom_level.PAK", ids) && ids.size() == 1 &&
+              ids[0] == "crash1/custom_level/custom_level");
+        CHECK(launchArguments("nst -om {livello}", ids[0]) == "nst -om crash1/custom_level/custom_level");
+        CHECK(launchArguments("{livello} {livello}", "a") == "a a");
+        CHECK(launchArguments("nst", "a") == "nst");
+        std::string note;
+        CHECK(m.restore("custom_level.PAK", err, note));
     }
 
     // download interrotti

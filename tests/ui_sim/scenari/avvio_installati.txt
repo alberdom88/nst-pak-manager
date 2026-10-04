@@ -1,0 +1,4 @@
+# installa un livello, torna all'elenco e lo avvia dalla scheda INSTALLATI (ZR)
+. A . A . X . A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+B . R . SNAP
+ZR . SNAP

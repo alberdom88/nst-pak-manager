@@ -53,6 +53,11 @@ class Screen:
                     snaps.append(self.render())
                     i += len("\x1b]SNAP\x07")
                     continue
+                if data.startswith("\x1b]EVENT ", i):
+                    end = data.index("\x07", i)
+                    snaps.append("*** " + data[i + 8:end] + " ***")
+                    i = end + 1
+                    continue
                 m = re.match(r"\x1b\[([0-9;]*)([A-Za-z])", data[i:])
                 if not m:
                     i += 1

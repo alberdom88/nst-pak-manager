@@ -1,0 +1,282 @@
+RAPPORTO controlla_pak.py
+da installare: Level 3.pak   originali Switch: /mnt/c/Users/DOMENICOALBERGA/AppData/Roaming/eden/load/0100D1B006744000/crash_original/romfs/archives/l112_roadtonowhere.pak (1 archivi)
+
+=== CONTENITORE ===
+                     da installare                          Switch (l112_roadtonowhere.pak)
+firma                0x1A414749                             0x1A414749
+versione             11                                     12
+settore              2048                                   2048
+hashSearchDivider    1212240                                5726623
+hashSearchMargin     72                                     21
+flags                1                                      1
+radice percorsi      temporary/mack/data/win64/output/      temporary/mack/data/nx/output/
+header LZMA (byte)   2                                      4
+compressione         {'LZMA': 3227, 'nessuna': 316}         {'nessuna': 67, 'LZMA': 683}
+ID dei file          FNV-1a del percorso breve, ordinati    FNV-1a del percorso breve, ordinati
+igz piattaforma      {6: 3000}                              {2: 613}
+havok                {'packfile hk_2014.1.0-r1, puntatori 8 byte, little-endian': 50} {'packfile hk_2014.1.0-r1, puntatori 8 byte, little-endian': 29}
+pool di memoria solo nel mio: ['', 'Geometry', 'VramStaging']
+pool di memoria solo Switch:  ['Image']
+
+=== LIVELLO ===
+dentro: Crash1/L112_RoadToNowhere_Custom
+creato dal livello originale: L112_RoadToNowhere (nella Switch: l112_roadtonowhere.pak)
+file da unire a update.pak (update/...): 1 ['update/maps/crash1/l112_roadtonowhere/l112_roadtonowhere_custom_zoneinfo.igz']
+
+=== FILE CONFRONTATI ===
+file nel .pak: 3543; con corrispondente Switch: {'stesso percorso': 744, 'con il nome del livello originale': 3}; senza: 2796
+  altri file diversi                                      35
+  altri file identici                                     2
+  hkx diversi                                             29
+  igz diversi (stessi tipi e dimensioni)                  287
+  igz diversi (tipi diversi)                              326
+  igz non letti (limite)                                  445
+
+=== TIPI DI OGGETTO (dimensione in byte) ===
+tipi in comune: 543; con dimensione diversa: 233
+  ActorInputCommand                                  mio [128]  Switch [120]
+  CActor                                             mio [576]  Switch [568]
+  CActorData                                         mio [288]  Switch [280]
+  CAlphaClipAttr                                     mio [32]  Switch [24]
+  CAmbientAudioComponentData                         mio [56]  Switch [48]
+  CAnimationTimelinesComponentData                   mio [32]  Switch [24]
+  CBehaviorComponentData                             mio [64]  Switch [56]
+  CBehaviorGraphReflectionData                       mio [88]  Switch [80]
+  CBobController                                     mio [128]  Switch [120]
+  CBoltPointContainerComponentData                   mio [32]  Switch [24]
+  CBoxLightComponentData                             mio [112]  Switch [96]
+  CCEBoltOn                                          mio [112]  Switch [104]
+  CCEGraphEvent                                      mio [88]  Switch [80]
+  CCESimpleEffect                                    mio [120]  Switch [112]
+  CCESound                                           mio [88]  Switch [80]
+  CCameraProxyComponentData                          mio [40]  Switch [32]
+  CCameraTargetComponentData                         mio [80]  Switch [72]
+  CCollectibleComponentData                          mio [208]  Switch [200]
+  CCombatSoundData                                   mio [72]  Switch [64]
+  CCrashBandicootBounceData                          mio [64]  Switch [56]
+  CDSPOverrideComponentData                          mio [48]  Switch [40]
+  CDestructibleComponentData                         mio [40]  Switch [32]
+  CDotNetEntityComponentData_1                       mio [40]  Switch [32]
+  CDynamicCheckpointComponentData                    mio [64]  Switch [56]
+  CDynamicClipEntity                                 mio [232]  Switch [224]
+  CEnableRequestManager                              mio [56]  Switch [48]
+  CFilterByAngleRange                                mio [40]  Switch [32]
+  CFilterByDistance                                  mio [32]  Switch [24]
+  CFilterByTags                                      mio [32]  Switch [24]
+  CFilterByTeam                                      mio [32]  Switch [24]
+  CFilterByVerticalRange                             mio [40]  Switch [32]
+  CFilterMethodTable                                 mio [72]  Switch [64]
+  CFilterTargetable                                  mio [24]  Switch [16]
+  CGameSoundMusicSettings                            mio [128]  Switch [120]
+  CGlobalWindData                                    mio [72]  Switch [64]
+  CHavokLinearCastQueryParameters                    mio [40]  Switch [32]
+  CModelComponentData                                mio [40]  Switch [32]
+  CMovementControllerComponentData                   mio [40]  Switch [32]
+  CMusicMix                                          mio [40]  Switch [32]
+  CNullPhysicsComponentData                          mio [24]  Switch [16]
+  CObjectBolt                                        mio [72]  Switch [64]
+  CPhysicsBoundingBoxComponentData                   mio [72]  Switch [64]
+  CPhysicsGenericShapeComponentData                  mio [80]  Switch [72]
+  CPhysicsSystemEntityModelComponentData             mio [72]  Switch [64]
+  CPlayerTriggerRadiusComponentData                  mio [32]  Switch [24]
+  CPointLightComponentData                           mio [64]  Switch [48]
+  CQueryFilter                                       mio [56]  Switch [48]
+  CRotationController                                mio [208]  Switch [192]
+  CScreenspaceTargetComponentData                    mio [64]  Switch [56]
+  CScriptTriggerEntity                               mio [264]  Switch [256]
+  CScriptTriggerEntityData                           mio [152]  Switch [144]
+  CSoundBankListComponentData                        mio [32]  Switch [24]
+  CSplineCameraData                                  mio [120]  Switch [112]
+  CSplineComponentData                               mio [40]  Switch [32]
+  CSplineConstantVelocityMover                       mio [48]  Switch [40]
+  CSplineController                                  mio [288]  Switch [272]
+  CSplineLaneKeyframe                                mio [40]  Switch [32]
+  CSplineLaneMoverComponentData                      mio [160]  Switch [152]
+  CSplineLinearConvergeAttachBehavior                mio [48]  Switch [40]
+  CSplineRotationKeyframe                            mio [56]  Switch [48]
+  CSplineSnapAttachBehavior                          mio [24]  Switch [16]
+  CSplineTimeBasedMover                              mio [72]  Switch [64]
+  CStaticCollisionComponentData                      mio [40]  Switch [32]
+  CStaticComponentData                               mio [40]  Switch [32]
+  CStaticVfxComponentData                            mio [56]  Switch [48]
+  CTimer                                             mio [40]  Switch [32]
+  CTintSphereComponentData                           mio [64]  Switch [56]
+  CTriggerVolumeBoxComponentData                     mio [96]  Switch [88]
+  CTriggerVolumeCylinderComponentData                mio [112]  Switch [96]
+  CUpgradeableInt                                    mio [32]  Switch [24]
+  CVfxDrawDebrisOperator                             mio [112]  Switch [104]
+  CVfxDrawEntityFadeOperator                         mio [40]  Switch [24]
+  CVfxDrawEntityTintOperator                         mio [312]  Switch [304]
+  CVfxDrawForceFeedbackOperator                      mio [208]  Switch [200]
+  CVfxDrawModelOperator                              mio [88]  Switch [80]
+  CVfxDrawPointForceOperator                         mio [440]  Switch [432]
+  CVfxDrawPointLightOperator                         mio [40]  Switch [24]
+  CVfxDrawSoundOperator                              mio [96]  Switch [88]
+  CVfxTextComponentData                              mio [88]  Switch [80]
+  CVisualDataBoxComponentData                        mio [88]  Switch [80]
+tipi solo nel mio (89): CBlendedDecalMaterial, CBlendedMaterial, CCECustomEvent, CCEKillEffects, CCharacterInfo, CCharacterInfoHashTable, CCheckpointList, CClampToGroundComponentData, CCloudParticleSortedMaterial, CCustomEvent, CDebugMipmapClampAttr, CDebugMipmapClampBundle, CDirectionWorldToLocalNode, CFlowWaterMaterial, CFurMaterial, CGrassMaterial, CGuiMaterial, CGuiScreenSpaceTimerStartNode, CIridescentParametersAttr, CLevelGoalList, CLoopingVfxComponentData, CPlayerFollowData, CRelativeCamera, CRotationWorldToLocalNode, CSpeedTreeMaterial, CSplineEvent, CSplineKeyframedVelocityMover, CSplineMarker, CSplineRelativeAttachBehavior, CStandardMaterial, CStatisticData, CUnlitMaterial, CUnlitRimMaterial, CVertexWibbleMaterialFeature, CVertexWibbleParametersAttr, CVfxBlendedCombinerMaterial, CVfxDecalMaterial, CVfxDistortionMaterial, CVfxDrawBoxLightOperator, CVfxDrawCameraShakeOperator, CVfxLitDecalMaterial, CVfxLitSmokeMaterial, CVfxLitSmokeWithThresholdMaterial, CVfxMaterial, CVfxRaycastOperator, CVfxSimpleAlphaThresholdMaterial, CVscBehaviorStateEventOnEnterDelegator, CWaterMaterial, CZoneInfo, CZoneInfoSave, igAlphaBlendFunctionAttr, igAlphaBlendStateAttr, igAnimatedMorphWeights, igAnimatedMorphWeightsTransform, igColorAttr, igColorMaskAttr, igDepthFunctionAttr, igListenerRelativeVelocityFrameReference, igPitchApplicator, igShaderConstantInt, igShaderConstantVector, igSortDepthOffsetAttr, igSoundUpdateLinearDoppler, igStencilFunctionAttr, igStencilRefAttr, igStencilStateAttr, igVfxAccelerateDragCurveOperator, igVfxAccelerateOperator, igVfxAccelerateRangeOperator, igVfxAccelerateRangedRampOperator, igVfxAlignLineBillboardOperator, igVfxCurveInputByDistanceOperator, igVfxCurveInputRemapOperator, igVfxCylindricalSpawnLocationData, igVfxDrawBezierAdvancedOperator, igVfxDrawGradientSpriteOperator, igVfxDrawLineOperator, igVfxOrbitEulerCurveRadiusCurveOperator, igVfxPoseLoadOperator, igVfxPosePlacedPrimitiveRotateOperator, igVfxTranslatePivotCurveOperator, igVscAbsFloatAccessor, igVscAxisToRotationNode, igVscFloorFloatNode, igVscMultiplyVec3fScalarAccessor, igVscSubtractFloatAccessor, igVscSwitch03Node, igVscVec3fRotationPitchFloatAccessor, igVscVec3fRotationRollFloatAccessor
+tipi presenti nei file diversi: igObjectList(613), igNameList(613), igImage2(227), igAttrList(117), CAlphaClipAttr(117), CDebugMipmapClampAttr(117), igAlphaFunctionAttr(117), igAlphaStateAttr(117), igBlendFunctionAttr(117), igBlendStateAttr(117), igCullFaceAttr(117), igDecalAttr(117), igDepthStateAttr(117), igDepthWriteStateAttr(117), igCachedAttrListList(117), igCachedAttrList(117), igTextureBindAttr2(117), igTextureAttr2(117), igGraphicsMaterial(117), igMemoryCommandStream(117), igGraphicsObjectSet(117), igGraphicsTexture(117), igGraphicsSamplerStateBundle(117), igGraphicsShaderConstant(117), CAlphaClipBundle(117), CDebugMipmapClampBundle(117), igShaderParametersAttr(116), igShaderConstantDataList(116), igShaderConstantValueList(116), igShaderConstantFloat(114), igShaderConstantValueFloat(114), igShaderConstantBool(114), igShaderConstantValueBool(114), igTextureMatrixAttr(109), igVscMetaObject(95), igObjectRefMetaField(95), igVscMethod(93), igVscEntryPointNodeList(93), igColorAttr(90), igVscDelegatorList(87)
+
+=== FILE DIVERSI (max 80) ===
+  sound_samples/wavs/Ambience/AMB_Wind_Soft_Loop_01,CB1_lvl_L112_bank,NoLoc,48000,40,0,0.igz  [114628 / 114628 byte]  CSoundSample,igNameList,igObjectList
+  sounds/banks/AI/AI_Jungle_Enemy_Patrol_Turtle_bank.igz  [13128 / 12416 byte]  CAudioArchive,CPlatformAudioSettingsOverrideList,CSound,CSoundHandleOrNameList,CSoundInstanceHandleList,CSoundList
+  vsc/common/Collectibles/common_Collectible_Template_Spawned_c.igz  [40660 / 40516 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentEntityToComponentAccessor,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor
+  sound_samples/wavs/Ambience/AMB_Birds_Trees_Loop_01,CB1_lvl_Results_bank,NoLoc,48000,40,0,0.igz  [189128 / 189128 byte]  CSoundSample,igNameList,igObjectList
+  materialinstances/Levels/Global/C1_CloudSet_01,C1_Cloud04,1.igz  [6568 / 4228 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CCloudParticleSortedMaterial,CDebugMipmapClampAttr,CDebugMipmapClampBundle,igAlphaFunctionAttr
+  textures/ColorMap,textures@!misc_splat`tga,111.igz  [13424 / 13424 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!levels!Crash1!temple!C1_DirtStreakDecal01_C`tga,111.igz  [352032 / 89888 byte]  igImage2,igNameList,igObjectList
+  maps/Crash1/L112_RoadToNowhere/L112_RoadToNowhere_Enemies.igz  [48740 / 61136 byte] tipi diversi  CAnimationTimelinesComponentData,CAttackImmunityTimestampTable,CAttackNumberTimestampTable,CAudioArchiveHandleList,CBaseMovementControllerList,CBoltPoint
+  textures/GuiStandard_diffuse,textures@!ui!Crash!SaveSlotImages!C1_JawsOfDarkness`png,101.igz  [135688 / 135688 byte]  igImage2,igNameList,igObjectList
+  models/Levels/Crash1/crates/Crash_Crate_Iron.igz  [88112 / 87860 byte] tipi diversi  CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData,igModelDrawCallData
+  materialinstances/Crash_Crates_materials,Crash_Crate_Nitro,0000210.igz  [28784 / 10728 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CBlendedDecalMaterial,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CStandardMaterial
+  textures/GuiStandard_diffuse,textures@!ui!Crash!SaveSlotImages!C1_SunsetVista`png,101.igz  [135688 / 135688 byte]  igImage2,igNameList,igObjectList
+  vfxFonts/VFX_Text_Letter_Sub_Font.igz  [2908 / 2908 byte]  CVfxFont,igNameList,igObjectList
+  sounds/banks/Levels/CB1_lvl_Results_bank.igz  [3732 / 3672 byte]  CAudioArchive,CPlatformAudioSettingsOverrideList,CSound,CSoundInstanceHandleList,CSoundList,CSpeakerVolumes
+  textures/GuiStandard_diffuse,textures@!ui!Crash!SaveSlotImages!C1_FumblingInTheDark`png,101.igz  [135696 / 135696 byte]  igImage2,igNameList,igObjectList
+  models/Levels/Crash1/Global/C1_EndLevelTeleporter.igz  [179552 / 178936 byte] tipi diversi  CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData,igModelDrawCallData
+  actors/Crash1/Environment/FX_Butterfly_skinned.igz  [21004 / 14316 byte] tipi diversi  CGraphicsSkinInfo,CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData
+  sounds/banks/AI/NPC_BonusCortex_bank.igz  [5424 / 5236 byte]  CAudioArchive,CPlatformAudioSettingsOverrideList,CSound,CSoundInstanceHandleList,CSoundList,CSubSound
+  materialinstances/Levels/Crash1/C1_TeleporterRock_materials,C1_BonusWarp,0a9.igz  [43900 / 14268 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CBlendedDecalMaterial,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CStandardMaterial
+  textures/NormalMap,textures@!actors!Bosses!BossCortex!NeoCortex_Hair_N`png,111.igz  [1400600 / 352024 byte]  igImage2,igNameList,igObjectList
+  sky/C1_RollingSkybox01.igz  [19464 / 19360 byte] tipi diversi  CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData,igModelDrawCallData
+  materialinstances/Actors/Crash1/C1_Tawna_materials,Tawna,7f.igz  [73544 / 25784 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CFurMaterial,CIridescentMaterialFeature
+  vsc/common/Crates/Iron/common_Crate_Swap_To_Iron_On_Damage_c.igz  [23328 / 22944 byte] tipi diversi  CFxMaterialRedirectTable,CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,igAddDependencyAttribute
+  maps/Crash1/L112_RoadToNowhere/L112_RoadToNowhere_Camera.igz  [12208 / 8652 byte] tipi diversi  CCameraScreenSafeArea,CEntity,CEntityData,CPlayerFollowData,CRelativeCamera,CSplineCamera
+  models/VFX/Crash/FXM_C1_BonusWarp_holograph.igz  [27816 / 27564 byte] tipi diversi  CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData,igModelDrawCallData
+  textures/ColorMap,textures@!levels!Crash1!factory!C1_Metal_Trim03_C`tga,111.igz  [5594912 / 352032 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!levels!Crash1!temple!C1_StoneTrim01_C`tga,111.igz  [1400600 / 352024 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!levels!Crash1!crates!C1_TNTCrate_Countdown_1_C`tga,111.igz  [1400616 / 352040 byte]  igImage2,igNameList,igObjectList
+  vfx/Collectables/ExtraLife/Collectible_ExtraLife_SpinAway.igz  [3964 / 3612 byte] tipi diversi  igNameList,igObjectList,igVfxDrawModelOperator,igVfxEffect,igVfxOperatorPrimitiveData,igVfxRangedCurveSpawnCountData
+  textures/ColorMap,textures@!levels!ActionPacks!APS1!APS1_Ice_D`tga,111.igz  [177264 / 46192 byte]  igImage2,igNameList,igObjectList
+  vsc/common/Crates/TNT/common_Crate_TNT_c.igz  [33560 / 33612 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor,igAddDependencyAttribute
+  materialinstances/Levels/Crash1/C1_WoodPlanks01_materials,Bridge_Platform_02,4.igz  [17236 / 6256 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CStandardMaterial,igAlphaFunctionAttr
+  textures/Composite3,textures@!{default_b,actors!Bosses!BossCortex!NeoCortex_Body_{G,M}}`png,111.igz  [2798736 / 177296 byte]  igImage2,igNameList,igObjectList
+  vsc/common/Global/Gems/common_Collectible_Gem_Spawned_c.igz  [9484 / 9352 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityToComponentAccessor,CVscComponentSendEntityMessageNode,igAddDependencyAttribute,igDynamicMetaObject
+  materialinstances/Levels/Crash1/L101_NSanityBeach_materials,C1_HighResGrass_01,020000000.igz  [17932 / 7800 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CGrassMaterial,CVertexWibbleMaterialFeature
+  textures/NormalMap,textures@!trees!Tree_Leaves_01_N`tga,111.igz  [352024 / 89880 byte]  igImage2,igNameList,igObjectList
+  vsc/common/UI/Countdown/common_CountDown.igz  [6536 / 6456 byte] tipi diversi  igDynamicMetaObject,igFloatMetaField,igGuiVscEventDelegator,igGuiVscMessageEntryPointNode,igGuiVscPlaceableAccessor,igGuiVscUpdaterAccessor
+  vsc/common/Global/Gems/common_Gem_Platform_Spline_c.igz  [54972 / 54772 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor,CVscEntityToPlayerNodeAccessor
+  textures/ColorMap,textures@!levels!Crash1!temple!templeStone_BrickWall_C`tga,111.igz  [1400608 / 352032 byte]  igImage2,igNameList,igObjectList
+  vfx/Global/Systems/Global_FadeOutPlatforms.igz  [8760 / 5972 byte] tipi diversi  CVfxDrawEntityTintOperator,igNameList,igObjectList,igVfxColorCurveOperator,igVfxCommitOperator,igVfxEffect
+  textures/ColorMap,textures@!levels!ActionPacks!APS1!APS1_Snow01_Alpha_D`tga,111.igz  [352032 / 89888 byte]  igImage2,igNameList,igObjectList
+  textures/NormalMap,textures@!levels!ActionPacks!APS1!APS1_SnowFlat_N`tif,111.igz  [352024 / 89880 byte]  igImage2,igNameList,igObjectList
+  materialinstances/Levels/Crash1/L112_RoadToNoWhere_materials,L112_TerrainChunk01,0052.igz  [49052 / 15948 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CBlendedDecalMaterial,CBlendedMaterial,CDebugMipmapClampAttr,CDebugMipmapClampBundle
+  textures/NormalMap,textures@!actors!Crash1!NPC!Tawna!Tawna_Clothes_N`tga,111.igz  [1400600 / 352024 byte]  igImage2,igNameList,igObjectList
+  vsc/common/Global/Platforms/common_InvisiblePlatform_MaterialSwap_c.igz  [13128 / 12876 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentUpdaterAccessor,igAddDependencyAttribute,igBoolMetaField
+  vsc/common/Global/Hazards/GameObject_Bounce_Behavior_c.igz  [37344 / 37424 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor,igAddDependencyAttribute
+  textures/Composite3,textures@!{default_b`png,levels!Crash1!factory!C1_Metal_Trim03_{G,M}`tga},111.igz  [2798736 / 177296 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!levels!Crash1!global!C1_EndScreen_CrashFaceBG_C`tga,111.igz  [2798720 / 177280 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!actors!Crash1!NPC!Tawna!Tawna_Body_E`tga,111.igz  [701552 / 177264 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!VFX!Masks!FXT_Distortion_SimpleCircle_Black`tga,111.igz  [24368 / 24368 byte]  igImage2,igNameList,igObjectList
+  models/Levels/Crash1/collectibles/Collectible_Tawna_BonusRound.igz  [97420 / 97168 byte] tipi diversi  CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData,igModelDrawCallData
+  textures/NormalMap,textures@!actors!Crash1!Enemies!Turtle_01!Turtle01Shell_N`tga,111.igz  [5594904 / 352024 byte]  igImage2,igNameList,igObjectList
+  textures/NormalMap,textures@!levels!Crash1!jungle!C1_ForestFloor01_N`tga,111.igz  [1400608 / 352032 byte]  igImage2,igNameList,igObjectList
+  sound_samples/wavs/ENV/ENV_Hazard_RockPlatform_Fall,Hazard_Wooden_Fences_bank,NoLoc,48000,40,0,0.igz  [19428 / 19428 byte]  CSoundSample,igNameList,igObjectList
+  textures/ColorMap,textures@!levels!Crash1!temple!templeStone_Base_C`tga,111.igz  [1400608 / 352032 byte]  igImage2,igNameList,igObjectList
+  models/Levels/Crash1/L101_NSanityBeach/C1_RubbleRocks01.igz  [25748 / 25440 byte] tipi diversi  CMaterialHandleTableInfo,igGraphicsIndexBuffer,igGraphicsVertexBuffer,igIndexBuffer,igModelData,igModelDrawCallData
+  vfx/Global/Generic_CameraFadeObject_Default.igz  [3428 / 3080 byte] tipi diversi  CVfxDrawEntityFadeOperator,igNameList,igObjectList,igVfxCameraFadeOperator,igVfxCommitOperator,igVfxEffect
+  textures/NormalMap,textures@!levels!Crash1!village!C1_WoodGrain01_N`tga,111.igz  [1400600 / 352024 byte]  igImage2,igNameList,igObjectList
+  vsc/common/Crates/TNT/common_Crate_TNT_Messenger.igz  [12272 / 12132 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor,igDynamicMetaObject
+  materialinstances/Crystal_Ice_Shard2_materials,FXD_Crystal_IceShard2,1.igz  [24912 / 9276 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CBlendedMaterial,CDebugMipmapClampAttr,CDebugMipmapClampBundle,igAlphaFunctionAttr
+  materialinstances/Crash_Crates_materials,cr_Destructable_Crate_TnT,0800000.igz  [17196 / 6232 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CStandardMaterial,igAlphaFunctionAttr
+  textures/Composite3,textures@!{default_b`png,levels!Crash1!temple!C1_SerpentStone_G`tga,default_m`png},111.igz  [177288 / 46216 byte]  igImage2,igNameList,igObjectList
+  textures/ColorMap,textures@!levels!Crash1!temple!C1_Moss01_C`tga,111.igz  [1400600 / 352024 byte]  igImage2,igNameList,igObjectList
+  textures/HeightMap,textures@!actors!Crash1!NPC!Tawna!Tawna_Body_H`tga,111.igz  [177096 / 177096 byte]  igImage2,igNameList,igObjectList
+  sound_samples/wavs/Characters/ENEMY_Bridge_Enemy_Tracking_Hog/fx_champ_hog_snort_01,AI_Bridge_Enemy_Hog_bank,NoLoc,48000,40,0,0.igz  [11716 / 11716 byte]  CSoundSample,igNameList,igObjectList
+  vfx/Collectables/ExtraLife/Collectible_ExtraLife_Collect.igz  [24640 / 14100 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CVfxMaterial,igAlphaFunctionAttr
+  vsc/common/Global/Spawners/Multiple_Spawner_Template_c.igz  [68736 / 70656 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor,igAddDependencyAttribute
+  sound_samples/wavs/Characters/ENEMY_Jungle_Enemy_Patrol_Turtle/fx_enemy_patrol_turtle_foot_01,AI_Jungle_Enemy_Patrol_Turtle_bank,NoLoc,48000,40,0,0.igz  [10980 / 10980 byte]  CSoundSample,igNameList,igObjectList
+  textures/Composite3,textures@!{default_b`png,levels!Crash1!temple!templeStone_Base_G`tga,default_m`png},111.igz  [701576 / 177288 byte]  igImage2,igNameList,igObjectList
+  maps/Crash1/L112_RoadToNowhere/L112_RoadToNowhere_Crates.igz  [34772 / 229996 byte] tipi diversi  CAttackImmunityTimestampTable,CAttackNumberTimestampTable,CCollectibleComponentData,CDotNetEntityComponentData_1,CEnableRequestManager,CEntity
+  materialinstances/P15_Skybox_Far_materials,p15_skybox_far,0c0.igz  [13860 / 6624 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CUnlitMaterial,igAlphaBlendFunctionAttr
+  materialinstances/SaveSlotImages/C1SaveSlotImages_materials.igz  [76792 / 36388 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CGuiMaterial,igAlphaFunctionAttr
+  vsc/common/UI/Crash_HUD/common_Crash_HUD_ZoneCollectibles.igz  [14980 / 14680 byte] tipi diversi  igDynamicMetaObject,igFloatMetaField,igGuiVscEventDelegator,igGuiVscMessageEntryPointNode,igGuiVscPlaceableAccessor,igHandleMetaField
+  textures/Composite3,textures@!{default_b`png,levels!Crash2!Jungle!C2_MushroomFungi01_G`tga,default_m`png},111.igz  [177288 / 46216 byte]  igImage2,igNameList,igObjectList
+  materialinstances/Levels/Crash1/C1_dirtStreakDecal01_mat_materials,C1_IdolHead_Blargh,1.igz  [14228 / 6476 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CBlendedDecalMaterial,CDebugMipmapClampAttr,CDebugMipmapClampBundle,igAlphaFunctionAttr
+  vsc/common/Global/Spawners/common_Spawner_Template_c.igz  [100696 / 102524 byte] tipi diversi  CVscComponentDataAccessor,CVscComponentEntityAccessor,CVscComponentEntityMessageDelegator,CVscComponentSendEntityMessageNode,CVscComponentUpdaterAccessor,igAddDependencyAttribute
+  textures/NormalMap,textures@!levels!Crash1!jungle!C1_Jungle_Cliff01_N`tga,111.igz  [5594912 / 352032 byte]  igImage2,igNameList,igObjectList
+  textures/Composite3,textures@!{actors!Crash1!Enemies!Turtle_01!Turtle01Flesh_{B,G}`tga,default_m`png},111.igz  [2798736 / 177296 byte]  igImage2,igNameList,igObjectList
+  materialinstances/Levels/Crash1/C1_WoodPlanks01_materials,L112_FallawayPlank01,4.igz  [17236 / 6256 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CStandardMaterial,igAlphaFunctionAttr
+  vfx/Crates/Crate_Hologram_Destroy.igz  [26392 / 15136 byte] tipi diversi  CAlphaClipAttr,CAlphaClipBundle,CDebugMipmapClampAttr,CDebugMipmapClampBundle,CFxMaterialRedirectTable,CVfxDrawDebrisOperator
+
+=== FILE SENZA CORRISPONDENTE (max 80) ===
+  textures/ColorMap,textures@!VFX!Graphic!FXT_Feathes_White`tga,111.igz
+  materialinstances/Levels/Crash1/C1_Temple_StoneStuff_materials,Ruin_BottomLineA,0003000000.igz
+  materialinstances/Levels/Crash1/L101_NSanityBeach_materials,C1_HighResGrass_02,020000000.igz
+  sounds/banks/AI/AI_Jungle_Enemy_Basic_FlyTrap_bank.igz
+  materialinstances/Design_Set_Core_01_materials,Design_Core_Bridge_N_01,1008.igz
+  textures/ColorMap,textures@!Common!00`tga,111.igz
+  textures/ColorMap,textures@!VFX!Misc!C3_NTropy_Portal`tga,111.igz
+  textures/CavityBakedColorMap,textures@!actors!Crash2!Enemies!Possum!Possum_PossumFur_{C,N}`tga,111.igz
+  textures/CavityBakedColorMap,textures@!levels!Crash1!{factory!C1_GreenGoo02_C,jungle!C1_Hub_01_GreenGoo01_N}`tga,111.igz
+  materialinstances/Design_Set_JumpMetrics_materials,design_set_jumpmetrics,d.igz
+  materialinstances/Levels/Crash1/C1_Castle_materials,Castle_SwingingAxe,010000000.igz
+  textures/NormalMap,textures@!levels!Crash1!factory!C1_MetalPanel_03_N`tga,111.igz
+  materialinstances/Levels/Crash1/C1_FernLeaf01_materials.igz
+  models/Levels/Crash2/Temple/GameEnts/C2_Temple_Platform_Drop01.hkx
+  materialinstances/Levels/Crash1/C1_PapuPapu_Hut_materials,C1_TempleRuins_Spear,1090.igz
+  textures/CavityBakedColorMap,textures@!levels!Crash1!castle!C1_Castle_Carpet_BigN_{C,N}`tga,111.igz
+  textures/ColorMap,textures@!levels!Crash1!factory!C1_Metal_Trim_C`tga,111.igz
+  textures/NormalMap,textures@!levels!Crash1!castle!C1_Wood_Rough01_N`tga,111.igz
+  materialinstances/Levels/Crash1/C1_NBrio_Bonus_materials,C1_DarkPillarWide,1.igz
+  textures/HeightMap,textures@!actors!Crash1!Enemies!LabAssistant_Base_01!LabAssistant_Base_Head_H`tga,111.igz
+  materialinstances/Levels/Crash1/C1_Temple_StoneMossBlends_materials,C1_Pillar_Tipped,0009.igz
+  textures/NormalMap,textures@!levels!Crash1!factory!C1_PlatesMetal_03_N`tga,111.igz
+  materialinstances/Levels/Crash1/C1_Temple_StoneStuff_materials,Ruin_BigHead,0507000000.igz
+  materialinstances/Actors/Crash2/C2_StoneCracksDecal02_materials,L207_Platform02,1.igz
+  textures/CavityBakedColorMap,textures@!actors!Crash2!Enemies!Gorilla!Gorilla_01_Fur_{C,N}`tga,111.igz
+  materialinstances/Crash1/C1_GameOver_materials,crash_GameOverRoom,1.igz
+  textures/ColorMap,textures@!levels!Crash1!factory!C1_PlatesMetal_03_C`tga,111.igz
+  textures/ColorMap,textures@!levels!Crash1!jungle!C1_BeachSand03_C`tga,111.igz
+  materialinstances/Crash_WoodCrate_materials,FXM_cratebasicfloating_chunk01,1.igz
+  materialinstances/Levels/Crash2/C2_TempleWet_materials,Ruin_BottomPlatformWet,0006.igz
+  textures/NormalMap,textures@!actors!Crash2!Enemies!FlyTrap_Purple!Flytrap_03_N`tga,111.igz
+  sound_samples/wavs/Characters/CB/CHAMP_CB_FootV2_Jump_Flip_01,CHAMP_Crash_bank,NoLoc,48000,40,0,0.igz
+  textures/Composite3,textures@!{255_255_255_g,default_{g,m}}`png,111.igz
+  textures/Composite3,textures@!{default_e`png,levels!Crash2!Sewer!C2_{Sewer_MetalTrim01_G,Metal_Trim02_M}`tga},111.igz
+  textures/NormalMap,textures@!levels!Crash1!village!C1_WoodPale01_N`tga,111.igz
+  models/Levels/Crash1/L126_TheLab/theLab_cableThinB.igz
+  textures/Composite2_GB,textures@!{levels!Crash2!Hub!C2_SocketPurple01_g`tga,default_m`png},111.igz
+  sound_samples/wavs/ENV/ENV_Hazard_Stone_Platform_Tilit_Creak_03,Hazard_HoverPlatform_bank,NoLoc,48000,40,0,0.igz
+  textures/ColorMap,textures@!VFX!Misc!C3_NeoCortex_Portal`tga,111.igz
+  sound_samples/wavs/Characters/CB/FX_CRASH_Attack_Spin_03_Out,CHAMP_Crash_bank,NoLoc,48000,40,0,0.igz
+  textures/CavityBakedColorMap,textures@!levels!Crash1!temple!C1_StoneCracksDecal01_{C,N}`tga,111.igz
+  models/Levels/Crash1/temple/C1_TempleRuins_OrbitingPillar.hkx
+  materialinstances/Levels/Crash1/C1_Castle_materials,C1_Castle_LOPath_Fourthcurve_Mirror,006002000.igz
+  textures/CavityBakedColorMap,textures@!actors!NPC!FakeCrash!FakeCrash_Teeth_{C,N}`tga,111.igz
+  textures/Composite3,textures@!{default_e`png,actors!Playable!Crash!CrashFur_{G,M}`tga},111.igz
+  textures/Composite3,textures@!actors!Playable!Crash!CrashCloth_{B,G,M}`tga,111.igz
+  textures/Composite3,textures@!levels!{Crash1!cave!C1_Cavecrystals_{e,g},Earth!Earth_Green_Crystal_M}`tga,111.igz
+  textures/NormalMap,textures@!actors!Crash2!Hazards!Hippo!Hippo_N`tga,111.igz
+  materialinstances/Levels/Crash1/L110_LostCity_materials,L115_SunsetVista_Terrain,2.igz
+  materialinstances/Spider_01_materials,spider_01,3.igz
+  sound_samples/wavs/Characters/ENEMY_Jungle_Enemy_Armadillo/fx_jungle_armadillo_foot_scuff_02,AI_Jungle_Enemy_Armadillo_bank,NoLoc,48000,40,0,0.igz
+  textures/CavityBakedColorMap,textures@!{actors!Crash2!Enemies!Possum!Possum_Eyes_C`tga,default_n`png},111.igz
+  textures/NormalMap,textures@!levels!Crash1!castle!C1_NBrio_Candle_N`tga,111.igz
+  textures/Composite3,textures@!{default_e`png,levels!Crash1!jungle!C1_Sandtile02_G`tga,default_m`png},111.igz
+  textures/NormalMap,textures@!levels!Crash1!factory!C1_Metal_Trim_N`tga,111.igz
+  materialinstances/Levels/Crash2/C2_TempleWet_materials,Ruin_Path3x3Wet,0c14.igz
+  materialinstances/Levels/Crash1/C1_CastleWet_materials,castelExt_waterDecalC,400.igz
+  textures/ColorMap,textures@!levels!Crash1!cave!C1_CaveRockwall2_C`tga,111.igz
+  materialinstances/Levels/Crash1/C1_Factory_materials,theLab_cableMedA,001008000000.igz
+  actors/Crash1/Enemies/FlyTrap_head.hkx
+  sound_samples/wavs/Characters/CB/FX_CRASH_RunStop_01,CHAMP_Crash_bank,NoLoc,48000,40,0,0.igz
+  materialinstances/Levels/Crash1/C1_Factory_materials,theLab_panel6,000008000000.igz
+  materialinstances/Actors/Crash2/C2_StoneCracksDecal02_materials,L207_Platform01,1.igz
+  materialinstances/Levels/Crash1/C1_Temple_StoneStuff_materials,Ruin_Stackf,002e000000.igz
+  textures/CavityBakedColorMap,textures@!{VFX!Misc!C3_BugLite_Portal`tga,default_n`png},111.igz
+  textures/Composite3,textures@!actors!Crash2!Enemies!Lizard_Frilled!Lizard_Frilled_Body_{E,G,M}`tga,111.igz
+  materialinstances/Levels/Crash1/L110_LostCity_materials,L110_grassCornerRight,1.igz
+  textures/ColorMap,textures@!actors!Crash1!NPC!UkaUka!UkaUka_E`png,111.igz
+  materialinstances/Design_Set_Core_01_materials,Design_Core_Platform_06,4000.igz
+  materialinstances/Levels/Crash1/C1_TreeBarkMoss01_materials,L207_Bldg3,1.igz
+  actors/Crash2/Enemies/Lizard_Frilled.igz
+  textures/CavityBakedColorMap,textures@!levels!Crash1!{village!C1_Wood_Red01_C,jungle!C1_Wood_Red01_N}`tga,111.igz
+  models/Levels/Crash1/L110_TheLostCity/L110_grassClumpLeft.igz
+  materialinstances/Levels/Crash1/C1_Temple_StoneMossBlends_materials,C1_Pillar_Fangs,1001.igz
+  textures/Composite3,textures@!{default_b`png,levels!Crash1!crates!C1_CrashCrate01_g`tga,default_m`png},111.igz
+  materialinstances/RampWithWalls02_materials,rampwithwalls02,6.igz
+  textures/Composite3,textures@!{levels!Crash1!factory!C1_Path_Glow_{E,G}`tga,default_m`png},111.igz
+  textures/CavityBakedColorMap,textures@!levels!Crash1!castle!C1_Stone_Brick02_{C,N}`tga,111.igz
+  textures/Composite3,textures@!{levels!Crash1!collectibles!C1_NewGem01_{E,G}`tga,default_b`png},111.igz
+  sound_samples/wavs/Characters/ENEMY_Temple_Lizard/fx_temple_lizard_foot_scuff_03,AI_Temple_Enemy_Lizard_bank,NoLoc,48000,40,0,0.igz
