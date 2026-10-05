@@ -112,7 +112,7 @@ def main():
         subprocess.check_call(["g++", "-std=gnu++17", "-O1", "-Wall", "-fno-exceptions", "-fno-rtti",
                                "-I" + HERE, "-I" + os.path.join(PROJ, "source"), "-I" + a.curl_include,
                                "-o", exe] +
-                              [os.path.join(PROJ, "source", f) for f in ("main.cpp", "core.cpp", "net.cpp", "util.cpp")] +
+                              [os.path.join(PROJ, "source", f) for f in ("main.cpp", "core.cpp", "mega.cpp", "net.cpp", "util.cpp")] +
                               [os.path.join(work, "cJSON.o"), libcurl])
         www = os.path.join(work, "www")
         os.makedirs(www)

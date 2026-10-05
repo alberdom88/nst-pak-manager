@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "cJSON.h"
+#include "mega.hpp"
 #include "util.hpp"
 
 static const char PAK_MAGIC[4] = {'I', 'G', 'A', 0x1A};  // 0x1A414749 little-endian
@@ -25,10 +26,9 @@ std::string defaultConfigJson() {
         "      \"url\": \"http://192.168.1.50:8000/\"\n"
         "    },\n"
         "    {\n"
-        "      \"name\": \"Google Drive\",\n"
-        "      \"type\": \"gdrive\",\n"
-        "      \"folder\": \"https://drive.google.com/drive/folders/ID_DELLA_CARTELLA\",\n"
-        "      \"api_key\": \"LA_TUA_CHIAVE_API\"\n"
+        "      \"name\": \"MEGA\",\n"
+        "      \"type\": \"mega\",\n"
+        "      \"url\": \"https://mega.nz/folder/ID_CARTELLA#CHIAVE\"\n"
         "    }\n"
         "  ]\n"
         "}\n";
@@ -82,26 +82,27 @@ bool parseConfig(const std::string& json, Config& cfg, std::string& err) {
         SourceConfig sc;
         sc.type = util::toLower(jsonString(s, "type"));
         sc.url = jsonString(s, "url");
-        sc.folder = jsonString(s, "folder");
-        sc.apiKey = jsonString(s, "api_key");
-        std::string apiBase = jsonString(s, "api_base");
-        if (!apiBase.empty()) sc.apiBase = apiBase;
-        if (sc.type.empty()) sc.type = sc.folder.empty() ? "http" : "gdrive";
+        sc.apiBase = jsonString(s, "api_base");
+        if (sc.type.empty()) {
+            std::string lower = util::toLower(sc.url);
+            sc.type = lower.find("mega.nz") != std::string::npos || lower.find("mega.co.nz") != std::string::npos
+                          ? "mega" : "http";
+        }
         sc.name = jsonString(s, "name");
-        if (sc.name.empty()) sc.name = sc.type == "gdrive" ? "Google Drive" : sc.url;
-        if (sc.type != "http" && sc.type != "gdrive") {
+        if (sc.name.empty()) sc.name = sc.type == "mega" ? "MEGA" : sc.url;
+        if (sc.type == "gdrive") {
             cJSON_Delete(root);
-            err = "sorgente '" + sc.name + "': type deve essere \"http\" o \"gdrive\"";
+            err = "sorgente '" + sc.name + "': Google Drive non e' piu' supportato, usa \"mega\" o \"http\"";
             return false;
         }
-        if (sc.type == "http" && sc.url.empty()) {
+        if (sc.type != "http" && sc.type != "mega") {
+            cJSON_Delete(root);
+            err = "sorgente '" + sc.name + "': type deve essere \"http\" o \"mega\"";
+            return false;
+        }
+        if (sc.url.empty()) {
             cJSON_Delete(root);
             err = "sorgente '" + sc.name + "': manca \"url\"";
-            return false;
-        }
-        if (sc.type == "gdrive" && (sc.folder.empty() || sc.apiKey.empty())) {
-            cJSON_Delete(root);
-            err = "sorgente '" + sc.name + "': servono \"folder\" e \"api_key\"";
             return false;
         }
         out.sources.push_back(sc);
@@ -261,22 +262,6 @@ bool parseManifest(const std::string& json, const std::string& manifestUrl,
     return true;
 }
 
-std::string driveFolderId(const std::string& s) {
-    size_t p = s.find("folders/");
-    if (p != std::string::npos) {
-        std::string rest = s.substr(p + 8);
-        return rest.substr(0, rest.find_first_of("/?#&"));
-    }
-    p = s.find("id=");
-    if (p != std::string::npos) {
-        std::string rest = s.substr(p + 3);
-        return rest.substr(0, rest.find_first_of("&#"));
-    }
-    size_t a = s.find_first_not_of(" \t");
-    size_t b = s.find_last_not_of(" \t");
-    return a == std::string::npos ? "" : s.substr(a, b - a + 1);
-}
-
 std::vector<std::string> parseOriginals(const std::string& text) {
     std::vector<std::string> out;
     size_t start = 0;
@@ -323,6 +308,35 @@ std::string launchArguments(const std::string& pattern, const std::string& level
     size_t pos;
     while ((pos = out.find(key)) != std::string::npos) out.replace(pos, key.size(), levelId);
     return out;
+}
+
+const char* const DIRECT_LAUNCH_PATCH_DIR = "/atmosphere/exefs_patches/nst_avvio_livello";
+
+std::string debugXml(const std::string& levelId) {
+    return "<?xml version=\"1.0\" encoding=\"ascii\"?>\n"
+           "<!-- scritto da NST Pak Manager: avvio diretto nel livello -->\n"
+           "<config>\n"
+           "\t<MAP filename=\"" + levelId + "\"/>\n"
+           "</config>\n";
+}
+
+std::string debugXmlLevel(const std::string& xml) {
+    size_t p = xml.find("<MAP");
+    while (p != std::string::npos) {
+        size_t end = xml.find('>', p);
+        if (end == std::string::npos) return "";
+        std::string tag = xml.substr(p, end - p);
+        size_t a = tag.find("filename");
+        if (a != std::string::npos) {
+            size_t q = tag.find_first_of("\"'", a);
+            if (q != std::string::npos) {
+                size_t q2 = tag.find(tag[q], q + 1);
+                if (q2 != std::string::npos) return tag.substr(q + 1, q2 - q - 1);
+            }
+        }
+        p = xml.find("<MAP", end);
+    }
+    return "";
 }
 
 static bool pakLevels(const std::string& path, std::vector<std::string>& out, std::vector<std::string>& ids) {
@@ -416,66 +430,9 @@ static bool listHttp(const SourceConfig& src, std::vector<RemoteFile>& out, std:
     return true;
 }
 
-static bool listDrive(const SourceConfig& src, std::vector<RemoteFile>& out, std::string& err) {
-    std::string id = driveFolderId(src.folder);
-    if (id.empty()) {
-        err = "ID della cartella Drive non valido";
-        return false;
-    }
-    std::string pageToken;
-    for (int page = 0; page < 50; page++) {
-        std::string url = src.apiBase + "/drive/v3/files?q=" +
-                          util::urlEncode("'" + id + "' in parents and trashed = false") +
-                          "&fields=" + util::urlEncode("nextPageToken,files(id,name,size,mimeType)") +
-                          "&pageSize=1000&supportsAllDrives=true&includeItemsFromAllDrives=true&key=" +
-                          util::urlEncode(src.apiKey);
-        if (!pageToken.empty()) url += "&pageToken=" + util::urlEncode(pageToken);
-
-        std::string body;
-        long status = 0;
-        if (!net::get(url, body, status, err)) return false;
-        cJSON* root = cJSON_Parse(body.c_str());
-        if (!root) {
-            err = "risposta di Google Drive non valida";
-            return false;
-        }
-        const cJSON* error = cJSON_GetObjectItemCaseSensitive(root, "error");
-        if (error || status >= 400) {
-            std::string msg = error ? jsonString(error, "message") : "";
-            char buf[64];
-            snprintf(buf, sizeof(buf), "Google Drive HTTP %ld", status);
-            err = std::string(buf) + (msg.empty() ? "" : ": " + msg);
-            cJSON_Delete(root);
-            return false;
-        }
-        const cJSON* files = cJSON_GetObjectItemCaseSensitive(root, "files");
-        const cJSON* f;
-        cJSON_ArrayForEach(f, files) {
-            if (jsonString(f, "mimeType") == "application/vnd.google-apps.folder") continue;
-            RemoteFile rf;
-            rf.name = jsonString(f, "name");
-            if (!isValidPakName(rf.name)) continue;
-            std::string fid = jsonString(f, "id");
-            if (fid.empty()) continue;
-            rf.url = src.apiBase + "/drive/v3/files/" + util::urlEncode(fid) +
-                     "?alt=media&supportsAllDrives=true&key=" + util::urlEncode(src.apiKey);
-            std::string size = jsonString(f, "size");
-            if (!size.empty()) {
-                rf.size = strtoull(size.c_str(), nullptr, 10);
-                rf.sizeKnown = rf.size > 0;
-            }
-            addUnique(out, rf);
-        }
-        pageToken = jsonString(root, "nextPageToken");
-        cJSON_Delete(root);
-        if (pageToken.empty()) return true;
-    }
-    return true;
-}
-
 bool listSource(const SourceConfig& src, std::vector<RemoteFile>& out, std::string& err) {
     out.clear();
-    bool ok = src.type == "gdrive" ? listDrive(src, out, err) : listHttp(src, out, err);
+    bool ok = src.type == "mega" ? mega::list(src, out, err) : listHttp(src, out, err);
     if (!ok) return false;
     std::sort(out.begin(), out.end(), [](const RemoteFile& a, const RemoteFile& b) {
         return util::toLower(a.name) < util::toLower(b.name);
@@ -493,10 +450,42 @@ Manager::Manager(const std::string& root, const Config& cfg) {
     if (p != std::string::npos) dir.replace(p, 10, cfg.titleId);
     if (dir.empty() || dir[0] != '/') dir = "/" + dir;
     while (dir.size() > 1 && dir.back() == '/') dir.pop_back();
+    root_ = root;
     modDir_ = root + dir;
     appDir_ = appDirFor(root);
     backupDir_ = appDir_ + "/backup/" + cfg.titleId;
     statePath_ = appDir_ + "/state-" + cfg.titleId + ".json";
+}
+
+std::string Manager::romfsDir() const {
+    const std::string suffix = "/archives";
+    if (modDir_.size() > suffix.size() && util::endsWithCI(modDir_, suffix))
+        return modDir_.substr(0, modDir_.size() - suffix.size());
+    return modDir_;
+}
+
+bool Manager::setDirectLaunch(const std::string& levelId, std::string& err) {
+    if (!util::mkdirs(romfsDir()) || !util::writeFileAtomic(directLaunchPath(), debugXml(levelId))) {
+        err = "impossibile scrivere " + directLaunchPath();
+        return false;
+    }
+    return true;
+}
+
+void Manager::clearDirectLaunch() {
+    if (util::fileExists(directLaunchPath())) util::removeFile(directLaunchPath());
+}
+
+std::string Manager::directLaunchLevel() const {
+    std::string text;
+    if (!util::readFile(directLaunchPath(), text)) return "";
+    return debugXmlLevel(text);
+}
+
+bool Manager::directLaunchPatchInstalled() const {
+    for (const std::string& f : util::listFiles(root_ + DIRECT_LAUNCH_PATCH_DIR))
+        if (util::endsWithCI(f, ".ips")) return true;
+    return false;
 }
 
 const InstalledFile* Manager::find(const std::string& name) const {
@@ -659,8 +648,10 @@ bool Manager::install(const RemoteFile& file, const std::string& target, const s
 
     // 1. Scarica in un file temporaneo: se qualcosa va storto non si tocca nulla
     uint64_t written = 0;
-    if (!net::download(file.url, tmp, file.sizeKnown ? file.size : 0, progress, written, err))
-        return false;
+    bool downloaded = file.megaNode.empty()
+                          ? net::download(file.url, tmp, file.sizeKnown ? file.size : 0, progress, written, err)
+                          : mega::download(file, tmp, progress, written, err);
+    if (!downloaded) return false;
     if (file.sizeKnown && written != file.size) {
         util::removeFile(tmp);
         err = "download incompleto (" + util::formatSize(written) + " su " + util::formatSize(file.size) + ")";

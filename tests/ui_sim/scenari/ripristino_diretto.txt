@@ -1,0 +1,6 @@
+# il ripristino dell'originale del livello dell'avvio diretto cancella anche debug.xml
+# uso: --prepare 'mkdir -p sdmc:/atmosphere/contents/0100D1B006744000/romfs && echo "<config><MAP filename=\"crash1/custom_level/custom_level\"/></config>" > sdmc:/atmosphere/contents/0100D1B006744000/romfs/debug.xml'
+. A . A . X . A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+B . R . SNAP
+X . A . SNAP
+A . SNAP

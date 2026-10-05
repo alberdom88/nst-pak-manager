@@ -53,22 +53,50 @@ background l'app mostra un avviso. Dopo l'installazione puoi avviare Crash
 direttamente dall'app (A nella schermata del risultato, oppure ZL): il gioco
 parte con i file appena installati, dal menu iniziale.
 
-### Entrare direttamente nel livello (sperimentale)
+### Entrare direttamente nel livello
 
 Come il tasto *Play* dell'editor sul PC, l'app può far partire il gioco già dentro
 il livello installato: **Y** nella schermata del risultato, oppure **ZR** sulla
 riga del file nella scheda INSTALLATI. L'app legge dal `.pak` il nome del livello
-(per esempio `crash1/l112_roadtonowhere/l112_roadtonowhere`) e lo passa al gioco
-come argomento di avvio, `nst -om <livello>`, con il servizio di sistema `ldr:shel`
-di Atmosphère. È la stessa opzione `-om` del gioco PC: l'eseguibile Switch la
-contiene ancora.
+(per esempio `crash1/l112_roadtonowhere/l112_roadtonowhere`) e lo scrive in
+`debug.xml`, il file di configurazione di sviluppo che il gioco legge all'avvio:
 
-- Funziona solo su console con Atmosphère (non negli emulatori).
-- Gli argomenti restano validi per tutti gli avvii del gioco finché non riapri
-  l'app: se poi avvii Crash dal menu HOME entra di nuovo nel livello. Per tornare
-  all'avvio normale riapri l'app (all'apertura li azzera) o avvia il gioco con ZL.
-- Il formato degli argomenti si cambia in `config.json` con `launch_args`
-  (`{livello}` viene sostituito dal nome del livello).
+```xml
+<config>
+	<MAP filename="crash1/l112_roadtonowhere/l112_roadtonowhere"/>
+</config>
+```
+
+Con quel file il gioco carica il livello invece del menu, come con l'opzione `-om`
+del PC. Il file va in `atmosphere/contents/0100D1B006744000/romfs/debug.xml`.
+
+**Patch (una volta sola).** La versione in commercio ignora `debug.xml`: la funzione
+che ne permette la lettura (`CConfigSystem::InFinal`) risponde sempre "no". Una
+patch IPS di 4 byte la fa rispondere "sì". La patch dipende dalla versione del
+gioco, quindi si crea dal dump dell'eseguibile (ExeFS):
+
+```
+python tools/crea_avvio_livello.py "<cartella del dump ExeFS>" "<livello.pak>"
+```
+
+Lo script crea la cartella `avvio_livello` con:
+
+- `sd/`: da copiare nella radice della SD. Mette la patch in
+  `atmosphere/exefs_patches/nst_avvio_livello/<ID build>.ips` e un `debug.xml` di
+  prova per il livello indicato.
+- `eden/NST avvio livello/`: la stessa cosa come mod di Eden (cartella delle mod del
+  gioco: tasto destro sul gioco, voce per aprire la cartella dei dati delle mod).
+
+Senza `debug.xml` la patch non cambia nulla. Se la patch manca, l'app lo segnala
+prima di avviare.
+
+- L'avvio diretto resta attivo finché c'è `debug.xml`: anche se avvii Crash dal
+  menu HOME entra nel livello. L'intestazione dell'app mostra `avvio diretto: ...`.
+- **ZL** (o A nella schermata del risultato) avvia il gioco dal menu e cancella
+  `debug.xml`. Anche il ripristino dell'originale di quel livello lo cancella.
+- In più l'app passa al gioco l'opzione `-om <livello>` come argomento di avvio
+  (servizio `ldr:shel` di Atmosphère), se disponibile. Il formato si cambia in
+  `config.json` con `launch_args`; con `"launch_args": ""` non viene usata.
 
 ## Elenco degli originali (`originali.txt`)
 
@@ -167,27 +195,31 @@ relativo; `target` è l'originale proposto per quel file):
              { "name": "update.pak", "url": "https://altro.sito/update.pak" } ] }
 ```
 
-### Google Drive (`"type": "gdrive"`)
+### MEGA (`"type": "mega"`)
 
-1. In Drive: tasto destro sulla cartella con i `.pak` → **Condividi** → Accesso
-   generale: **Chiunque abbia il link** (Visualizzatore).
-2. In [Google Cloud Console](https://console.cloud.google.com/): crea un progetto,
-   apri **API e servizi → Libreria** e abilita **Google Drive API**.
-3. **API e servizi → Credenziali → Crea credenziali → Chiave API**. Conviene
-   limitare la chiave alla sola Google Drive API.
-4. Nella config:
+Gratuito: basta un account MEGA (20 GB) e il link della cartella, senza chiavi API.
+
+1. Su [mega.nz](https://mega.nz) carica i `.pak` in una cartella.
+2. Tasto destro sulla cartella → **Condividi** → **Copia link**. Il link deve
+   contenere la chiave, cioè la parte dopo `#`. Non va bene il link "senza chiave".
+3. Nella config:
 
 ```json
 {
-  "name": "Google Drive",
-  "type": "gdrive",
-  "folder": "https://drive.google.com/drive/folders/ID_DELLA_CARTELLA",
-  "api_key": "LA_TUA_CHIAVE_API"
+  "name": "MEGA",
+  "type": "mega",
+  "url": "https://mega.nz/folder/AbCdEfGh#chiave-della-cartella"
 }
 ```
 
-La chiave dà accesso solo ai file condivisi pubblicamente, ma chi la conosce può
-leggere quella cartella: non pubblicarla.
+- L'app elenca i `.pak` che stanno direttamente nella cartella del link. Per usare
+  una sottocartella, aprila su mega.nz e copia il link dalla barra degli indirizzi
+  (`.../folder/<cartella>#<chiave>/folder/<sottocartella>`).
+- Su MEGA nomi e contenuti dei file sono cifrati: l'app li decifra con la chiave
+  del link. Chi ha il link completo può scaricare i file, quindi non pubblicarlo.
+- Il traffico gratuito di MEGA ha una quota (alcuni GB ogni qualche ora). Se si
+  esaurisce, il download si ferma con "quota di trasferimento esaurita": riprova
+  più tardi.
 
 ### Opzioni avanzate
 
@@ -196,7 +228,7 @@ leggere quella cartella: non pubblicarla.
 | `title_id`  | `0100D1B006744000`                               | Gioco di destinazione |
 | `mod_dir`   | `/atmosphere/contents/{title_id}/romfs/archives` | Cartella in cui installare |
 | `ca_file`   | `cacert.pem` nella cartella dell'app (se esiste) | Certificati HTTPS aggiuntivi |
-| `launch_args` | `nst -om {livello}`                            | Argomenti per entrare direttamente nel livello |
+| `launch_args` | `nst -om {livello}`                            | Argomenti di avvio aggiuntivi per l'avvio diretto (vuoto = nessuno) |
 
 Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
 <https://curl.se/docs/caextract.html> e mettilo in `sdmc:/switch/nst-pak-manager/`.
@@ -213,7 +245,7 @@ Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
 | ZR | ricarica l'elenco (e `originali.txt`) | avvia il gioco dentro il livello di quel file |
 | L / R | vai a REMOTI / INSTALLATI | |
 | - | cambia sorgente | |
-| ZL | chiude l'app e avvia il gioco (dal menu iniziale) | |
+| ZL | chiude l'app e avvia il gioco dal menu (spegne l'avvio diretto) | |
 | + | esci | |
 | B (durante il download) | annulla | |
 
@@ -251,7 +283,7 @@ sh tests/run_tests.sh
 
 Compila il codice di download/installazione/backup per Linux (serve
 `libcurl4-openssl-dev`) e lo prova contro un server locale che simula cartella
-web, manifest e API di Google Drive.
+web, manifest e API di MEGA (con file cifrati come quelli veri).
 
 Si può provare anche l'interfaccia sul PC, con un `switch.h` finto che legge i
 tasti da uno scenario e stampa le schermate:
@@ -266,8 +298,9 @@ python tests/ui_sim/ui_sim.py tests/ui_sim/scenari/completo.txt --config tests/u
 source/main.cpp   interfaccia (console libnx, solo Switch)
 source/core.*     configurazione, sorgenti, installazione, backup, ripristino
 source/net.*      download con libcurl
+source/mega.*     cartelle MEGA: elenco, AES e decifratura dei download
 source/util.*     file, percorsi, URL
 source/cJSON.*    parser JSON (MIT, vedi cJSON.LICENSE)
 tests/            test su PC (tests/ui_sim: interfaccia simulata)
-tools/            controlla_pak.py, list_originals.py, make_manifest.py
+tools/            controlla_pak.py, list_originals.py, make_manifest.py, crea_avvio_livello.py
 ```

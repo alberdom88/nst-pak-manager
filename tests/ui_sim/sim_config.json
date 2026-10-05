@@ -1,7 +1,7 @@
 {
   "sources": [
     { "name": "PC di casa", "type": "http", "url": "http://127.0.0.1:{PORT}/files/" },
-    { "name": "Google Drive", "type": "gdrive", "folder": "https://drive.google.com/drive/folders/FOLDER123?usp=sharing",
-      "api_key": "TESTKEY", "api_base": "http://127.0.0.1:{PORT}" }
+    { "name": "MEGA", "type": "mega", "url": "https://mega.nz/folder/PUBFOLD1#EBESExQVFhcYGRobHB0eHw",
+      "api_base": "http://127.0.0.1:{PORT}/mega" }
   ]
 }

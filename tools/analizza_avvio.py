@@ -286,6 +286,23 @@ CONDITIONS = ["eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc", "hi", "ls", "ge", 
 OUTLINE_FUNCTIONS = ["loadStartupMap", "gameMainInitialize", "loadExtraArguments", "_Z6igMainiPPc"]
 
 
+def decode_bitmask(n, imms, immr, regsize):
+    """Costante delle istruzioni logiche con immediato (AND/ORR/EOR)"""
+    combined = (n << 6) | (~imms & 0x3F)
+    length = combined.bit_length() - 1
+    if length < 1:
+        return None
+    levels = (1 << length) - 1
+    s, r = imms & levels, immr & levels
+    esize = 1 << length
+    welem = (1 << (s + 1)) - 1
+    elem = ((welem >> r) | (welem << (esize - r))) & ((1 << esize) - 1)
+    val = 0
+    for i in range(regsize // esize):
+        val |= elem << (i * esize)
+    return val
+
+
 def _fmt(d, depth=0):
     """Descrizione leggibile del valore di un registro"""
     kind = d[0]
@@ -321,6 +338,7 @@ def outline(m, sc, start, end, ranges=None, vtables=None):
     lines = []
     regs = {}  # registro -> indirizzo calcolato con adrp/add
     desc = {}  # registro -> descrizione del valore (per le chiamate indirette)
+    small = end - start <= 32  # funzioni di poche istruzioni: descritte per intero
 
     def d_of(r):
         return desc.get(r, ("arg", r))
@@ -383,17 +401,31 @@ def outline(m, sc, start, end, ranges=None, vtables=None):
                     elif addr in m.relative and m.cstr(m.relative[addr]):
                         text = "testo %r (puntatore) -> x%d" % (m.cstr(m.relative[addr]), rt)
                         desc[rt] = ("glob", repr(m.cstr(m.relative[addr])))
+                    elif size == 3 and addr in m.relative and (
+                            m.relative[addr] in m.objects or m.relative[addr] in m.func_at):
+                        # puntatore a un simbolo (GOT locale): da qui in poi il registro vale quell'indirizzo
+                        tgt = m.relative[addr]
+                        name = _name_of_data(m, tgt)
+                        text = "indirizzo di %s -> x%d" % (name, rt)
+                        desc[rt] = ("addr", name)
+                        if vtables is not None and name.startswith("_ZTV"):
+                            vtables.add(tgt)
+                        regs[rt] = tgt
                     elif m.is_data(addr):
                         name = _name_of_data(m, addr)
                         text = "legge il dato %s -> x%d" % (name, rt)
                         desc[rt] = ("glob", name)
                     else:
                         desc.pop(rt, None)
-                    regs.pop(rt, None)
+                    if not (size == 3 and addr in m.relative and regs.get(rt) == m.relative[addr]):
+                        regs.pop(rt, None)
                 elif m.is_data(addr):
                     text = "scrive %s nel dato %s" % ("0" if rt == 31 else _fmt(d_of(rt)), _name_of_data(m, addr))
             elif load:
                 base = d_of(rn)
+                if small:
+                    text = "legge %d byte da [%s + 0x%X] -> %s%d" % (1 << size, _fmt(base), off,
+                                                                   "x" if size == 3 else "w", rt)
                 if size == 3:
                     if base[0] == "load" and base[2] == 0:
                         desc[rt] = ("method", base[1], off)
@@ -435,6 +467,20 @@ def outline(m, sc, start, end, ranges=None, vtables=None):
         elif (insn & 0x7F00001F) == 0x7100001F:  # CMP immediato
             imm = ((insn >> 10) & 0xFFF) << (12 if (insn >> 22) & 1 else 0)
             text = "confronta %s%d con %d" % ("x" if insn >> 31 else "w", (insn >> 5) & 31, imm)
+        elif (insn & 0x7FE0FFE0) == 0x2A0003E0:  # MOV w, w (ORR con wzr)
+            rd, rm = insn & 31, (insn >> 16) & 31
+            if small or rd < 8:
+                text = "%s%d = %s" % ("x" if insn >> 31 else "w", rd,
+                                      "0" if rm == 31 else _fmt(d_of(rm)))
+            desc[rd] = ("glob", "0") if rm == 31 else d_of(rm)
+            regs.pop(rd, None)
+        elif (insn & 0x7F8003E0) == 0x320003E0:  # MOV con costante a maschera (ORR immediata con wzr)
+            rd = insn & 31
+            val = decode_bitmask((insn >> 22) & 1, (insn >> 10) & 0x3F, (insn >> 16) & 0x3F, 64 if insn >> 31 else 32)
+            if small or rd < 8:
+                text = "%s%d = %s" % ("x" if insn >> 31 else "w", rd, "?" if val is None else str(val))
+            desc[rd] = ("glob", str(val))
+            regs.pop(rd, None)
         elif (insn & 0x7F800000) == 0x52800000:  # MOV immediato
             imm = ((insn >> 5) & 0xFFFF) << (16 * ((insn >> 21) & 3))
             if (insn & 31) < 8:
@@ -518,19 +564,20 @@ def search_functions(m, sc, patterns):
     return out
 
 
-CONFIG_WORDS = ["MAP", "filename", "checkpoint", "INIT", "debugGameMode", "PRINT_CONTROL", "PrintToFile",
-                "ram:/alchemy.xml", "alchemy.xml", "build", "version", "debug"]
-CONFIG_PARTS = ("alchemy", "registry", ".xml", ".ini", ".cfg", "app:/", "rom:/", "ram:/", "host:/", "config")
-CONFIG_NAMES = ("Config", "Registry", "Alchemy", "alchemy", "Ini", "Settings")
-CONFIG_VERBS = ("load", "read", "parse", "init", "open", "file", "instance", "create", "get", "set", "find")
+CONFIG_WORDS = ["MAP", "filename", "checkpoint", "INIT", "debugGameMode", "debug", "release", "final", "retail",
+                "config", "Config", "xml", ".xml", "settings", "game", "ram:/alchemy.xml"]
+PATH_PARTS = (".xml", ".ini", ".cfg", ".txt", ".igx", ".json", "app:/", "rom:/", "ram:/", "host:/", "data:/",
+              "sd:/", "save:/", "cache:/", "alchemy:", "%s")
+CONFIG_CLASSES = ("13CConfigSystem", "18CBuildConfigSystem")
 
 
 def config_report(m, sc):
-    """Da dove viene la configurazione letta da loadStartupMap (sezione MAP, chiave filename)"""
+    """Da dove viene la configurazione letta da loadStartupMap (sezione MAP, chiave filename):
+    classe CConfigSystem, chi la carica e con quale file"""
     out = ["CONFIGURAZIONE DEL GIOCO (solo nomi e testi)", "ID build: %s" % m.build_id, ""]
     fn = lambda pc: m.function_of(pc) or "?"  # noqa: E731
 
-    # testi da cercare: parole esatte e testi che contengono certe parti
+    # testi: parole esatte e percorsi di file
     targets = {}
     for word in CONFIG_WORDS:
         w = word.encode() + b"\0"
@@ -541,76 +588,142 @@ def config_report(m, sc):
                 break
             targets[k] = word
             k += 1
-    extra = []
-    for mt in re.finditer(rb"[\x20-\x7e]{3,200}\0", bytes(m.mem[m.ro[0]:m.data[1]])):
+    paths = []
+    for mt in re.finditer(rb"[\x20-\x7e]{2,200}\0", bytes(m.mem[m.ro[0]:m.data[1]])):
         text = mt.group()[:-1].decode("ascii")
-        low = text.lower()
-        if any(part in low for part in CONFIG_PARTS) and not text.startswith("_Z"):
+        if any(part in text.lower() for part in PATH_PARTS) and " " not in text and not text.startswith("_Z"):
             addr = m.ro[0] + mt.start()
-            if addr not in targets and len(extra) < 600:
+            if addr not in targets:
                 targets[addr] = text
-                extra.append(text)
+                paths.append(text)
 
-    roots = [f for f in m.funcs if "TheConfig" in f[2] or "TheFinalConfig" in f[2]][:12]
-    root_set = {f[0]: f[2] for f in roots}
-    root_globals = {}
-    for start, end, name in roots:
-        def on_root_ref(pc, addr, name=name):
-            if m.is_data(addr):
-                root_globals.setdefault(addr, set()).add(name)
-        sc.scan(start, end, on_root_ref)
+    cfg_funcs = [f for f in m.funcs if any(c in f[2] for c in CONFIG_CLASSES)]
+    cfg_starts = {f[0]: f[2] for f in cfg_funcs}
 
     print("Scansione del codice (puo' richiedere un paio di minuti)...", file=sys.stderr)
-    users, gusers, callers = {}, {}, {}
+    users, callers = {}, {}
 
     def on_ref(pc, addr):
         if addr in targets:
             users.setdefault(targets[addr], set()).add(fn(pc))
         elif addr in m.relative and m.relative[addr] in targets:
             users.setdefault(targets[m.relative[addr]], set()).add("(tabella) " + fn(pc))
-        if addr in root_globals:
-            gusers.setdefault(addr, set()).add(fn(pc))
+        elif addr in m.relative and m.relative[addr] in cfg_starts:  # indirizzo di funzione in una tabella
+            callers.setdefault(cfg_starts[m.relative[addr]], set()).add("(indirizzo) " + fn(pc))
 
     def on_call(pc, target):
-        if target in root_set:
-            callers.setdefault(root_set[target], set()).add(fn(pc))
+        if target in cfg_starts:
+            callers.setdefault(cfg_starts[target], set()).add(fn(pc))
 
     sc.scan(m.text[0], m.text[1] & ~3, on_ref, on_call)
 
     vtables = set()
-    shown = set()
 
-    def show(start, end, name, title=None):
-        if name in shown:
-            return
-        shown.add(name)
+    def by_name(name):
+        for f in m.funcs:
+            if f[2] == name:
+                return f
+        return None
+
+    def show(f, ranges=None, limit=12000):
+        start, end, name = f
         out.append("")
-        out.append(title or "%s (%d byte)" % (name, end - start))
-        if end - start <= 12000:
-            out.extend(outline(m, sc, start, end, vtables=vtables))
+        out.append("%s (%d byte)" % (name, end - start))
+        if end - start <= limit:
+            out.extend(outline(m, sc, start, end, ranges=ranges, vtables=vtables))
         else:
             out.append("   (troppo lunga, non riportata)")
 
-    out.append("=== TheConfig / TheFinalConfig ===")
-    if not roots:
+    out.append("=== CConfigSystem: funzioni e chi le chiama ===")
+    if not cfg_funcs:
         out.append("nessuna funzione trovata")
-    for start, end, name in roots:
-        out.append("%s: chiamata da %d funzioni" % (name, len(callers.get(name, ()))))
-    for start, end, name in roots:
-        show(start, end, name)
+    for start, end, name in sorted(cfg_funcs, key=lambda f: f[2]):
+        who = sorted(callers.get(name, ()))
+        out.append("%s (%d byte): %s" % (name, end - start, ", ".join(who[:20]) or "nessuna chiamata diretta"))
+
     out.append("")
-    out.append("--- dati globali usati da queste funzioni e chi altro li usa ---")
-    others = []
-    for addr in sorted(root_globals):
-        who = sorted(gusers.get(addr, set()) - set(root_set.values()))
-        out.append("%s (usato da %s): %s" % (_name_of_data(m, addr), ", ".join(sorted(root_globals[addr])),
-                                             ", ".join(who[:30]) or "nessun altro"))
-        others.extend(who)
-    for name in sorted(set(others), key=lambda n: (len(n), n))[:10]:
-        for start, end, n in m.funcs:
-            if n == name:
-                show(start, end, n)
-                break
+    out.append("=== TABELLE VIRTUALI DI CConfigSystem (offset del metodo -> funzione) ===")
+    for addr, name in sorted(m.objects.items()):
+        if name.startswith("_ZTV") and any(c in name for c in CONFIG_CLASSES):
+            out.append(name)
+            out.extend(vtable_entries(m, addr, 64))
+
+    out.append("")
+    out.append("=== SCHEMA DELLE FUNZIONI DI CConfigSystem ===")
+    for f in sorted(cfg_funcs, key=lambda f: f[2]):
+        show(f, limit=6000)
+
+    out.append("")
+    out.append("=== CHI CARICA LA CONFIGURAZIONE (chiamanti di Load, Reload e dei costruttori) ===")
+    loaders = set()
+    for start, end, name in cfg_funcs:
+        if any(k in name for k in ("4Load", "6Reload", "C1E", "C2E", "6GetXml")):
+            loaders.update(c for c in callers.get(name, ()) if not c.startswith("(") and
+                           not any(k in c for k in CONFIG_CLASSES))
+    for name in sorted(loaders, key=lambda n: (len(n), n))[:12]:
+        f = by_name(name)
+        if f:
+            show(f)
+
+    out.append("")
+    out.append("=== gameMainInitialize: parte con TheConfig ===")
+    f = next(iter(m.find_functions("_Z18gameMainInitializeiPPc")), None)
+    if f:
+        out.append(f[2])
+        out.extend(outline(m, sc, f[0], f[1], ranges=[(0xE0, 0x1A0), (0x270, 0x2A0)], vtables=vtables))
+    out.append("")
+    out.append("=== TheConfig ===")
+    for f in m.find_functions("TheConfig")[:3]:
+        show(f)
+    out.append("")
+    out.append("=== loadStartupMap: parte che legge la configurazione ===")
+    for f in m.find_functions("loadStartupMap")[:1]:
+        out.append(f[2])
+        out.extend(outline(m, sc, f[0], f[1], ranges=[(0x80, 0x120), (0x480, 0x500), (0x6C0, 0x700)],
+                           vtables=vtables))
+
+    out.append("")
+    out.append("=== ALTRE TABELLE VIRTUALI USATE ===")
+    for addr in sorted(vtables)[:12]:
+        name = _name_of_data(m, addr)
+        if any(c in name for c in CONFIG_CLASSES):
+            continue
+        out.append(name)
+        out.extend(vtable_entries(m, addr, 64))
+
+    out.append("")
+    out.append("=== igRegistry: lettura dei file XML ===")
+    reg_names = sorted({f[2] for f in m.funcs if "10igRegistry" in f[2]}, key=lambda n: (len(n), n))
+    out.append("funzioni: " + ", ".join(reg_names[:80]))
+    keys = ("4read", "4load", "7promote", "8getValueEPKcRNS_11igStringBuf", "find", "Node", "parse", "merge")
+    for name in [n for n in reg_names if any(k in n for k in keys)][:14]:
+        f = by_name(name)
+        if f:
+            show(f, limit=6000)
+
+    out.append("")
+    out.append("=== igFileContext: percorsi senza dispositivo (es. 'debug.xml') ===")
+    fc_names = sorted({f[2] for f in m.funcs if "13igFileContext" in f[2]}, key=lambda n: (len(n), n))
+    out.append("funzioni: " + ", ".join(fc_names[:120]))
+    keys = ("Default", "default", "resolve", "Resolve", "fixup", "Fixup", "expand", "Expand", "Root", "root",
+            "getDevice", "Current", "Working", "Mount", "mount")
+    for name in [n for n in fc_names if any(k in n for k in keys)][:10]:
+        f = by_name(name)
+        if f:
+            show(f, limit=4000)
+
+    out.append("")
+    out.append("=== XML incorporati nel programma (inizio) ===")
+    found = 0
+    for mt in re.finditer(rb"<\?xml[\x09\x0a\x0d\x20-\x7e]{0,1200}", bytes(m.mem[m.ro[0]:m.data[1]])):
+        text = mt.group().decode("ascii")
+        out.append("--- a 0x%X ---" % (m.ro[0] + mt.start()))
+        out.extend("   " + line for line in text[:800].splitlines()[:25])
+        found += 1
+        if found >= 6:
+            break
+    if not found:
+        out.append("nessuno")
 
     out.append("")
     out.append("=== TESTI: chi li usa ===")
@@ -618,44 +731,12 @@ def config_report(m, sc):
         who = sorted(users.get(word, ()))
         out.append("'%s': %s" % (word, ", ".join(who[:25]) + (" ... (%d)" % len(who) if len(who) > 25 else "")
                                  if who else "nessuno"))
-    for text in extra:
+    out.append("")
+    out.append("--- percorsi di file e formati (con chi li usa) ---")
+    for text in paths:
         who = sorted(users.get(text, ()))
         if who:
-            out.append("'%s': %s" % (text, ", ".join(who[:12]) + (" ... (%d)" % len(who) if len(who) > 12 else "")))
-
-    out.append("")
-    out.append("=== FUNZIONI CHE USANO I FILE DI CONFIGURAZIONE ===")
-    file_users = set()
-    for text in ["ram:/alchemy.xml", "alchemy.xml"] + [t for t in extra if "alchemy" in t.lower() or
-                                                       t.lower().endswith((".xml", ".ini", ".cfg"))]:
-        file_users.update(u for u in users.get(text, ()) if not u.startswith("(tabella)"))
-    for name in sorted(file_users, key=lambda n: (len(n), n))[:12]:
-        for start, end, n in m.funcs:
-            if n == name:
-                show(start, end, n)
-                break
-
-    out.append("")
-    out.append("=== loadStartupMap: parte che legge la configurazione ===")
-    for start, end, name in m.find_functions("loadStartupMap")[:1]:
-        out.append(name)
-        out.extend(outline(m, sc, start, end, ranges=[(0, 0x140), (0x480, 0x500), (0x6C0, 0x700)], vtables=vtables))
-
-    out.append("")
-    out.append("=== TABELLE VIRTUALI USATE (offset del metodo -> funzione) ===")
-    for addr in sorted(vtables)[:20]:
-        out.append("%s" % _name_of_data(m, addr))
-        out.extend(vtable_entries(m, addr))
-
-    out.append("")
-    out.append("=== NOMI DI FUNZIONI (configurazione e registro) ===")
-    names = [f[2] for f in m.funcs if any(c in f[2] for c in CONFIG_NAMES)
-             and any(v in f[2].lower() for v in CONFIG_VERBS)]
-    names = sorted(set(names), key=lambda n: (len(n), n))
-    for name in names[:400]:
-        out.append("  " + name)
-    if len(names) > 400:
-        out.append("  ... altri %d" % (len(names) - 400))
+            out.append("'%s': %s" % (text, ", ".join(who[:8]) + (" ... (%d)" % len(who) if len(who) > 8 else "")))
     return out
 
 

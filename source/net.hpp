@@ -22,12 +22,20 @@ void setCaFile(const std::string& path);
 bool get(const std::string& url, std::string& body, long& status, std::string& err,
          std::string* effectiveUrl = nullptr);
 
+// Richiesta POST con corpo JSON; la risposta finisce in body (anche con stato HTTP >= 400)
+bool post(const std::string& url, const std::string& data, std::string& body, long& status,
+          std::string& err);
+
 // Dimensione (Content-Length) di ogni URL con richieste HEAD; -1 se sconosciuta.
 // Si ferma al primo errore di connessione per non bloccare l'elenco.
 std::vector<int64_t> contentLengths(const std::vector<std::string>& urls);
 
+// Trasforma i dati ricevuti prima di scriverli (es. decifratura), nell'ordine in cui arrivano
+using Transform = std::function<void(char* data, size_t size)>;
+
 // Scarica un file su disco. In caso di errore il file parziale viene eliminato.
 bool download(const std::string& url, const std::string& path, uint64_t expectedSize,
-              const Progress& progress, uint64_t& written, std::string& err);
+              const Progress& progress, uint64_t& written, std::string& err,
+              const Transform* transform = nullptr);
 
 }  // namespace net

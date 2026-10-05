@@ -1,4 +1,5 @@
-# installa un livello, torna all'elenco e lo avvia dalla scheda INSTALLATI (ZR)
+# con la patch installata: installa, torna all'elenco e avvia il livello dalla scheda INSTALLATI (ZR)
+# uso: --prepare 'mkdir -p sdmc:/atmosphere/exefs_patches/nst_avvio_livello && echo x > sdmc:/atmosphere/exefs_patches/nst_avvio_livello/29E1A37D84227147A50A18D055FBB032.ips'
 . A . A . X . A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 B . R . SNAP
 ZR . SNAP

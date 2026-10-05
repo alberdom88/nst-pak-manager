@@ -9,7 +9,7 @@ PORT=18765
 
 gcc -c -O1 -o "$WORK/cJSON.o" source/cJSON.c
 g++ -std=gnu++17 -O1 -Wall -Wextra -fno-exceptions -fno-rtti -I"$CURL_INC" \
-    -o "$WORK/test_core" tests/test_core.cpp source/core.cpp source/net.cpp source/util.cpp "$WORK/cJSON.o" \
+    -o "$WORK/test_core" tests/test_core.cpp source/core.cpp source/mega.cpp source/net.cpp source/util.cpp "$WORK/cJSON.o" \
     $(ls /usr/lib/*/libcurl.so.4 2>/dev/null | head -1 || echo -lcurl)
 
 mkdir -p "$WORK/www" "$WORK/sd"

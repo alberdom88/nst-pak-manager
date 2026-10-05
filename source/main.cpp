@@ -16,7 +16,7 @@
 #include "net.hpp"
 #include "util.hpp"
 
-#define APP_VERSION_STR "1.4.0"
+#define APP_VERSION_STR "1.6.0"
 
 static const char* ROOT = "sdmc:";
 static const int COLS = 79;  // la console e' 80x45: lasciamo libera l'ultima colonna
@@ -206,6 +206,7 @@ struct App {
     std::set<std::string> sel;                // selezione nella scheda installati
     std::string status;
     const char* statusColor = nullptr;
+    std::string directLevel;  // livello dell'avvio diretto attivo (debug.xml), vuoto se spento
 };
 
 static std::string originalsPath() { return appDirFor(ROOT) + "/originali.txt"; }
@@ -219,6 +220,7 @@ static void refreshLocal(App& a) {
     a.present.clear();
     for (const std::string& f : util::listFiles(a.mgr->modDir())) a.present.insert(util::toLower(f));
     a.game = gameRunning();
+    a.directLevel = a.mgr->directLaunchLevel();
     for (int t = 0; t < 2; t++) {
         int n = t == 0 ? (int)a.remote.size() : (int)a.installed.size();
         if (a.cursor[t] >= n) a.cursor[t] = n > 0 ? n - 1 : 0;
@@ -262,8 +264,11 @@ static void draw(App& a) {
                 (a.cfg.sources.size() > 1 ? "    [-] cambia" : ""));
     std::string t0 = "REMOTI (" + std::to_string(a.remote.size()) + ")";
     std::string t1 = "INSTALLATI (" + std::to_string(a.installed.size()) + ")";
-    printf("\x1b[3;2H%s %s %s   %s %s %s\x1b[K", a.tab == 0 ? C_REV : C_DIM, t0.c_str(), C_RESET,
-           a.tab == 1 ? C_REV : C_DIM, t1.c_str(), C_RESET);
+    std::string direct;
+    if (!a.directLevel.empty())
+        direct = "avvio diretto: " + a.directLevel.substr(a.directLevel.rfind('/') + 1);
+    printf("\x1b[3;2H%s %s %s   %s %s %s   %s%s%s\x1b[K", a.tab == 0 ? C_REV : C_DIM, t0.c_str(), C_RESET,
+           a.tab == 1 ? C_REV : C_DIM, t1.c_str(), C_RESET, C_OK, fit(direct, 44).c_str(), C_RESET);
     line(4, std::string(COLS, '-'), C_DIM);
 
     int n = a.tab == 0 ? (int)a.remote.size() : (int)a.installed.size();
@@ -332,7 +337,7 @@ static void draw(App& a) {
         line(44, " A scegli originale  Y suggeriti/nessuno  X installa  ZR aggiorna", C_TITLE);
     else
         line(44, " A seleziona  Y tutti/nessuno  X ripristina originale  ZR entra nel livello", C_TITLE);
-    printf("\x1b[45;1H%s L/R scheda  Sinistra/Destra pagina  - sorgente  ZL avvia gioco  + esci%s\x1b[K", C_TITLE, C_RESET);
+    printf("\x1b[45;1H%s L/R scheda  Sinistra/Destra pagina  - sorgente  ZL avvia dal menu  + esci%s\x1b[K", C_TITLE, C_RESET);
 }
 
 // ---------------------------------------------------------------- scelta dell'originale
@@ -514,7 +519,9 @@ static void chooseSource(App& a) {
         line(2, "Scegli la sorgente", C_TITLE);
         for (size_t i = 0; i < a.cfg.sources.size() && i < 36; i++) {
             const SourceConfig& s = a.cfg.sources[i];
-            std::string text = "  " + fit(s.name, 30) + " " + s.type + "  " + (s.type == "http" ? s.url : "");
+            // per MEGA solo la cartella: la chiave del link non si mostra
+            std::string where = s.type == "http" ? s.url : s.url.substr(0, s.url.find('#'));
+            std::string text = "  " + fit(s.name, 30) + " " + fit(s.type, 4) + "  " + where;
             drawRow((int)i + 4, text, (int)i == cur, nullptr);
         }
         line(44, "A: scegli     B: annulla", C_TITLE);
@@ -556,12 +563,19 @@ static void clearLaunchArguments() {
     if (g_ldrOk) ldrShellFlushArguments();
 }
 
+// Spegne l'avvio diretto: il gioco torna ad aprirsi dal menu
+static void clearDirectLaunch(App& a) {
+    clearLaunchArguments();
+    a.mgr->clearDirectLaunch();
+    a.directLevel.clear();
+}
+
 // Chiude l'app e avvia il gioco, cosi' carica i file appena installati.
-// keepArgs: lascia gli argomenti impostati da launchLevel (avvio diretto di un livello)
-static void launchGame(App& a, bool keepArgs = false) {
-    if (!keepArgs) clearLaunchArguments();
+// keepDirect: lascia l'avvio diretto preparato da launchLevel (altrimenti il gioco parte dal menu)
+static void launchGame(App& a, bool keepDirect = false) {
+    if (!keepDirect) clearDirectLaunch(a);
     if (gameRunning()) {
-        clearLaunchArguments();
+        clearDirectLaunch(a);
         inform("Gioco gia' aperto",
                {"Un gioco e' aperto in background: chiudilo dal menu HOME e poi avvialo,",
                 "altrimenti continua a usare i file di prima."},
@@ -571,7 +585,7 @@ static void launchGame(App& a, bool keepArgs = false) {
     u64 tid = strtoull(a.cfg.titleId.c_str(), nullptr, 16);
     Result rc = appletRequestLaunchApplication(tid, NULL);
     if (R_FAILED(rc)) {
-        clearLaunchArguments();
+        clearDirectLaunch(a);
         char code[16];
         snprintf(code, sizeof(code), "0x%X", (unsigned)rc);
         inform("Avvio non riuscito",
@@ -583,37 +597,42 @@ static void launchGame(App& a, bool keepArgs = false) {
     g_exit = true;  // l'app deve chiudersi perche' il gioco parta
 }
 
-// Avvia il gioco direttamente nel livello contenuto in un .pak installato (opzione -om del gioco)
+// Avvia il gioco direttamente nel livello contenuto in un .pak installato. Il gioco legge
+// debug.xml (serve la patch dell'eseguibile, vedi tools/crea_avvio_livello.py); in piu', se
+// il servizio ldr:shel di Atmosphere e' disponibile, gli passa anche l'opzione -om.
 static void launchLevel(App& a, const std::string& pakName) {
     std::vector<std::string> ids;
     if (!pakLevelIds(a.mgr->modDir() + "/" + pakName, ids) || ids.empty()) {
         inform("Nessun livello", {pakName + " non contiene un livello da avviare."}, C_WARN);
         return;
     }
-    if (!g_ldrOk) {
-        inform("Avvio diretto non disponibile",
-               {"Il servizio di sistema per gli argomenti di avvio (ldr:shel) non e' accessibile.",
-                "Avvia il gioco normalmente con ZL."},
-               C_WARN);
-        return;
-    }
     if (gameRunning()) {
         inform("Gioco gia' aperto", {"Un gioco e' aperto in background: chiudilo dal menu HOME e riprova."}, C_WARN);
         return;
     }
-    std::string args = launchArguments(a.cfg.launchArgs, ids[0]);
-    u64 tid = strtoull(a.cfg.titleId.c_str(), nullptr, 16);
-    Result rc = ldrShellSetProgramArguments(tid, args.c_str(), args.size() + 1);
-    if (R_FAILED(rc)) {
-        char code[16];
-        snprintf(code, sizeof(code), "0x%X", (unsigned)rc);
-        inform("Avvio diretto non riuscito",
-               {std::string("Il sistema ha rifiutato gli argomenti di avvio (errore ") + code + ").",
-                "Avvia il gioco normalmente con ZL."},
-               C_WARN);
+    const std::string& level = ids[0];
+    if (!a.mgr->directLaunchPatchInstalled()) {
+        if (!confirm("Patch per l'avvio diretto non trovata",
+                     {"Per entrare nel livello il gioco legge il file debug.xml, che la versione in "
+                      "commercio ignora senza una piccola patch dell'eseguibile (si installa una volta sola).",
+                      "",
+                      "Creala sul PC con tools/crea_avvio_livello.py e copia la cartella \"sd\" che crea "
+                      "nella radice della SD (la patch finisce in " + std::string(DIRECT_LAUNCH_PATCH_DIR) + ").",
+                      "",
+                      "Senza la patch il gioco probabilmente si aprira' dal menu. Avviare lo stesso?"}))
+            return;
+    }
+    std::string err;
+    if (!a.mgr->setDirectLaunch(level, err)) {
+        inform("Avvio diretto non riuscito", {err}, C_WARN);
         return;
     }
-    a.status = "Avvio diretto: " + ids[0];
+    a.directLevel = level;
+    if (g_ldrOk && !a.cfg.launchArgs.empty()) {
+        std::string args = launchArguments(a.cfg.launchArgs, level);
+        ldrShellSetProgramArguments(strtoull(a.cfg.titleId.c_str(), nullptr, 16), args.c_str(), args.size() + 1);
+    }
+    a.status = "Avvio diretto: " + level;
     launchGame(a, true);
 }
 
@@ -773,8 +792,15 @@ static void restoreSelected(App& a) {
     int ok = 0;
     for (const InstalledFile& f : todo) {
         std::string err, note;
+        std::vector<std::string> ids;
+        bool direct = !a.directLevel.empty() && pakLevelIds(a.mgr->modDir() + "/" + f.name, ids) &&
+                      std::find(ids.begin(), ids.end(), a.directLevel) != ids.end();
         if (a.mgr->restore(f.name, err, note)) {
             ok++;
+            if (direct) {
+                clearDirectLaunch(a);
+                note += std::string(note.empty() ? "" : "; ") + "avvio diretto spento";
+            }
             report.push_back("OK       " + f.name + (note.empty() ? "" : "  (" + note + ")"));
         } else {
             report.push_back("ERRORE   " + f.name + ": " + err);
@@ -808,7 +834,7 @@ static bool loadConfig(Config& cfg) {
                "  " + path, "",
                "Aprilo dal PC (o via FTP) e inserisci le tue sorgenti:",
                "- \"http\": indirizzo di una cartella web o di un manifest .json",
-               "- \"gdrive\": link della cartella Google Drive condivisa e chiave API", "",
+               "- \"mega\": link di una cartella MEGA condivisa (con la chiave dopo #)", "",
                "Metti nella stessa cartella anche originali.txt (elenco dei .pak del gioco).",
                "Poi riavvia l'app."});
         return false;

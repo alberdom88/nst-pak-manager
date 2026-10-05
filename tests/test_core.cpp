@@ -1,10 +1,13 @@
 // Test del core su PC (Linux): sorgenti remote, installazione, backup, ripristino.
+#include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <cstdlib>
 #include <string>
 #include <vector>
 
 #include "../source/core.hpp"
+#include "../source/mega.hpp"
 #include "../source/util.hpp"
 
 static int g_fail = 0, g_pass = 0;
@@ -61,9 +64,56 @@ int main(int argc, char** argv) {
     CHECK(!isValidPakName("a/b.pak"));
     CHECK(!isValidPakName(".pak"));
     CHECK(!isValidPakName("note.txt"));
-    CHECK(driveFolderId("https://drive.google.com/drive/folders/ABC_12-x?usp=sharing") == "ABC_12-x");
-    CHECK(driveFolderId("https://drive.google.com/open?id=XYZ&foo=1") == "XYZ");
-    CHECK(driveFolderId("  RAWID ") == "RAWID");
+    // ---------- MEGA: AES, CTR, base64 e link
+    {
+        uint8_t key[16], pt[16], ct[16], back[16];
+        for (int i = 0; i < 16; i++) {
+            key[i] = (uint8_t)i;
+            pt[i] = (uint8_t)(i * 0x11);
+        }
+        mega::Aes128 aes(key);  // vettore di prova FIPS-197
+        aes.encrypt(pt, ct);
+        static const uint8_t expect[16] = {0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30,
+                                           0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a};
+        CHECK(memcmp(ct, expect, 16) == 0);
+        aes.decrypt(ct, back);
+        CHECK(memcmp(back, pt, 16) == 0);
+        // CTR a pezzi di dimensioni qualsiasi = CTR in un colpo solo
+        std::string data(1000, '\0'), once, pieces;
+        for (size_t i = 0; i < data.size(); i++) data[i] = (char)(i * 31 + 7);
+        uint8_t iv[16] = {1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0xFE};
+        once = data;
+        mega::Ctr c1(key, iv);
+        c1.crypt((uint8_t*)&once[0], once.size());
+        pieces = data;
+        mega::Ctr c2(key, iv);
+        size_t pos = 0, step = 1;
+        while (pos < pieces.size()) {
+            size_t n = std::min(step, pieces.size() - pos);
+            c2.crypt((uint8_t*)&pieces[pos], n);
+            pos += n;
+            step = step * 3 % 41 + 1;
+        }
+        CHECK(once == pieces && once != data);
+        mega::Ctr c3(key, iv);
+        c3.crypt((uint8_t*)&once[0], once.size());
+        CHECK(once == data);
+
+        CHECK(mega::b64decode("AAEC") == std::string("\0\1\2", 3));
+        CHECK(mega::b64decode("_-8") == std::string("\xff\xef", 2));
+        mega::Link l;
+        std::string e;
+        CHECK(mega::parseLink(" https://mega.nz/folder/AbC123xy#EBESExQVFhcYGRobHB0eHw ", l, e) &&
+              l.folder == "AbC123xy" && l.key.size() == 16 && l.sub.empty());
+        CHECK(mega::parseLink("https://mega.nz/folder/AbC#EBESExQVFhcYGRobHB0eHw/folder/SUB1", l, e) &&
+              l.folder == "AbC" && l.sub == "SUB1");
+        CHECK(mega::parseLink("https://mega.nz/#F!AbC!EBESExQVFhcYGRobHB0eHw!SUB2", l, e) &&
+              l.folder == "AbC" && l.sub == "SUB2" && l.key[0] == 0x10);
+        CHECK(!mega::parseLink("https://mega.nz/file/AbC#EBESExQVFhcYGRobHB0eHw", l, e) &&
+              e.find("singolo file") != std::string::npos);
+        CHECK(!mega::parseLink("https://mega.nz/folder/AbC", l, e) && e.find("chiave") != std::string::npos);
+        CHECK(!mega::parseLink("https://example.com/x", l, e));
+    }
     {
         std::vector<RemoteFile> v;
         parseDirectoryListing(
@@ -80,11 +130,20 @@ int main(int argc, char** argv) {
         Config c;
         std::string err;
         CHECK(parseConfig(defaultConfigJson(), c, err));
-        CHECK(c.sources.size() == 2 && c.sources[1].type == "gdrive");
+        CHECK(c.sources.size() == 2 && c.sources[1].type == "mega");
         CHECK(c.titleId == "0100D1B006744000");
         CHECK(!parseConfig("{\"sources\":[]}", c, err));
         CHECK(!parseConfig("{\"title_id\":\"xyz\",\"sources\":[{\"url\":\"http://a/\"}]}", c, err));
-        CHECK(!parseConfig("{\"sources\":[{\"type\":\"gdrive\",\"folder\":\"x\"}]}", c, err));
+        CHECK(!parseConfig("{\"sources\":[{\"type\":\"gdrive\",\"url\":\"x\"}]}", c, err) &&
+              err.find("Google Drive") != std::string::npos);
+        // link MEGA incompleto: la configurazione si legge, l'errore compare nell'elenco della sorgente
+        CHECK(parseConfig("{\"sources\":[{\"type\":\"mega\",\"url\":\"https://mega.nz/folder/X\"}]}", c, err));
+        {
+            std::vector<RemoteFile> v;
+            CHECK(!listSource(c.sources[0], v, err) && err.find("chiave") != std::string::npos);
+        }
+        CHECK(parseConfig("{\"sources\":[{\"url\":\"https://mega.nz/folder/X#EBESExQVFhcYGRobHB0eHw\"}]}", c, err) &&
+              c.sources[0].type == "mega" && c.sources[0].name == "MEGA");
         CHECK(!parseConfig("{ rotto", c, err));
         CHECK(parseConfig("{\"title_id\":\"0100d1b006744000\",\"sources\":[{\"url\":\"http://a/\"}]}", c, err));
         CHECK(c.titleId == "0100D1B006744000" && c.sources[0].type == "http" && c.sources[0].name == "http://a/");
@@ -151,21 +210,34 @@ int main(int argc, char** argv) {
     CHECK(byName(man, "wrong_size.pak") && byName(man, "wrong_size.pak")->size == 9999);
     CHECK(byName(man, "../evil.pak") == nullptr);
 
-    // ---------- sorgente Google Drive (finta API)
-    std::vector<RemoteFile> drive;
-    SourceConfig driveSrc;
-    driveSrc.name = "Drive";
-    driveSrc.type = "gdrive";
-    driveSrc.folder = "https://drive.google.com/drive/folders/FOLDER123?usp=sharing";
-    driveSrc.apiKey = "TESTKEY";
-    driveSrc.apiBase = base;
-    CHECK(listSource(driveSrc, drive, err));
-    CHECK(drive.size() == 3);  // 2 pagine, cartelle e .txt esclusi
-    CHECK(byName(drive, "L102_Jungle.pak") && byName(drive, "L102_Jungle.pak")->size == 1234);
-    SourceConfig badKey = driveSrc;
-    badKey.apiKey = "SBAGLIATA";
-    CHECK(!listSource(badKey, none, err));
-    CHECK(err.find("API key not valid") != std::string::npos);
+    // ---------- sorgente MEGA (finta API: la prima richiesta risponde "occupato")
+    std::vector<RemoteFile> megaFiles;  // usati anche nei test di installazione
+    SourceConfig megaSrc;
+    megaSrc.name = "MEGA";
+    megaSrc.type = "mega";
+    megaSrc.url = "https://mega.nz/folder/PUBFOLD1#EBESExQVFhcYGRobHB0eHw";
+    megaSrc.apiBase = base + "/mega";
+    CHECK(listSource(megaSrc, megaFiles, err));
+    CHECK(megaFiles.size() == 3);  // .txt e file della sottocartella esclusi
+    CHECK(megaFiles.size() == 3 && megaFiles[0].name == "L101_NSanityBeach.pak" && megaFiles[1].name == "L102_Jungle.pak" &&
+          megaFiles[2].name == "update.pak");
+    CHECK(byName(megaFiles, "L102_Jungle.pak") && byName(megaFiles, "L102_Jungle.pak")->size == 1234 &&
+          byName(megaFiles, "L102_Jungle.pak")->megaKey.size() == 32);
+    {
+        SourceConfig sub = megaSrc;
+        sub.url += "/folder/SUB00001";
+        std::vector<RemoteFile> v;
+        CHECK(listSource(sub, v, err) && v.size() == 1 && v[0].name == "L201_Sub.pak");
+        SourceConfig wrongKey = megaSrc;
+        wrongKey.url = "https://mega.nz/folder/PUBFOLD1#ZGVmZ2hpamtsbW5vcHFycw";
+        CHECK(!listSource(wrongKey, v, err) && err.find("chiave") != std::string::npos);
+        SourceConfig wrongFolder = megaSrc;
+        wrongFolder.url = "https://mega.nz/folder/ALTRA001#EBESExQVFhcYGRobHB0eHw";
+        CHECK(!listSource(wrongFolder, v, err) && err.find("non trovata") != std::string::npos);
+        SourceConfig missing = sub;
+        missing.url = megaSrc.url + "/folder/NOSUB001";
+        CHECK(!listSource(missing, v, err) && err.find("sottocartella") != std::string::npos);
+    }
 
     // ---------- installazione / backup / ripristino
     Config cfg;
@@ -192,16 +264,18 @@ int main(int argc, char** argv) {
     CHECK(m.find("update.pak") && m.find("update.pak")->backup == "update.pak");
 
     // reinstallo da un'altra sorgente: niente secondo backup
-    const RemoteFile* updDrive = byName(drive, "update.pak");
-    CHECK(m.install(*updDrive, updDrive->name, "Drive", noProgress, err));
-    CHECK(slurp(updDest).size() == 5000);
+    const RemoteFile* updMega = byName(megaFiles, "update.pak");
+    CHECK(m.install(*updMega, updMega->name, "MEGA", noProgress, err));
+    CHECK(slurp(updDest).size() == 5000 && slurp(updDest).compare(0, 19, "IGA\x1amega-update.pak") == 0);
+    CHECK(slurp(updDest).compare(4990, 10, slurp(updDest).substr(4990 - 15, 10)) == 0);  // decifrato fino in fondo
     CHECK(util::listFiles(m.backupDir()).size() == 1);
-    CHECK(m.find("update.pak")->source == "Drive" && m.find("update.pak")->backup == "update.pak");
+    CHECK(m.find("update.pak")->source == "MEGA" && m.find("update.pak")->backup == "update.pak");
 
     // file nuovo, senza nulla da salvare; nome con spazi
     CHECK(m.install(*byName(httpList, "Nome con spazi.pak"), "Nome con spazi.pak", "PC", noProgress, err));
     CHECK(m.find("Nome con spazi.pak") && m.find("Nome con spazi.pak")->backup.empty());
-    CHECK(m.install(*byName(drive, "L101_NSanityBeach.pak"), "L101_NSanityBeach.pak", "Drive", noProgress, err));
+    CHECK(m.install(*byName(megaFiles, "L101_NSanityBeach.pak"), "L101_NSanityBeach.pak", "MEGA", noProgress, err));
+    CHECK(slurp(m.modDir() + "/L101_NSanityBeach.pak").find("mega-L101_NSanityBeach.pak", 69900 - 30) != std::string::npos);
 
     // file remoto con un nome diverso dall'originale da sostituire
     const std::vector<std::string> originals = {"L101_NSanityBeach.pak", "L102_Jungle.pak", "update.pak"};
@@ -272,9 +346,9 @@ int main(int argc, char** argv) {
     CHECK(slurp(updDest) == before && !util::fileExists(updDest + ".part"));
 
     // spazio insufficiente (dimensione dichiarata enorme)
-    RemoteFile huge = *byName(drive, "L102_Jungle.pak");
+    RemoteFile huge = *byName(megaFiles, "L102_Jungle.pak");
     huge.size = 1ull << 50;
-    CHECK(!m.install(huge, huge.name, "Drive", noProgress, err) && err.find("spazio insufficiente") != std::string::npos);
+    CHECK(!m.install(huge, huge.name, "MEGA", noProgress, err) && err.find("spazio insufficiente") != std::string::npos);
 
     // ripristino
     std::string note;
@@ -300,7 +374,7 @@ int main(int argc, char** argv) {
         util::removeFile(state);
         Manager m3(sd, cfg);
         CHECK(m3.load(err, warn) && m3.installed().empty());
-        CHECK(m3.install(*updDrive, updDrive->name, "Drive", noProgress, err));
+        CHECK(m3.install(*updMega, updMega->name, "MEGA", noProgress, err));
         CHECK(m3.find("update.pak")->backup == "update.pak.1");
         CHECK(slurp(m.backupDir() + "/update.pak") == "MOD-PRECEDENTE");
         CHECK(slurp(m.backupDir() + "/update.pak.1").size() == 3000);
@@ -332,6 +406,22 @@ int main(int argc, char** argv) {
         CHECK(launchArguments("nst -om {livello}", ids[0]) == "nst -om crash1/custom_level/custom_level");
         CHECK(launchArguments("{livello} {livello}", "a") == "a a");
         CHECK(launchArguments("nst", "a") == "nst");
+        // avvio diretto con debug.xml
+        CHECK(debugXmlLevel(debugXml(ids[0])) == ids[0]);
+        CHECK(debugXmlLevel("<config><MAP checkpoint='x' filename='a/b/c'/></config>") == "a/b/c");
+        CHECK(debugXmlLevel("<config><INIT debugGameMode=\"1\"/></config>").empty());
+        CHECK(m.romfsDir() + "/archives" == m.modDir());
+        CHECK(m.directLaunchLevel().empty());
+        CHECK(m.setDirectLaunch(ids[0], err) && m.directLaunchLevel() == ids[0]);
+        CHECK(util::fileExists(m.romfsDir() + "/debug.xml"));
+        m.clearDirectLaunch();
+        CHECK(m.directLaunchLevel().empty() && !util::fileExists(m.romfsDir() + "/debug.xml"));
+        CHECK(!m.directLaunchPatchInstalled());
+        util::mkdirs(sd + DIRECT_LAUNCH_PATCH_DIR);
+        spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/LEGGIMI.txt", "x");
+        CHECK(!m.directLaunchPatchInstalled());
+        spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/29E1A37D84227147A50A18D055FBB032.ips", "IPS32EEOF");
+        CHECK(m.directLaunchPatchInstalled());
         std::string note;
         CHECK(m.restore("custom_level.PAK", err, note));
     }

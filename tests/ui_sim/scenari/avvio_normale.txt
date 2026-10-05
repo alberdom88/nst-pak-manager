@@ -1,0 +1,4 @@
+# avvio diretto rimasto attivo (debug.xml): l'intestazione lo segnala, ZL avvia dal menu e lo spegne
+# uso: --prepare 'mkdir -p sdmc:/atmosphere/contents/0100D1B006744000/romfs && echo "<config><MAP filename=\"crash1/l101_nsanitybeach/l101_nsanitybeach\"/></config>" > sdmc:/atmosphere/contents/0100D1B006744000/romfs/debug.xml'
+. SNAP
+ZL . SNAP

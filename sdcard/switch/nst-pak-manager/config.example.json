@@ -7,10 +7,9 @@
       "url": "http://192.168.1.50:8000/"
     },
     {
-      "name": "Google Drive",
-      "type": "gdrive",
-      "folder": "https://drive.google.com/drive/folders/ID_DELLA_CARTELLA",
-      "api_key": "LA_TUA_CHIAVE_API"
+      "name": "MEGA",
+      "type": "mega",
+      "url": "https://mega.nz/folder/ID_CARTELLA#CHIAVE"
     }
   ]
 }

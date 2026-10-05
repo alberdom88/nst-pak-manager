@@ -37,8 +37,9 @@ static std::string describe(CURLcode rc, const char* errbuf, long status) {
         char buf[64];
         snprintf(buf, sizeof(buf), "il server ha risposto HTTP %ld", status);
         std::string s = buf;
-        if (status == 401 || status == 403) s += " (accesso negato: controlla permessi o chiave API)";
+        if (status == 401 || status == 403) s += " (accesso negato: controlla i permessi o il link)";
         if (status == 404) s += " (file o cartella non trovati)";
+        if (status == 509) s += " (quota di trasferimento esaurita: riprova piu' tardi)";
         return s;
     }
     std::string s = curl_easy_strerror(rc);
@@ -87,6 +88,36 @@ bool get(const std::string& url, std::string& body, long& status, std::string& e
     return true;
 }
 
+bool post(const std::string& url, const std::string& data, std::string& body, long& status,
+          std::string& err) {
+    body.clear();
+    status = 0;
+    CURL* c = curl_easy_init();
+    if (!c) {
+        err = "impossibile inizializzare curl";
+        return false;
+    }
+    char errbuf[CURL_ERROR_SIZE] = {0};
+    commonOptions(c, url, errbuf);
+    struct curl_slist* headers = curl_slist_append(nullptr, "Content-Type: application/json");
+    curl_easy_setopt(c, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(c, CURLOPT_POSTFIELDS, data.c_str());
+    curl_easy_setopt(c, CURLOPT_POSTFIELDSIZE, (long)data.size());
+    curl_easy_setopt(c, CURLOPT_ACCEPT_ENCODING, "");
+    curl_easy_setopt(c, CURLOPT_TIMEOUT, 120L);
+    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, writeString);
+    curl_easy_setopt(c, CURLOPT_WRITEDATA, &body);
+    CURLcode rc = curl_easy_perform(c);
+    curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &status);
+    curl_easy_cleanup(c);
+    curl_slist_free_all(headers);
+    if (rc != CURLE_OK) {
+        err = (rc == CURLE_WRITE_ERROR) ? "risposta troppo grande" : describe(rc, errbuf, status);
+        return false;
+    }
+    return true;
+}
+
 static size_t discard(char*, size_t size, size_t nmemb, void*) { return size * nmemb; }
 
 std::vector<int64_t> contentLengths(const std::vector<std::string>& urls) {
@@ -120,11 +151,13 @@ struct DownloadCtx {
     bool writeError = false;
     bool cancelled = false;
     const Progress* progress = nullptr;
+    const Transform* transform = nullptr;
 };
 
 static size_t writeFile(char* ptr, size_t size, size_t nmemb, void* user) {
     DownloadCtx* ctx = (DownloadCtx*)user;
     size_t n = size * nmemb;
+    if (ctx->transform && *ctx->transform) (*ctx->transform)(ptr, n);
     if (fwrite(ptr, 1, n, ctx->f) != n) {
         ctx->writeError = true;
         return 0;
@@ -145,7 +178,7 @@ static int onProgress(void* user, curl_off_t dltotal, curl_off_t dlnow, curl_off
 }
 
 bool download(const std::string& url, const std::string& path, uint64_t expectedSize,
-              const Progress& progress, uint64_t& written, std::string& err) {
+              const Progress& progress, uint64_t& written, std::string& err, const Transform* transform) {
     written = 0;
     CURL* c = curl_easy_init();
     if (!c) {
@@ -155,6 +188,7 @@ bool download(const std::string& url, const std::string& path, uint64_t expected
     DownloadCtx ctx;
     ctx.expected = expectedSize;
     ctx.progress = &progress;
+    ctx.transform = transform;
     ctx.f = fopen(path.c_str(), "wb");
     if (!ctx.f) {
         curl_easy_cleanup(c);

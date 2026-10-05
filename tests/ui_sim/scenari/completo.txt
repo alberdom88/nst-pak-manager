@@ -5,8 +5,8 @@ A . SNAP
 DOWN DOWN A A . SNAP
 X . SNAP
 A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
-A . SNAP
-# scheda installati, poi sorgente Google Drive: Y propone gli abbinamenti ricordati
+B . SNAP
+# scheda installati, poi sorgente MEGA: Y propone gli abbinamenti ricordati
 R . SNAP
 MINUS . SNAP
 DOWN A L Y . SNAP
