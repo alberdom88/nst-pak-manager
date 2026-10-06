@@ -1,15 +1,17 @@
-# senza originali.txt: la scelta propone "stesso nome"
+# A seleziona due file (nome automatico) e X li installa
 . SNAP
 DOWN A . SNAP
-A . SNAP
-DOWN DOWN A A . SNAP
+DOWN DOWN A . SNAP
 X . SNAP
 A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
 B . SNAP
-# scheda installati, poi sorgente MEGA: Y propone gli abbinamenti ricordati
+# scheda installati, poi sorgente MEGA: gli stessi file risultano installati (I)
 R . SNAP
 MINUS . SNAP
-DOWN A L Y . SNAP
+DOWN A L . SNAP
+# B: scelta a mano dell'originale (mostra cosa e' gia' sostituito), poi annulla
+B . SNAP
+B . SNAP
 # ripristina update.pak
 R DOWN X . SNAP
 A . SNAP

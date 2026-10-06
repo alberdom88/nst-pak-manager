@@ -1,0 +1,3 @@
+# Y nella scheda REMOTI: scarica il livello (nome dal file), chiede conferma senza patch e avvia nel livello
+. SNAP Y . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+A . SNAP

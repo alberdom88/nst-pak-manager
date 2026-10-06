@@ -106,8 +106,13 @@ public:
     // Scarica il file remoto, lo controlla e lo installa con il nome target
     // (l'originale del gioco da sostituire). Se nella cartella mod c'era gia' un
     // file target non installato da questa app, viene spostato nella cartella backup.
+    // target vuoto = nome automatico: per un livello quello che ha dentro (l'unico con cui il
+    // gioco lo trova), altrimenti l'originale suggerito o il nome del file remoto.
+    // installedAs riceve il nome usato.
     bool install(const RemoteFile& file, const std::string& target, const std::string& sourceName,
-                 const net::Progress& progress, std::string& err);
+                 const net::Progress& progress, std::string& err, std::string* installedAs = nullptr);
+    // Elenco dei .pak originali (originali.txt): grafia dei nomi automatici e suggerimenti
+    void setOriginals(const std::vector<std::string>& originals) { originals_ = originals; }
     // Livelli nuovi (convertiti con --nuovo): unisce i file update/ del .pak installato all'update.pak
     // originale (copia in originalUpdatePath()) e installa il risultato come update.pak, con backup.
     // registered = false se il livello non ha nulla da registrare (ha il nome di un livello originale).
@@ -132,6 +137,7 @@ public:
 
 private:
     bool save(std::string& err);
+    std::string autoTarget(const RemoteFile& file, const std::string& downloaded) const;
     bool place(const std::string& tmp, const std::string& target, const std::string& remoteName,
                const std::string& sourceName, uint64_t written, std::string& err);
     std::string uniqueBackupName(const std::string& name) const;
@@ -139,6 +145,7 @@ private:
     std::string root_, modDir_, appDir_, backupDir_, statePath_;
     std::vector<InstalledFile> installed_;
     std::vector<std::pair<std::string, std::string>> remembered_;  // remoto -> originale
+    std::vector<std::string> originals_;
 };
 
 // Percorsi standard dell'app sulla SD

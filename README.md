@@ -56,7 +56,8 @@ parte con i file appena installati, dal menu iniziale.
 ### Entrare direttamente nel livello
 
 Come il tasto *Play* dell'editor sul PC, l'app può far partire il gioco già dentro
-il livello installato: **Y** nella schermata del risultato, oppure **ZR** sulla
+il livello: **Y** nella scheda REMOTI (scarica e avvia), **Y** nella schermata del
+risultato dopo un'installazione, oppure **ZR** sulla
 riga del file nella scheda INSTALLATI. L'app legge dal `.pak` il nome del livello
 (per esempio `crash1/l112_roadtonowhere/l112_roadtonowhere`) e lo scrive in
 `debug.xml`, il file di configurazione di sviluppo che il gioco legge all'avvio:
@@ -112,9 +113,10 @@ non lo conosce: va registrato in `update.pak`, come fa l'editor sul PC quando pr
    `archives/update.pak`). Lo fa `tools/crea_avvio_livello.py` con
    `--romfs "<cartella del dump RomFS>"`: copia la cartella `sd` come per la patch.
    Se il gioco non ha un `update.pak`, lì basta un file vuoto.
-3. Installa il livello con il suo nome ("Stesso nome") ed entra con **Y** o **ZR**.
-   L'app crea `update.pak` (l'originale più la registrazione del livello), lo
-   installa con il backup e avvia il gioco nel livello.
+3. Nella scheda REMOTI premi **Y** sul livello: l'app lo scarica (con il suo
+   nome), crea `update.pak` (l'originale più la registrazione del livello), lo
+   installa con il backup e avvia il gioco nel livello. Se è già installato, **ZR**
+   nella scheda INSTALLATI fa lo stesso senza scaricarlo di nuovo.
 
 Puoi tenere installati più livelli nuovi: a ogni avvio diretto l'app registra quello
 scelto. Il livello non compare nei menu del gioco, si apre solo così. Nella scheda
@@ -136,24 +138,28 @@ semplice file di testo, un nome per riga: puoi anche scriverlo o correggerlo a
 mano. Senza questo file l'app funziona lo stesso, ma il nome va scritto con la
 tastiera.
 
-## Scegliere l'originale da sostituire
+## Nome di installazione
 
-Nella scheda REMOTI premi **A** su un file: si apre l'elenco degli originali.
+Non serve dire all'app quale file sostituire: il nome lo prende dal file scaricato.
 
-- il cursore parte dall'originale suggerito, segnato con `*`: quello scelto
-  l'ultima volta per lo stesso file, oppure il campo `target` del manifest,
-  oppure lo stesso nome se è tra gli originali;
+- **Livello**: viene installato con il nome del livello che ha dentro, per esempio
+  `L112_RoadToNowhere.pak` o `Custom_Level.pak`, comunque si chiami su MEGA o sul
+  PC. È l'unico nome con cui il gioco lo trova.
+- **Altri file** (per esempio `update.pak`): l'ultima scelta fatta per quel file,
+  poi il campo `target` del manifest, poi il nome stesso del file.
+
+Per i casi particolari **B** apre l'elenco degli originali e permette di scegliere a
+mano:
+
+- il cursore parte dall'originale suggerito, segnato con `*`;
 - **Y** apre la tastiera per cercare (es. `jungle`), **X** toglie il filtro;
 - la prima voce permette di scrivere il nome a mano, la seconda di tenere il
   nome del file scaricato;
 - accanto agli originali vedi `ora: <file>` se li hai già sostituiti con l'app,
   oppure `mod esterna` se nella cartella c'è un file messo a mano (finirà nel backup).
 
-Il file scelto appare come `MioLivello_v2.pak -> L101_NSanityBeach.pak`. Premi
-di nuovo **A** per toglierlo dalla selezione. Se assegni un originale già
-assegnato a un altro file, l'abbinamento precedente viene tolto, così due file
-non finiscono mai sullo stesso nome. **Y** nella scheda REMOTI seleziona in un
-colpo tutti i file che hanno un suggerimento.
+Un livello scelto a mano con un nome diverso dal suo viene comunque bloccato:
+il gioco non lo troverebbe.
 
 ## Se il livello resta nero o il gioco crasha
 
@@ -263,9 +269,10 @@ Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
 |---|---|---|
 | Su / Giù | sposta il cursore | sposta il cursore |
 | Sinistra / Destra | pagina precedente / successiva | idem |
-| A | scegli l'originale da sostituire / togli dalla selezione | seleziona / deseleziona |
-| Y | seleziona i file con un suggerimento / azzera | seleziona tutto / niente |
-| X | installa i selezionati (o sceglie per quello sotto il cursore) | ripristina i selezionati |
+| A | seleziona / togli dalla selezione (nome automatico) | seleziona / deseleziona |
+| Y | **gioca**: scarica il file (se serve), registra il livello se è nuovo e avvia il gioco dentro | seleziona tutto / niente |
+| X | installa i selezionati (o quello sotto il cursore) | ripristina i selezionati |
+| B | scegli a mano l'originale da sostituire | |
 | ZR | ricarica l'elenco (e `originali.txt`) | avvia il gioco dentro il livello di quel file |
 | L / R | vai a REMOTI / INSTALLATI | |
 | - | cambia sorgente | |

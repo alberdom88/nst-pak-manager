@@ -16,7 +16,7 @@
 #include "net.hpp"
 #include "util.hpp"
 
-#define APP_VERSION_STR "1.7.0"
+#define APP_VERSION_STR "1.8.0"
 
 static const char* ROOT = "sdmc:";
 static const int COLS = 79;  // la console e' 80x45: lasciamo libera l'ultima colonna
@@ -181,6 +181,7 @@ static bool keyboard(const std::string& header, const std::string& initial, std:
 static bool sameName(const std::string& a, const std::string& b) { return util::toLower(a) == util::toLower(b); }
 
 static std::string arrowLabel(const std::string& remote, const std::string& target) {
+    if (target.empty()) return remote;  // nome automatico (dal contenuto del file)
     return sameName(remote, target) ? remote : remote + " -> " + target;
 }
 
@@ -238,6 +239,7 @@ static void loadRemote(App& a) {
     consoleUpdate(NULL);
     a.originalsFound = loadOriginals(originalsPath(), a.originals);
     if (!a.originalsFound) a.originals.clear();
+    a.mgr->setOriginals(a.originals);
     a.pick.clear();
     a.cursor[0] = a.scroll[0] = 0;
     std::string err;
@@ -297,7 +299,7 @@ static void draw(App& a) {
             auto p = a.pick.find(f.name);
             std::string right;
             if (p != a.pick.end())
-                right = " -> " + p->second;
+                right = p->second.empty() ? " -> nome automatico" : " -> " + p->second;
             else if (!from.empty())
                 right = " (= " + from[0]->name + (from.size() > 1 ? " +" + std::to_string(from.size() - 1) : "") + ")";
             std::string size = f.sizeKnown ? util::formatSize(f.size) : "?";
@@ -320,7 +322,7 @@ static void draw(App& a) {
     std::string info;
     const char* infoColor = C_DIM;
     if (a.tab == 0) {
-        info = " A sceglie l'originale da sostituire   I = gia' installato (= con che nome)";
+        info = " Il nome di installazione viene dal file   I = gia' installato (= con che nome)";
         if (!a.originalsFound) {
             info = " originali.txt non trovato: vedi README (tools/list_originals.py)";
             infoColor = C_WARN;
@@ -334,7 +336,7 @@ static void draw(App& a) {
     }
     line(43, info, infoColor);
     if (a.tab == 0)
-        line(44, " A scegli originale  Y suggeriti/nessuno  X installa  ZR aggiorna", C_TITLE);
+        line(44, " A seleziona  X installa  Y gioca  B scegli originale  ZR aggiorna", C_TITLE);
     else
         line(44, " A seleziona  Y tutti/nessuno  X ripristina originale  ZR entra nel livello", C_TITLE);
     printf("\x1b[45;1H%s L/R scheda  Sinistra/Destra pagina  - sorgente  ZL avvia dal menu  + esci%s\x1b[K", C_TITLE, C_RESET);
@@ -485,30 +487,6 @@ static void assignPick(App& a, const std::string& remoteName, const std::string&
     a.pick[remoteName] = target;
 }
 
-static void pickSuggested(App& a) {
-    if (!a.pick.empty()) {
-        a.pick.clear();
-        a.status = "Selezione azzerata";
-        a.statusColor = nullptr;
-        return;
-    }
-    int withSuggestion = 0;
-    for (const RemoteFile& f : a.remote) {
-        std::string t = a.mgr->suggestTarget(f, a.originals);
-        if (t.empty()) continue;
-        bool taken = false;
-        for (const auto& p : a.pick) taken = taken || sameName(p.second, t);
-        if (taken) continue;
-        a.pick[f.name] = t;
-        withSuggestion++;
-    }
-    int rest = (int)a.remote.size() - withSuggestion;
-    a.status = std::to_string(withSuggestion) + " file con originale suggerito";
-    if (rest == 1) a.status += "; l'altro si sceglie con A";
-    if (rest > 1) a.status += "; gli altri " + std::to_string(rest) + " si scelgono con A";
-    a.statusColor = rest > 0 ? C_WARN : C_OK;
-}
-
 // ---------------------------------------------------------------- azioni
 
 static void chooseSource(App& a) {
@@ -655,13 +633,43 @@ static std::string firstLevelPak(App& a, const std::vector<std::string>& names) 
     return "";
 }
 
+// Scarica e installa un file mostrando l'avanzamento. target vuoto = nome automatico.
+static bool installWithProgress(App& a, const RemoteFile& f, const std::string& target, int index, int count,
+                                std::string& installedAs, std::string& err, bool& cancelled) {
+    const std::string label = arrowLabel(f.name, target);
+    cls();
+    line(2, "Installazione in corso", C_TITLE);
+    ProgressState ps;
+    ps.start = armGetSystemTick();
+    const u64 freq = armGetSystemTickFreq();
+    net::Progress cb = [&](uint64_t done, uint64_t tot) {
+        u64 now = armGetSystemTick();
+        if (!appletMainLoop()) {
+            g_exit = true;
+            ps.cancelled = true;
+            return false;
+        }
+        padUpdate(&g_pad);
+        if (padGetButtonsDown(&g_pad) & HidNpadButton_B) {
+            ps.cancelled = true;
+            return false;
+        }
+        if (now - ps.lastDraw > freq / 8) {
+            ps.lastDraw = now;
+            drawProgress(index, count, label, done, tot, (double)(now - ps.start) / (double)freq);
+            consoleUpdate(NULL);
+        }
+        return true;
+    };
+    drawProgress(index, count, label, 0, f.size, 0);
+    consoleUpdate(NULL);
+    bool ok = a.mgr->install(f, target, a.cfg.sources[a.source].name, cb, err, &installedAs);
+    cancelled = ps.cancelled;
+    return ok;
+}
+
 static void installSelected(App& a) {
-    if (a.pick.empty() && !a.remote.empty()) {
-        const RemoteFile& f = a.remote[a.cursor[0]];
-        std::string target;
-        if (!pickTarget(a, f, target)) return;
-        assignPick(a, f.name, target);
-    }
+    if (a.pick.empty() && !a.remote.empty()) a.pick[a.remote[a.cursor[0]].name] = "";  // nome automatico
     std::vector<std::pair<RemoteFile, std::string>> todo;
     for (const RemoteFile& f : a.remote) {
         auto p = a.pick.find(f.name);
@@ -675,6 +683,7 @@ static void installSelected(App& a) {
     for (const auto& t : todo) {
         total += t.first.size;
         allKnown = allKnown && t.first.sizeKnown;
+        if (t.second.empty()) continue;  // nome automatico: si sa solo dopo il download
         if (a.mgr->find(t.second)) replaces++;
         else if (a.present.count(util::toLower(t.second))) backups++;
         bool known = false;
@@ -685,7 +694,9 @@ static void installSelected(App& a) {
     lines.push_back("Installare " + std::to_string(todo.size()) + " file" +
                     (total ? " (" + util::formatSize(total) + (allKnown ? "" : " o piu'") + ")" : "") + "?");
     lines.push_back("");
-    for (size_t i = 0; i < todo.size() && i < 18; i++) lines.push_back("  " + arrowLabel(todo[i].first.name, todo[i].second));
+    for (size_t i = 0; i < todo.size() && i < 18; i++)
+        lines.push_back("  " + arrowLabel(todo[i].first.name, todo[i].second) +
+                        (todo[i].second.empty() ? "  (nome dal contenuto del file)" : ""));
     if (todo.size() > 18) lines.push_back("  ... e altri " + std::to_string(todo.size() - 18));
     lines.push_back("");
     if (backups == 1) lines.push_back("1 file gia' presente verra' salvato nel backup.");
@@ -703,7 +714,6 @@ static void installSelected(App& a) {
 
     appletSetAutoSleepDisabled(true);
     appletSetMediaPlaybackState(true);
-    const std::string sourceName = a.cfg.sources[a.source].name;
     std::vector<std::string> report;
     std::vector<std::string> installedNames;
     int ok = 0;
@@ -714,40 +724,15 @@ static void installSelected(App& a) {
             report.push_back("SALTATO  " + label);
             continue;
         }
-        cls();
-        line(2, "Installazione in corso", C_TITLE);
-        ProgressState ps;
-        ps.start = armGetSystemTick();
-        const u64 freq = armGetSystemTickFreq();
-        net::Progress cb = [&](uint64_t done, uint64_t tot) {
-            u64 now = armGetSystemTick();
-            if (!appletMainLoop()) {
-                g_exit = true;
-                ps.cancelled = true;
-                return false;
-            }
-            padUpdate(&g_pad);
-            if (padGetButtonsDown(&g_pad) & HidNpadButton_B) {
-                ps.cancelled = true;
-                return false;
-            }
-            if (now - ps.lastDraw > freq / 8) {
-                ps.lastDraw = now;
-                drawProgress((int)i + 1, (int)todo.size(), label, done, tot, (double)(now - ps.start) / (double)freq);
-                consoleUpdate(NULL);
-            }
-            return true;
-        };
-        drawProgress((int)i + 1, (int)todo.size(), label, 0, todo[i].first.size, 0);
-        consoleUpdate(NULL);
-        std::string err;
-        if (a.mgr->install(todo[i].first, todo[i].second, sourceName, cb, err)) {
+        std::string err, as;
+        bool cancelled = false;
+        if (installWithProgress(a, todo[i].first, todo[i].second, (int)i + 1, (int)todo.size(), as, err, cancelled)) {
             ok++;
-            installedNames.push_back(todo[i].second);
-            report.push_back("OK       " + label);
+            installedNames.push_back(as);
+            report.push_back("OK       " + arrowLabel(todo[i].first.name, as));
         } else {
             report.push_back("ERRORE   " + label + ": " + err);
-            if (ps.cancelled) stop = true;
+            if (cancelled) stop = true;
         }
         if (g_exit) break;
     }
@@ -775,6 +760,38 @@ static void installSelected(App& a) {
     u64 k = waitFor(HidNpadButton_A | HidNpadButton_B | HidNpadButton_Y);
     if (k == HidNpadButton_A) launchGame(a);
     if (k == HidNpadButton_Y) launchLevel(a, levelPak);
+}
+
+// Gioca il file sotto il cursore: lo scarica (se non e' gia' installato uguale), registra il
+// livello se e' nuovo e avvia il gioco direttamente dentro
+static void playRemote(App& a) {
+    if (a.remote.empty()) return;
+    const RemoteFile f = a.remote[a.cursor[0]];
+    if (gameRunning()) {
+        inform("Gioco gia' aperto", {"Un gioco e' aperto in background: chiudilo dal menu HOME e riprova."}, C_WARN);
+        return;
+    }
+    std::string name;
+    for (const InstalledFile* i : a.mgr->installedFrom(f.name))
+        if (f.sizeKnown && i->size == f.size && a.mgr->existsInModDir(i->name)) name = i->name;
+    if (name.empty()) {
+        appletSetAutoSleepDisabled(true);
+        appletSetMediaPlaybackState(true);
+        std::string err;
+        bool cancelled = false;
+        bool ok = installWithProgress(a, f, "", 1, 1, name, err, cancelled);
+        appletSetMediaPlaybackState(false);
+        appletSetAutoSleepDisabled(false);
+        if (g_exit) return;
+        refreshLocal(a);
+        if (!ok) {
+            inform("Installazione non riuscita", {f.name + ": " + err}, C_WARN);
+            return;
+        }
+    }
+    a.status = "Installato " + arrowLabel(f.name, name);
+    a.statusColor = C_OK;
+    launchLevel(a, name);
 }
 
 static void restoreSelected(App& a) {
@@ -906,18 +923,20 @@ static void run() {
         if (k & HidNpadButton_A && n > 0) {
             if (a.tab == 0) {
                 const RemoteFile& f = a.remote[cur];
-                if (a.pick.erase(f.name) == 0) {
-                    std::string target;
-                    if (pickTarget(a, f, target)) assignPick(a, f.name, target);
-                }
+                if (a.pick.erase(f.name) == 0) a.pick[f.name] = "";  // nome automatico
             } else {
                 const std::string& name = a.installed[cur].name;
                 if (!a.sel.erase(name)) a.sel.insert(name);
             }
         }
         if (k & HidNpadButton_Y) {
-            if (a.tab == 0) pickSuggested(a);
+            if (a.tab == 0) playRemote(a);
             else toggleAllInstalled(a);
+        }
+        if (k & HidNpadButton_B && a.tab == 0 && n > 0) {  // scelta a mano dell'originale da sostituire
+            const RemoteFile& f = a.remote[cur];
+            std::string target;
+            if (pickTarget(a, f, target)) assignPick(a, f.name, target);
         }
         if (k & HidNpadButton_X) {
             if (a.tab == 0) installSelected(a);

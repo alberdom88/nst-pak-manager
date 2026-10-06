@@ -626,9 +626,23 @@ static bool hasPakMagic(const std::string& path) {
     return n == 4 && memcmp(magic, PAK_MAGIC, 4) == 0;
 }
 
-bool Manager::install(const RemoteFile& file, const std::string& target, const std::string& sourceName,
-                      const net::Progress& progress, std::string& err) {
-    if (!isValidPakName(target)) {
+std::string Manager::autoTarget(const RemoteFile& file, const std::string& downloaded) const {
+    // Un livello si installa solo con il nome che ha dentro (come lo cerca il gioco)
+    std::vector<std::string> levels;
+    if (pakLevelNames(downloaded, levels) && !levels.empty()) {
+        std::string name = levels[0] + ".pak";
+        for (const std::string& o : originals_)
+            if (util::toLower(o) == util::toLower(name)) return o;  // grafia dell'originale
+        return name;
+    }
+    std::string suggested = suggestTarget(file, originals_);
+    return suggested.empty() ? file.name : suggested;
+}
+
+bool Manager::install(const RemoteFile& file, const std::string& wanted, const std::string& sourceName,
+                      const net::Progress& progress, std::string& err, std::string* installedAs) {
+    std::string target = wanted;
+    if (!target.empty() && !isValidPakName(target)) {
         err = "nome dell'originale non valido: " + target;
         return false;
     }
@@ -643,8 +657,8 @@ bool Manager::install(const RemoteFile& file, const std::string& target, const s
         return false;
     }
 
-    const std::string dest = util::joinPath(modDir_, target);
-    const std::string tmp = dest + ".part";
+    // Nome automatico: il .part prende il nome del file remoto
+    const std::string tmp = util::joinPath(modDir_, (target.empty() ? file.name : target) + ".part");
     util::removeFile(tmp);
 
     // 1. Scarica in un file temporaneo: se qualcosa va storto non si tocca nulla
@@ -663,6 +677,15 @@ bool Manager::install(const RemoteFile& file, const std::string& target, const s
         err = "il file scaricato non e' un .pak valido (link non diretto o pagina di errore?)";
         return false;
     }
+    if (target.empty()) {
+        target = autoTarget(file, tmp);
+        if (!isValidPakName(target)) {
+            util::removeFile(tmp);
+            err = "nome non valido ricavato dal file: " + target;
+            return false;
+        }
+    }
+    if (installedAs) *installedAs = target;
     // Un livello si trova solo con il suo nome: rinominare il .pak non rinomina i file che contiene
     std::vector<std::string> levels;
     if (pakLevelNames(tmp, levels) && !levels.empty()) {

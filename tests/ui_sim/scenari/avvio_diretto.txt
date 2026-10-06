@@ -1,4 +1,4 @@
-# installa un livello e lo avvia direttamente (Y): senza patch l'app chiede conferma, poi scrive debug.xml
-. SNAP A . SNAP A . SNAP X . SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+# installa un livello e nel risultato Y lo avvia direttamente: senza patch l'app chiede conferma, poi scrive debug.xml
+. A . X . A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
 Y . SNAP
 A . SNAP

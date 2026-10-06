@@ -427,6 +427,33 @@ int main(int argc, char** argv) {
         CHECK(m.restore("custom_level.PAK", err, note));
     }
 
+    // nome automatico (target vuoto): per un livello quello che ha dentro, altrimenti suggerito o remoto
+    {
+        const RemoteFile* custom = byName(httpList, "Custom_Level.pak");
+        RemoteFile renamed = *custom;
+        renamed.name = "Il mio livello v2.pak";  // nome qualsiasi sulla sorgente
+        std::string as;
+        CHECK(m.install(renamed, "", "PC", noProgress, err, &as) && as == "Custom_Level.pak");
+        CHECK(util::fileExists(m.modDir() + "/Custom_Level.pak") && !util::fileExists(m.modDir() + "/Il mio livello v2.pak.part"));
+        CHECK(m.find("Custom_Level.pak") && m.find("Custom_Level.pak")->remote == "Il mio livello v2.pak");
+        std::string note;
+        CHECK(m.restore("Custom_Level.pak", err, note));
+        m.setOriginals({"CUSTOM_LEVEL.pak", "update.pak"});
+        CHECK(m.install(*custom, "", "PC", noProgress, err, &as) && as == "CUSTOM_LEVEL.pak");  // grafia dell'elenco
+        CHECK(m.restore("CUSTOM_LEVEL.pak", err, note));
+        // file che non e' un livello: l'ultima scelta fatta per lui (qui L102_Jungle.pak), altrimenti il suo nome
+        CHECK(m.rememberedTarget("Nome con spazi.pak") == "L102_Jungle.pak");
+        CHECK(m.install(*byName(httpList, "Nome con spazi.pak"), "", "PC", noProgress, err, &as) && as == "L102_Jungle.pak");
+        CHECK(m.restore("L102_Jungle.pak", err, note));
+        RemoteFile fresh = *byName(httpList, "Nome con spazi.pak");
+        fresh.name = "Mai visto.pak";
+        CHECK(m.install(fresh, "", "PC", noProgress, err, &as) && as == "Mai visto.pak");
+        CHECK(m.restore("Mai visto.pak", err, note));
+        CHECK(m.install(*byName(man, "custom_v2.pak"), "", "PC", noProgress, err, &as) && as == "L101_NSanityBeach.pak");  // dal manifest
+        CHECK(m.restore("L101_NSanityBeach.pak", err, note));
+        m.setOriginals({});
+    }
+
     // download interrotti
     spit(m.modDir() + "/vecchio.pak.part", "x");
     CHECK(m.cleanupPartials() == 1 && !util::fileExists(m.modDir() + "/vecchio.pak.part"));

@@ -1,7 +1,7 @@
-# Custom_Level.pak (livello creato con un nome nuovo) installato al posto di L101: l'app lo blocca
+# Custom_Level.pak (livello con un nome nuovo) scelto a mano al posto di L101: l'app lo blocca
 . SNAP
-A . SNAP
-DOWN A . SNAP
+B . SNAP
+UP A TEXT=L101_NSanityBeach . SNAP
 X . SNAP
-A . . . . . . . . . . . . . . . . . . . . SNAP
+A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
 A . PLUS .

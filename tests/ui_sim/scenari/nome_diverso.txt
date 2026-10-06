@@ -1,16 +1,15 @@
-# Y: seleziona i file che hanno un originale suggerito (stesso nome in originali.txt)
-. SNAP Y . SNAP
-# "Nome con spazi.pak" non ha suggerimento: si apre la scelta, si cerca "jungle"
-DOWN DOWN A . SNAP
+# B: scelta a mano dell'originale. "Nome con spazi.pak": si cerca "jungle"
+. SNAP
+DOWN DOWN B . SNAP
 Y TEXT=jungle . SNAP
 A . SNAP
-# update.pak: deseleziona, riapri la scelta e scrivi a mano un originale gia' assegnato
-DOWN A A . SNAP
+# update.pak: scelta a mano scrivendo un originale gia' assegnato a un altro file
+DOWN B . SNAP
 UP UP UP UP UP A TEXT=l101_nsanitybeach . SNAP
-# installa
+# installa e torna all'elenco
 X . SNAP
 A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
-A . SNAP
+B . SNAP
 # scheda installati e ripristino del primo
 R . SNAP
 X . SNAP

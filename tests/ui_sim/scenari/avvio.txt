@@ -1,3 +1,3 @@
-# installa e avvia subito il gioco
-. SNAP A . SNAP A . SNAP X . SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+# A seleziona (il nome di installazione viene dal file), X installa, A avvia il gioco
+. SNAP A . SNAP X . SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
 A . SNAP
