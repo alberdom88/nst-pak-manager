@@ -1,0 +1,4 @@
+# livello nuovo (convertito con --nuovo): installato con il suo nome, Y crea update.pak e avvia
+# uso: --config tests/ui_sim/sim_config_nuovo.json --prepare (patch + copia dell'update.pak originale, vedi README)
+. SNAP A . SNAP A . X . A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+Y . . SNAP

@@ -226,6 +226,11 @@ if __name__ == "__main__":
             f.write(pak_bytes("http-" + n, s))
     with open(os.path.join(ROOT, "files", "Custom_Level.pak"), "wb") as f:
         f.write(level_pak("Crash1", "Custom_Level"))
+    # livello nuovo convertito con --nuovo (registrazione in update/), in una cartella a parte
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import crea_pak_prova
+    os.makedirs(os.path.join(ROOT, "nuovo"), exist_ok=True)
+    crea_pak_prova.write_pak(os.path.join(ROOT, "nuovo", "Nuovo.pak"), crea_pak_prova.level_files("Nuovo"))
     with open(os.path.join(ROOT, "files", "note.txt"), "w") as f:
         f.write("non un pak")
     manifest = {"files": [

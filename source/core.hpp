@@ -108,6 +108,12 @@ public:
     // file target non installato da questa app, viene spostato nella cartella backup.
     bool install(const RemoteFile& file, const std::string& target, const std::string& sourceName,
                  const net::Progress& progress, std::string& err);
+    // Livelli nuovi (convertiti con --nuovo): unisce i file update/ del .pak installato all'update.pak
+    // originale (copia in originalUpdatePath()) e installa il risultato come update.pak, con backup.
+    // registered = false se il livello non ha nulla da registrare (ha il nome di un livello originale).
+    bool registerLevel(const std::string& pakName, bool& registered, std::string& err);
+    std::string originalUpdatePath() const;
+
     // Rimuove il file installato e rimette il backup. In caso di successo
     // note puo' contenere un avviso (es. backup non piu' presente).
     bool restore(const std::string& name, std::string& err, std::string& note);
@@ -126,6 +132,8 @@ public:
 
 private:
     bool save(std::string& err);
+    bool place(const std::string& tmp, const std::string& target, const std::string& remoteName,
+               const std::string& sourceName, uint64_t written, std::string& err);
     std::string uniqueBackupName(const std::string& name) const;
 
     std::string root_, modDir_, appDir_, backupDir_, statePath_;

@@ -16,7 +16,7 @@
 #include "net.hpp"
 #include "util.hpp"
 
-#define APP_VERSION_STR "1.6.0"
+#define APP_VERSION_STR "1.7.0"
 
 static const char* ROOT = "sdmc:";
 static const int COLS = 79;  // la console e' 80x45: lasciamo libera l'ultima colonna
@@ -623,6 +623,16 @@ static void launchLevel(App& a, const std::string& pakName) {
             return;
     }
     std::string err;
+    // Livello nuovo (convertito con --nuovo): update.pak con la sua registrazione, creato qui
+    messageScreen("Preparazione", {"Controllo se " + pakName + " e' un livello nuovo da registrare..."});
+    consoleUpdate(NULL);
+    bool registered = false;
+    if (!a.mgr->registerLevel(pakName, registered, err)) {
+        inform("Livello nuovo non registrato", {err, "", "Il gioco non e' stato avviato."}, C_WARN);
+        refreshLocal(a);
+        return;
+    }
+    if (registered) refreshLocal(a);
     if (!a.mgr->setDirectLaunch(level, err)) {
         inform("Avvio diretto non riuscito", {err}, C_WARN);
         return;

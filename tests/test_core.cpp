@@ -8,6 +8,7 @@
 
 #include "../source/core.hpp"
 #include "../source/mega.hpp"
+#include "../source/pak.hpp"
 #include "../source/util.hpp"
 
 static int g_fail = 0, g_pass = 0;
@@ -429,6 +430,55 @@ int main(int argc, char** argv) {
     // download interrotti
     spit(m.modDir() + "/vecchio.pak.part", "x");
     CHECK(m.cleanupPartials() == 1 && !util::fileExists(m.modDir() + "/vecchio.pak.part"));
+
+    // ---------- livello nuovo: l'app crea update.pak (pak.cpp + Manager::registerLevel)
+    if (argc > 3) {
+        const std::string pakDir = argv[3];  // archivi creati da tests/crea_pak_prova.py
+        pak::Archive base;
+        CHECK(pak::read(pakDir + "/base_update.pak", base, err) && base.version == 12 && base.entries.size() == 6);
+        int compressed = 0;
+        for (const pak::Entry& e : base.entries) {
+            compressed += e.compression != 0;
+            CHECK(e.hash == pak::hashPath(e.path));
+        }
+        CHECK(compressed == 5);
+        std::string data;
+        CHECK(!pak::extract(base, base.entries[0].compression ? base.entries[0] : base.entries[1], data, err) ||
+              base.entries[0].compression == 0);  // i file compressi non si estraggono
+        CHECK(pak::write(base, pakDir + "/riscritto.pak", err));  // copia identica (verificata da verifica_pak.py)
+
+        Manager mr(sd + "/reg", cfg);
+        CHECK(mr.load(err, warn));
+        util::mkdirs(mr.modDir());
+        spit(mr.modDir() + "/Custom_Level.pak", slurp(pakDir + "/Custom_Level.pak"));
+        bool reg = true;
+        CHECK(!mr.registerLevel("Custom_Level.pak", reg, err) && !reg && err.find("update.pak originale") != std::string::npos);
+        util::mkdirs(mr.appDir() + "/originali");
+        spit(mr.originalUpdatePath(), slurp(pakDir + "/base_update.pak"));
+        spit(mr.modDir() + "/update.pak", "MOD-UPDATE-A-MANO");  // un update.pak gia' presente: va in backup
+        CHECK(mr.registerLevel("Custom_Level.pak", reg, err) && reg);
+        CHECK(mr.find("update.pak") && mr.find("update.pak")->source == "generato" &&
+              mr.find("update.pak")->backup == "update.pak" && mr.find("update.pak")->remote == "registrazione di Custom_Level.pak");
+        CHECK(slurp(mr.backupDir() + "/update.pak") == "MOD-UPDATE-A-MANO");
+        CHECK(!util::fileExists(mr.modDir() + "/update.pak.part"));
+        pak::Archive merged;
+        CHECK(pak::read(mr.modDir() + "/update.pak", merged, err) && merged.entries.size() == 7);
+        for (const pak::Entry& e : merged.entries)
+            if (e.path == "maps/crash1/custom_level/custom_level_zoneinfo.igz") {
+                CHECK(pak::extract(merged, e, data, err) && data.size() == 2600 && data.compare(0, 11, "zone-nuova:") == 0);
+            }
+        spit(pakDir + "/unito.pak", slurp(mr.modDir() + "/update.pak"));  // controllato da verifica_pak.py
+        // seconda registrazione: sostituisce la nostra, il backup resta quello di prima
+        CHECK(mr.registerLevel("Custom_Level.pak", reg, err) && reg && mr.find("update.pak")->backup == "update.pak");
+        // un .pak senza file update/: niente da registrare
+        CHECK(mr.registerLevel("update.pak", reg, err) && !reg);
+        // il gioco non ha update.pak: file vuoto come originale, update.pak con la sola registrazione
+        spit(mr.originalUpdatePath(), "");
+        CHECK(mr.registerLevel("Custom_Level.pak", reg, err) && reg);
+        CHECK(pak::read(mr.modDir() + "/update.pak", merged, err) && merged.entries.size() == 2);
+        std::string note;
+        CHECK(mr.restore("update.pak", err, note) && slurp(mr.modDir() + "/update.pak") == "MOD-UPDATE-A-MANO");
+    }
 
     net::shutdown();
     printf("%d controlli superati, %d falliti\n", g_pass, g_fail);

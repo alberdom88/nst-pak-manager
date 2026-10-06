@@ -14,6 +14,7 @@ Il gioco originale non viene modificato: patch e file si mettono nelle cartelle 
 
 Uso:
   python crea_avvio_livello.py "<file main o cartella del dump ExeFS>" <livello> [cartella_uscita]
+                               [--romfs "<cartella del dump RomFS>"]
     <livello>: un .pak con un livello (il nome viene letto dal file) oppure il nome completo,
                per esempio crash1/l112_roadtonowhere/l112_roadtonowhere
 
@@ -23,11 +24,16 @@ Crea (in cartella_uscita, predefinita "avvio_livello"):
   sd/atmosphere/exefs_patches/nst_avvio_livello/<ID build>.ips   -> radice della SD
   sd/atmosphere/contents/0100D1B006744000/romfs/debug.xml
 
+Con --romfs copia anche l'update.pak originale del gioco in
+  sd/switch/nst-pak-manager/originali/update.pak
+che NST Pak Manager usa per registrare i livelli nuovi (convertiti con --nuovo).
+
 Per tornare all'avvio normale basta togliere debug.xml (la patch da sola non cambia nulla).
 """
 
 import os
 import re
+import shutil
 import struct
 import sys
 
@@ -94,12 +100,30 @@ def write(path, data):
     print("  " + path)
 
 
+def find_update_pak(romfs):
+    for root, _, files in os.walk(romfs):
+        for name in files:
+            if name.lower() == "update.pak":
+                return os.path.join(root, name)
+    return None
+
+
 def main():
-    if len(sys.argv) < 3:
+    args = sys.argv[1:]
+    romfs = None
+    if "--romfs" in args:
+        k = args.index("--romfs")
+        if k + 1 >= len(args):
+            sys.exit("--romfs vuole la cartella del dump RomFS")
+        romfs = args[k + 1]
+        del args[k:k + 2]
+        if not os.path.isdir(romfs):
+            sys.exit("Cartella del dump RomFS non trovata: %s" % romfs)
+    if len(args) < 2:
         sys.exit(__doc__)
-    main_path = find_main(sys.argv[1])
-    level = sys.argv[2]
-    out_dir = sys.argv[3] if len(sys.argv) > 3 else "avvio_livello"
+    main_path = find_main(args[0])
+    level = args[1]
+    out_dir = args[2] if len(args) > 2 else "avvio_livello"
 
     if level.lower().endswith(".pak"):
         found = levels_in_pak(level)
@@ -137,6 +161,16 @@ def main():
     write(os.path.join(out_dir, "eden", "NST avvio livello", "romfs", "debug.xml"), xml)
     write(os.path.join(out_dir, "sd", "atmosphere", "exefs_patches", "nst_avvio_livello", build_id + ".ips"), patch)
     write(os.path.join(out_dir, "sd", "atmosphere", "contents", TITLE_ID, "romfs", "debug.xml"), xml)
+    if romfs:
+        dest = os.path.join(out_dir, "sd", "switch", "nst-pak-manager", "originali", "update.pak")
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        source = find_update_pak(romfs)
+        if source:
+            shutil.copyfile(source, dest)
+            print("  %s (copia di %s)" % (dest, source))
+        else:
+            open(dest, "wb").close()
+            print("  %s (vuoto: nel dump non c'e' update.pak)" % dest)
 
 
 if __name__ == "__main__":

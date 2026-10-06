@@ -8,6 +8,7 @@
 
 #include "cJSON.h"
 #include "mega.hpp"
+#include "pak.hpp"
 #include "util.hpp"
 
 static const char PAK_MAGIC[4] = {'I', 'G', 'A', 0x1A};  // 0x1A414749 little-endian
@@ -676,6 +677,30 @@ bool Manager::install(const RemoteFile& file, const std::string& target, const s
         }
     }
 
+    if (!place(tmp, target, file.name, sourceName, written, err)) return false;
+    bool known = false;
+    for (auto& p : remembered_)
+        if (p.first == file.name) {
+            p.second = target;
+            known = true;
+        }
+    if (!known) remembered_.push_back({file.name, target});
+    if (!save(err)) {
+        err = "file installato, ma " + err;
+        return false;
+    }
+    return true;
+}
+
+// Mette tmp al posto di target nella cartella mod (con il backup di un file non nostro)
+bool Manager::place(const std::string& tmp, const std::string& target, const std::string& remoteName,
+                    const std::string& sourceName, uint64_t written, std::string& err) {
+    const std::string dest = util::joinPath(modDir_, target);
+    if (!util::mkdirs(backupDir_)) {
+        util::removeFile(tmp);
+        err = "impossibile creare la cartella dei backup";
+        return false;
+    }
     // 2. Mette da parte il file esistente
     InstalledFile* entry = nullptr;
     for (InstalledFile& f : installed_)
@@ -710,29 +735,62 @@ bool Manager::install(const RemoteFile& file, const std::string& target, const s
     }
 
     if (entry) {
-        entry->remote = file.name;
+        entry->remote = remoteName;
         entry->source = sourceName;
         entry->size = written;
     } else {
         InstalledFile f;
         f.name = target;
-        f.remote = file.name;
+        f.remote = remoteName;
         f.source = sourceName;
         f.size = written;
         f.backup = backupName;
         installed_.push_back(f);
     }
-    bool known = false;
-    for (auto& p : remembered_)
-        if (p.first == file.name) {
-            p.second = target;
-            known = true;
-        }
-    if (!known) remembered_.push_back({file.name, target});
-    if (!save(err)) {
-        err = "file installato, ma " + err;
+    return true;
+}
+
+std::string Manager::originalUpdatePath() const { return appDir_ + "/originali/update.pak"; }
+
+bool Manager::registerLevel(const std::string& pakName, bool& registered, std::string& err) {
+    registered = false;
+    pak::Archive level;
+    if (!pak::read(util::joinPath(modDir_, pakName), level, err)) return false;
+    std::vector<const pak::Entry*> files;
+    for (const pak::Entry& e : level.entries)
+        if (util::toLower(e.path).compare(0, 7, "update/") == 0 && e.path.size() > 7) files.push_back(&e);
+    if (files.empty()) return true;  // livello con il nome di uno originale: niente da registrare
+
+    pak::Archive update;
+    uint64_t baseSize = 0;
+    const std::string base = originalUpdatePath();
+    if (!util::fileExists(base)) {
+        err = "per un livello nuovo serve una copia dell'update.pak originale del gioco in " + base +
+              " (dal dump RomFS: archives/update.pak). Se il gioco non ne ha uno, crea li' un file vuoto.";
         return false;
     }
+    if (util::fileSize(base, baseSize) && baseSize > 0) {
+        if (!pak::read(base, update, err)) return false;
+    } else {
+        update.version = level.version;  // il gioco non ha un update.pak: solo la registrazione
+    }
+    for (const pak::Entry* e : files) {
+        std::string data;
+        if (!pak::extract(level, *e, data, err)) return false;
+        pak::put(update, e->path.substr(7), data);
+    }
+
+    const std::string tmp = util::joinPath(modDir_, "update.pak.part");
+    util::removeFile(tmp);
+    if (!pak::write(update, tmp, err)) return false;
+    uint64_t written = 0;
+    util::fileSize(tmp, written);
+    if (!place(tmp, "update.pak", "registrazione di " + pakName, "generato", written, err)) return false;
+    if (!save(err)) {
+        err = "update.pak creato, ma " + err;
+        return false;
+    }
+    registered = true;
     return true;
 }
 

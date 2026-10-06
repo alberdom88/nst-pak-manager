@@ -98,6 +98,29 @@ prima di avviare.
   (servizio `ldr:shel` di Atmosphère), se disponibile. Il formato si cambia in
   `config.json` con `launch_args`; con `"launch_args": ""` non viene usata.
 
+### Livelli nuovi (con il loro nome)
+
+Un livello creato nell'editor con un nome nuovo (per esempio `Custom_Level`) il gioco
+non lo conosce: va registrato in `update.pak`, come fa l'editor sul PC quando premi
+*Play*. L'app lo fa da sola:
+
+1. Converti il livello con `--nuovo`: l'archivio prende il nome del livello
+   (`Custom_Level.pak`) e contiene, nella cartella interna `update/`, i file della
+   registrazione.
+2. **Una volta sola**: metti una copia dell'`update.pak` originale del gioco in
+   `sdmc:/switch/nst-pak-manager/originali/update.pak` (dal dump RomFS,
+   `archives/update.pak`). Lo fa `tools/crea_avvio_livello.py` con
+   `--romfs "<cartella del dump RomFS>"`: copia la cartella `sd` come per la patch.
+   Se il gioco non ha un `update.pak`, lì basta un file vuoto.
+3. Installa il livello con il suo nome ("Stesso nome") ed entra con **Y** o **ZR**.
+   L'app crea `update.pak` (l'originale più la registrazione del livello), lo
+   installa con il backup e avvia il gioco nel livello.
+
+Puoi tenere installati più livelli nuovi: a ogni avvio diretto l'app registra quello
+scelto. Il livello non compare nei menu del gioco, si apre solo così. Nella scheda
+INSTALLATI l'`update.pak` creato compare come `update.pak <- registrazione di ...`:
+X lo toglie e rimette l'originale.
+
 ## Elenco degli originali (`originali.txt`)
 
 Serve per proporti i nomi dei `.pak` del gioco quando scegli cosa sostituire. Si
@@ -150,6 +173,7 @@ Stampa un riassunto e scrive il rapporto completo in `report_<nome>.txt`.
    come `L101_NSanityBeach.pak` non viene trovato. L'app ora blocca questo caso
    e lascia tutto com'era. Per sostituire un livello, nell'editor apri quel
    livello originale e modificalo, così il nome interno resta giusto.
+   Un livello nuovo può anche tenere il suo nome: vedi "Livelli nuovi" più sotto.
 2. **Formato PC.** I `.pak` fatti con Crash NST Maker o presi da mod per PC sono
    nel formato della versione PC. Lo script mostra cosa cambia rispetto
    all'originale Switch (versione dell'archivio, percorsi, compressione,
@@ -299,6 +323,7 @@ source/main.cpp   interfaccia (console libnx, solo Switch)
 source/core.*     configurazione, sorgenti, installazione, backup, ripristino
 source/net.*      download con libcurl
 source/mega.*     cartelle MEGA: elenco, AES e decifratura dei download
+source/pak.*      archivi .pak: lettura e scrittura (update.pak dei livelli nuovi)
 source/util.*     file, percorsi, URL
 source/cJSON.*    parser JSON (MIT, vedi cJSON.LICENSE)
 tests/            test su PC (tests/ui_sim: interfaccia simulata)

@@ -1,0 +1,5 @@
+{
+  "sources": [
+    { "name": "Livelli nuovi", "type": "http", "url": "http://127.0.0.1:{PORT}/nuovo/" }
+  ]
+}
