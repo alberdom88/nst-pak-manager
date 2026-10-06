@@ -2,9 +2,10 @@
 """
 list_originals.py - crea originali.txt, l'elenco dei .pak originali del gioco
 
-L'app lo usa per farti scegliere quale file originale sostituire con il .pak
-scaricato. Prendi l'elenco dal dump della RomFS (in Eden: tasto destro sul
-gioco -> Dump RomFS) e copia il file creato in sdmc:/switch/nst-pak-manager/.
+Facoltativo: l'app sceglie da sola il nome di installazione (per un livello quello
+che ha dentro). L'elenco serve per la scelta a mano (tasto B) e per scrivere i nomi
+con le maiuscole giuste. Prendi l'elenco dal dump della RomFS (in Eden: tasto destro
+sul gioco -> Dump RomFS) e copia il file creato in sdmc:/switch/nst-pak-manager/.
 
 Uso:
     python list_originals.py <cartella_dump> [altre_cartelle...] [-o originali.txt]

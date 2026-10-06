@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 crea_avvio_livello.py - fa partire il gioco direttamente dentro un livello, senza argomenti di avvio
 
 Il gioco all'avvio legge il file di configurazione di sviluppo "debug.xml" e, se contiene
@@ -13,16 +13,19 @@ Questo script crea:
 Il gioco originale non viene modificato: patch e file si mettono nelle cartelle delle mod.
 
 Uso:
-  python crea_avvio_livello.py "<file main o cartella del dump ExeFS>" <livello> [cartella_uscita]
+  python crea_avvio_livello.py "<file main o cartella del dump ExeFS>" [<livello>] [cartella_uscita]
                                [--romfs "<cartella del dump RomFS>"]
-    <livello>: un .pak con un livello (il nome viene letto dal file) oppure il nome completo,
-               per esempio crash1/l112_roadtonowhere/l112_roadtonowhere
+    <livello>: facoltativo; un .pak con un livello (il nome viene letto dal file) oppure il
+               nome completo, per esempio crash1/l112_roadtonowhere/l112_roadtonowhere.
+               Serve per Eden (che non ha l'app); sulla Switch debug.xml lo scrive NST Pak Manager.
+    La cartella di Eden con i dump del gioco va bene sia come ExeFS sia come RomFS:
+    %APPDATA%\eden\dump\0100D1B006744000
 
 Crea (in cartella_uscita, predefinita "avvio_livello"):
   eden/NST avvio livello/exefs/<ID build>.ips      -> cartella delle mod di Eden per il gioco
-  eden/NST avvio livello/romfs/debug.xml
+  eden/NST avvio livello/romfs/debug.xml           (solo con <livello>)
   sd/atmosphere/exefs_patches/nst_avvio_livello/<ID build>.ips   -> radice della SD
-  sd/atmosphere/contents/0100D1B006744000/romfs/debug.xml
+  sd/atmosphere/contents/0100D1B006744000/romfs/debug.xml        (solo con <livello>)
 
 Con --romfs copia anche l'update.pak originale del gioco in
   sd/switch/nst-pak-manager/originali/update.pak
@@ -119,21 +122,24 @@ def main():
         del args[k:k + 2]
         if not os.path.isdir(romfs):
             sys.exit("Cartella del dump RomFS non trovata: %s" % romfs)
-    if len(args) < 2:
+    if len(args) < 1:
         sys.exit(__doc__)
     main_path = find_main(args[0])
-    level = args[1]
+    level = args[1] if len(args) > 1 else None
     out_dir = args[2] if len(args) > 2 else "avvio_livello"
+    if level and not level.lower().endswith(".pak") and "/" not in level and os.path.isdir(level):
+        out_dir, level = level, None  # solo cartella di uscita, senza livello
 
-    if level.lower().endswith(".pak"):
+    if level and level.lower().endswith(".pak"):
         found = levels_in_pak(level)
         if not found:
             sys.exit("%s non contiene un livello" % level)
         if len(found) > 1:
             print("Il .pak contiene piu' livelli, uso il primo: %s" % ", ".join(found))
         level = found[0]
-    level = level.strip().strip("/").lower()
-    if not re.match(r"^[a-z0-9_]+/[a-z0-9_]+/[a-z0-9_]+$", level):
+    if level:
+        level = level.strip().strip("/").lower()
+    if level and not re.match(r"^[a-z0-9_]+/[a-z0-9_]+/[a-z0-9_]+$", level):
         sys.exit("Nome del livello non valido: %s (atteso: gioco/cartella/livello)" % level)
 
     with open(main_path, "rb") as f:
@@ -151,16 +157,16 @@ def main():
 
     build_id = raw[0x40:0x60].hex().upper()
     patch = ips32(addr + NSO_HEADER, struct.pack("<I", MOV_W0_ONE))
-    xml = debug_xml(level).encode("ascii")
-
     print("Eseguibile: %s (ID build %s)" % (main_path, build_id))
     print("Funzione %s a 0x%X: 'mov w0, wzr' -> 'mov w0, #1'" % (SYMBOL, addr))
-    print("Livello: %s" % level)
+    print("Livello: %s" % (level or "nessuno (debug.xml non creato: sulla Switch lo scrive l'app)"))
     print("File creati:")
     write(os.path.join(out_dir, "eden", "NST avvio livello", "exefs", build_id + ".ips"), patch)
-    write(os.path.join(out_dir, "eden", "NST avvio livello", "romfs", "debug.xml"), xml)
     write(os.path.join(out_dir, "sd", "atmosphere", "exefs_patches", "nst_avvio_livello", build_id + ".ips"), patch)
-    write(os.path.join(out_dir, "sd", "atmosphere", "contents", TITLE_ID, "romfs", "debug.xml"), xml)
+    if level:
+        xml = debug_xml(level).encode("ascii")
+        write(os.path.join(out_dir, "eden", "NST avvio livello", "romfs", "debug.xml"), xml)
+        write(os.path.join(out_dir, "sd", "atmosphere", "contents", TITLE_ID, "romfs", "debug.xml"), xml)
     if romfs:
         dest = os.path.join(out_dir, "sd", "switch", "nst-pak-manager", "originali", "update.pak")
         os.makedirs(os.path.dirname(dest), exist_ok=True)
