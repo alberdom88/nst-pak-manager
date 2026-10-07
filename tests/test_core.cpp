@@ -397,12 +397,15 @@ int main(int argc, char** argv) {
         CHECK(err.find("Custom_Level") != std::string::npos && err.find("Nessuna modifica") != std::string::npos);
         CHECK(util::fileExists(l101) == hadL101 && slurp(l101) == beforeL101);
         CHECK(!util::fileExists(l101 + ".part"));
-        CHECK(m.install(*custom, "custom_level.PAK", "PC", noProgress, err));  // stesso livello: OK
+        std::string as;
+        CHECK(m.install(*custom, "Custom_Level.PAK", "PC", noProgress, err, &as));  // stesso livello: OK
+        CHECK(as == "custom_level.pak");  // come lo cerca il gioco: minuscolo
+        CHECK(util::fileExists(m.modDir() + "/custom_level.pak") && !util::fileExists(m.modDir() + "/Custom_Level.PAK"));
         std::vector<std::string> lv;
-        CHECK(pakLevelNames(m.modDir() + "/custom_level.PAK", lv) && lv.size() == 1 && lv[0] == "Custom_Level");
+        CHECK(pakLevelNames(m.modDir() + "/custom_level.pak", lv) && lv.size() == 1 && lv[0] == "Custom_Level");
         CHECK(pakLevelNames(updDest, lv) == false || lv.empty());  // file senza elenco valido: nessun livello
         std::vector<std::string> ids;
-        CHECK(pakLevelIds(m.modDir() + "/custom_level.PAK", ids) && ids.size() == 1 &&
+        CHECK(pakLevelIds(m.modDir() + "/custom_level.pak", ids) && ids.size() == 1 &&
               ids[0] == "crash1/custom_level/custom_level");
         CHECK(launchArguments("nst -om {livello}", ids[0]) == "nst -om crash1/custom_level/custom_level");
         CHECK(launchArguments("{livello} {livello}", "a") == "a a");
@@ -424,8 +427,13 @@ int main(int argc, char** argv) {
         spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/29E1A37D84227147A50A18D055FBB032.ips", "IPS32EEOF");
         CHECK(m.directLaunchPatchInstalled());
         std::string note;
-        CHECK(m.restore("custom_level.PAK", err, note));
+        CHECK(m.restore("custom_level.pak", err, note));
     }
+
+    // nome del .pak di un livello: grafia dell'originale, altrimenti minuscolo
+    CHECK(levelPakName("Custom_Level", {}) == "custom_level.pak");
+    CHECK(levelPakName("L112_RoadToNowhere", {"l112_roadtonowhere.pak"}) == "l112_roadtonowhere.pak");
+    CHECK(levelPakName("l101_nsanitybeach", {"L101_NSanityBeach.pak"}) == "L101_NSanityBeach.pak");
 
     // nome automatico (target vuoto): per un livello quello che ha dentro, altrimenti suggerito o remoto
     {
@@ -433,11 +441,53 @@ int main(int argc, char** argv) {
         RemoteFile renamed = *custom;
         renamed.name = "Il mio livello v2.pak";  // nome qualsiasi sulla sorgente
         std::string as;
-        CHECK(m.install(renamed, "", "PC", noProgress, err, &as) && as == "Custom_Level.pak");
-        CHECK(util::fileExists(m.modDir() + "/Custom_Level.pak") && !util::fileExists(m.modDir() + "/Il mio livello v2.pak.part"));
-        CHECK(m.find("Custom_Level.pak") && m.find("Custom_Level.pak")->remote == "Il mio livello v2.pak");
+        CHECK(m.install(renamed, "", "PC", noProgress, err, &as) && as == "custom_level.pak");
+        CHECK(util::fileExists(m.modDir() + "/custom_level.pak") && !util::fileExists(m.modDir() + "/Il mio livello v2.pak.part"));
+        CHECK(m.find("custom_level.pak") && m.find("custom_level.pak")->remote == "Il mio livello v2.pak");
         std::string note;
-        CHECK(m.restore("Custom_Level.pak", err, note));
+        // installato con le maiuscole da una versione precedente: fixLevelCase lo rinomina
+        std::string fixed;
+        CHECK(m.fixLevelCase("custom_level.pak", fixed, err) && fixed == "custom_level.pak");  // gia' giusto
+        CHECK(m.restore("custom_level.pak", err, note));
+        {
+            // stato scritto dalla 1.8.0: Custom_Level.pak installato dall'app
+            Manager old(sd + "/vecchio", cfg);
+            CHECK(old.load(err, warn));
+            util::mkdirs(old.modDir());
+            CHECK(old.install(renamed, "", "PC", noProgress, err, &as) && as == "custom_level.pak");
+            std::string st = slurp(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json");
+            size_t at;
+            while ((at = st.find("custom_level.pak")) != std::string::npos) st.replace(at, 16, "Custom_Level.pak");
+            spit(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json", st);
+            CHECK(util::moveFile(old.modDir() + "/custom_level.pak", old.modDir() + "/Custom_Level.pak"));
+            Manager m18(sd + "/vecchio", cfg);
+            CHECK(m18.load(err, warn) && m18.find("Custom_Level.pak"));
+            CHECK(m18.fixLevelCase("Custom_Level.pak", fixed, err) && fixed == "custom_level.pak");
+            CHECK(util::fileExists(m18.modDir() + "/custom_level.pak") && !util::fileExists(m18.modDir() + "/Custom_Level.pak"));
+            CHECK(!util::fileExists(m18.modDir() + "/Custom_Level.pak.rinomina"));
+            CHECK(m18.find("custom_level.pak") && !m18.find("Custom_Level.pak"));
+            Manager reload(sd + "/vecchio", cfg);
+            CHECK(reload.load(err, warn) && reload.find("custom_level.pak") && reload.rememberedTarget("Il mio livello v2.pak") == "custom_level.pak");
+            // reinstallazione sopra una voce con l'altra grafia: una sola voce, un solo file
+            CHECK(util::moveFile(reload.modDir() + "/custom_level.pak", reload.modDir() + "/Custom_Level.pak"));
+            st = slurp(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json");
+            while ((at = st.find("custom_level.pak")) != std::string::npos) st.replace(at, 16, "Custom_Level.pak");
+            spit(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json", st);
+            Manager again(sd + "/vecchio", cfg);
+            CHECK(again.load(err, warn));
+            CHECK(again.install(renamed, "", "PC", noProgress, err, &as) && as == "custom_level.pak");
+            CHECK(again.installed().size() == 1 && again.find("custom_level.pak"));
+            CHECK(util::fileExists(again.modDir() + "/custom_level.pak") && !util::fileExists(again.modDir() + "/Custom_Level.pak"));
+            // un file esterno (non installato dall'app) con le maiuscole: rinominato lo stesso
+            std::string levelData = slurp(again.modDir() + "/custom_level.pak");
+            CHECK(again.restore("custom_level.pak", err, note) && again.installed().empty());
+            spit(again.modDir() + "/Custom_Level.pak", levelData);
+            CHECK(again.fixLevelCase("Custom_Level.pak", fixed, err) && fixed == "custom_level.pak");
+            CHECK(slurp(again.modDir() + "/custom_level.pak") == levelData && again.installed().empty());
+            // un .pak che non e' un livello resta com'e'
+            spit(again.modDir() + "/Altro.pak", "PAK?");
+            CHECK(again.fixLevelCase("Altro.pak", fixed, err) && fixed == "Altro.pak" && util::fileExists(again.modDir() + "/Altro.pak"));
+        }
         m.setOriginals({"CUSTOM_LEVEL.pak", "update.pak"});
         CHECK(m.install(*custom, "", "PC", noProgress, err, &as) && as == "CUSTOM_LEVEL.pak");  // grafia dell'elenco
         CHECK(m.restore("CUSTOM_LEVEL.pak", err, note));

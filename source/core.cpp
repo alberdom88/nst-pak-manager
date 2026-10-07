@@ -303,6 +303,16 @@ bool pakLevelIds(const std::string& path, std::vector<std::string>& out) {
     return pakLevels(path, names, out);
 }
 
+std::string levelPakName(const std::string& level, const std::vector<std::string>& originals) {
+    const std::string name = level + ".pak";
+    for (const std::string& o : originals)
+        if (util::toLower(o) == util::toLower(name)) return o;  // grafia dell'originale
+    // Sulla Switch gli archivi dei livelli sono tutti in minuscolo (l112_roadtonowhere.pak) e il
+    // gioco li apre cosi': archives/<livello>.pak con l'identificativo in minuscolo. La romfs
+    // distingue maiuscole e minuscole, quindi Custom_Level.pak non verrebbe trovato.
+    return util::toLower(name);
+}
+
 std::string launchArguments(const std::string& pattern, const std::string& levelId) {
     std::string out = pattern;
     const std::string key = "{livello}";
@@ -629,12 +639,7 @@ static bool hasPakMagic(const std::string& path) {
 std::string Manager::autoTarget(const RemoteFile& file, const std::string& downloaded) const {
     // Un livello si installa solo con il nome che ha dentro (come lo cerca il gioco)
     std::vector<std::string> levels;
-    if (pakLevelNames(downloaded, levels) && !levels.empty()) {
-        std::string name = levels[0] + ".pak";
-        for (const std::string& o : originals_)
-            if (util::toLower(o) == util::toLower(name)) return o;  // grafia dell'originale
-        return name;
-    }
+    if (pakLevelNames(downloaded, levels) && !levels.empty()) return levelPakName(levels[0], originals_);
     std::string suggested = suggestTarget(file, originals_);
     return suggested.empty() ? file.name : suggested;
 }
@@ -685,20 +690,23 @@ bool Manager::install(const RemoteFile& file, const std::string& wanted, const s
             return false;
         }
     }
-    if (installedAs) *installedAs = target;
     // Un livello si trova solo con il suo nome: rinominare il .pak non rinomina i file che contiene
     std::vector<std::string> levels;
     if (pakLevelNames(tmp, levels) && !levels.empty()) {
         std::string want = util::toLower(target.substr(0, target.size() - 4));
-        bool match = false;
-        for (const std::string& l : levels) match = match || util::toLower(l) == want;
-        if (!match) {
+        std::string match;
+        for (const std::string& l : levels)
+            if (match.empty() && util::toLower(l) == want) match = l;
+        if (match.empty()) {
             util::removeFile(tmp);
             err = "dentro c'e' il livello '" + levels[0] + "', non '" + target.substr(0, target.size() - 4) +
                   "': con questo nome il gioco non lo trova (schermo nero o crash). Nessuna modifica fatta.";
             return false;
         }
+        // Le maiuscole contano: il gioco apre archives/<livello in minuscolo>.pak
+        target = levelPakName(match, originals_);
     }
+    if (installedAs) *installedAs = target;
 
     if (!place(tmp, target, file.name, sourceName, written, err)) return false;
     bool known = false;
@@ -730,6 +738,14 @@ bool Manager::place(const std::string& tmp, const std::string& target, const std
         if (util::toLower(f.name) == util::toLower(target)) entry = &f;
     std::string backupName = entry ? entry->backup : "";
     bool newBackup = false;
+    // Nostra installazione con un'altra grafia (Custom_Level.pak -> custom_level.pak): il file vecchio
+    // si toglie prima (su FAT e' lo stesso file di dest, altrove resterebbe accanto al nuovo)
+    if (entry && entry->name != target && util::fileExists(util::joinPath(modDir_, entry->name)) &&
+        !util::removeFile(util::joinPath(modDir_, entry->name))) {
+        util::removeFile(tmp);
+        err = "impossibile sostituire " + entry->name;
+        return false;
+    }
     if (util::fileExists(dest)) {
         if (entry) {
             // E' una nostra installazione precedente: il backup originale e' gia' salvato
@@ -758,6 +774,9 @@ bool Manager::place(const std::string& tmp, const std::string& target, const std
     }
 
     if (entry) {
+        // Stessa installazione con un'altra grafia (Custom_Level.pak -> custom_level.pak): su un file
+        // system che distingue le maiuscole il file vecchio e' ancora li'
+        entry->name = target;
         entry->remote = remoteName;
         entry->source = sourceName;
         entry->size = written;
@@ -769,6 +788,42 @@ bool Manager::place(const std::string& tmp, const std::string& target, const std
         f.size = written;
         f.backup = backupName;
         installed_.push_back(f);
+    }
+    return true;
+}
+
+bool Manager::fixLevelCase(const std::string& pakName, std::string& fixedName, std::string& err) {
+    fixedName = pakName;
+    const std::string path = util::joinPath(modDir_, pakName);
+    std::vector<std::string> levels;
+    if (pakName.size() <= 4 || !pakLevelNames(path, levels)) return true;
+    const std::string base = util::toLower(pakName.substr(0, pakName.size() - 4));
+    std::string want;
+    for (const std::string& l : levels)
+        if (want.empty() && util::toLower(l) == base) want = levelPakName(l, originals_);
+    if (want.empty() || want == pakName) return true;  // gia' giusto (o non e' il nome del livello)
+
+    // Su FAT i due nomi sono lo stesso file: si passa da un nome intermedio
+    const std::string tmp = path + ".rinomina";
+    const std::string dest = util::joinPath(modDir_, want);
+    util::removeFile(tmp);
+    if (!util::moveFile(path, tmp)) {
+        err = "impossibile rinominare " + pakName + " in " + want;
+        return false;
+    }
+    if (!util::moveFile(tmp, dest)) {
+        util::moveFile(tmp, path);
+        err = "impossibile rinominare " + pakName + " in " + want + (util::fileExists(dest) ? " (esiste gia')" : "");
+        return false;
+    }
+    for (InstalledFile& f : installed_)
+        if (f.name == pakName) f.name = want;
+    for (auto& p : remembered_)
+        if (p.second == pakName) p.second = want;
+    fixedName = want;
+    if (!save(err)) {
+        err = want + " rinominato, ma " + err;
+        return false;
     }
     return true;
 }

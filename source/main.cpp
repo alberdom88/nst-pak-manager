@@ -16,7 +16,7 @@
 #include "net.hpp"
 #include "util.hpp"
 
-#define APP_VERSION_STR "1.8.0"
+#define APP_VERSION_STR "1.8.1"
 
 static const char* ROOT = "sdmc:";
 static const int COLS = 79;  // la console e' 80x45: lasciamo libera l'ultima colonna
@@ -578,7 +578,8 @@ static void launchGame(App& a, bool keepDirect = false) {
 // Avvia il gioco direttamente nel livello contenuto in un .pak installato. Il gioco legge
 // debug.xml (serve la patch dell'eseguibile, vedi tools/crea_avvio_livello.py); in piu', se
 // il servizio ldr:shel di Atmosphere e' disponibile, gli passa anche l'opzione -om.
-static void launchLevel(App& a, const std::string& pakName) {
+static void launchLevel(App& a, const std::string& requested) {
+    std::string pakName = requested;  // copia: refreshLocal puo' cambiare l'elenco da cui viene
     std::vector<std::string> ids;
     if (!pakLevelIds(a.mgr->modDir() + "/" + pakName, ids) || ids.empty()) {
         inform("Nessun livello", {pakName + " non contiene un livello da avviare."}, C_WARN);
@@ -587,6 +588,16 @@ static void launchLevel(App& a, const std::string& pakName) {
     if (gameRunning()) {
         inform("Gioco gia' aperto", {"Un gioco e' aperto in background: chiudilo dal menu HOME e riprova."}, C_WARN);
         return;
+    }
+    // Installato con le maiuscole da una versione precedente: il gioco cerca il nome in minuscolo
+    std::string err, fixed;
+    if (!a.mgr->fixLevelCase(pakName, fixed, err)) {
+        inform("Nome del livello", {err, "", "Il gioco cerca il livello come " + util::toLower(pakName) + "."}, C_WARN);
+        return;
+    }
+    if (fixed != pakName) {
+        pakName = fixed;
+        refreshLocal(a);
     }
     const std::string& level = ids[0];
     if (!a.mgr->directLaunchPatchInstalled()) {
@@ -600,7 +611,6 @@ static void launchLevel(App& a, const std::string& pakName) {
                       "Senza la patch il gioco probabilmente si aprira' dal menu. Avviare lo stesso?"}))
             return;
     }
-    std::string err;
     // Livello nuovo (convertito con --nuovo): update.pak con la sua registrazione, creato qui
     messageScreen("Preparazione", {"Controllo se " + pakName + " e' un livello nuovo da registrare..."});
     consoleUpdate(NULL);

@@ -69,14 +69,16 @@ vanno convertiti per la Switch con il convertitore
    ```
    NST.exe --switch converti "MioLivello.pak" "%APPDATA%\eden\dump\0100D1B006744000\romfs" "out\MioLivello.pak" "out\report.txt" --nuovo
    ```
-   - `--nuovo`: il livello tiene il suo nome (consigliato). Si apre con l'avvio diretto,
-     nei menu del gioco non compare.
+   - `--nuovo` (consigliato): il livello prende il nome del file di uscita, qui `MioLivello`,
+     qualunque nome avesse nell'editor. Si apre con l'avvio diretto, nei menu del gioco non
+     compare.
    - `--come-originale`: per un livello creato nell'editor da uno originale
      (`L112_RoadToNowhere_Custom`): prende il posto dell'originale e si gioca anche dai menu.
    - `--sostituisci <livello>`: prende il posto del livello indicato (per esempio
      `L101_NSanityBeach`).
 
-   L'archivio convertito prende il nome del livello (per esempio `Custom_Level.pak`).
+   L'archivio viene scritto con il nome del livello in minuscolo (`out\miolivello.pak`):
+   sulla Switch il gioco cerca i livelli solo così.
 3. **Caricalo** nella cartella MEGA (o nella cartella del PC). Basta il livello:
    `update.pak` lo crea l'app.
 4. **Sulla Switch**: apri l'app, scheda REMOTI, premi **Y** sul livello. L'app lo scarica,
@@ -98,15 +100,19 @@ load\0100D1B006744000\
 │   └── romfs\debug.xml
 └── Mio livello\
     └── romfs\archives\
-        ├── Custom_Level.pak    ← il livello convertito
+        ├── miolivello.pak      ← il livello convertito (nome in minuscolo)
         └── update.pak          ← solo con --nuovo: quello creato dal convertitore
 ```
 
 `debug.xml` deve nominare il livello da aprire: crealo indicando il `.pak` convertito.
 
 ```
-python tools\crea_avvio_livello.py "%APPDATA%\eden\dump\0100D1B006744000" "out\Custom_Level.pak"
+python tools\crea_avvio_livello.py "%APPDATA%\eden\dump\0100D1B006744000" "out\miolivello.pak"
 ```
+
+Il nome del file conta: il gioco apre `archives/<livello in minuscolo>.pak` e la romfs
+distingue maiuscole e minuscole (`Custom_Level.pak` non viene trovato e il gioco resta sulla
+schermata di caricamento). Lo script avvisa se il nome non è quello giusto.
 
 Tieni un solo `update.pak` tra le mod attive. Per tornare al gioco normale togli `debug.xml`.
 
@@ -141,9 +147,12 @@ l'app mostra un avviso.
 
 Non serve dire all'app quale file sostituire: il nome lo prende dal file scaricato.
 
-- **Livello**: viene installato con il nome del livello che ha dentro, per esempio
-  `L112_RoadToNowhere.pak` o `Custom_Level.pak`, comunque si chiami su MEGA o sul PC. È
-  l'unico nome con cui il gioco lo trova.
+- **Livello**: viene installato con il nome del livello che ha dentro, in minuscolo come
+  tutti gli archivi della Switch: `l112_roadtonowhere.pak`, oppure `custom_level.pak` per il
+  livello `Custom_Level`, comunque si chiami su MEGA o sul PC. È l'unico nome con cui il
+  gioco lo trova: cerca `archives/<livello in minuscolo>.pak` e la romfs distingue le
+  maiuscole. Un livello installato con le maiuscole da una versione precedente (fino alla
+  1.8.0) viene rinominato da solo quando lo avvii.
 - **Altri file** (per esempio `update.pak`): l'ultima scelta fatta per quel file, poi il
   campo `target` del manifest, poi il nome stesso del file.
 
@@ -290,6 +299,15 @@ nome con cui è installato. Nella scheda INSTALLATI ogni riga mostra
 
 - **Il gioco si apre dal menu invece che nel livello**: manca la patch (l'app lo segnala) o
   è per un'altra versione del gioco; rifai i dump e il passo 2 della preparazione.
+- **Il gioco resta sulla schermata di caricamento**, nell'ordine:
+  1. nome del file con le maiuscole: il livello deve chiamarsi come dentro, in minuscolo
+     (`custom_level.pak`). Dalla 1.8.1 l'app lo rinomina da sola quando lo avvii; su Eden
+     rinominalo a mano;
+  2. versione del gioco diversa da quella del dump: la copia in `originali/update.pak` e
+     i file di registrazione del livello vengono dal dump, quindi devono essere della stessa
+     versione installata sulla Switch (HOME → icona di Crash → **+**, la versione è in alto);
+  3. il livello stesso: provalo su Eden con gli stessi file. Se si blocca anche lì, allega il
+     rapporto della conversione.
 - **"Livello nuovo non registrato"**: manca `switch/nst-pak-manager/originali/update.pak`.
 - **Schermo nero o crash**: quasi sempre il `.pak` è ancora nel formato PC, o è stato
   rinominato. Rinominare il `.pak` non rinomina il livello che contiene (l'app installa

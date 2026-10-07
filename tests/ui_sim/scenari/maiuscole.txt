@@ -1,0 +1,3 @@
+# livello installato con le maiuscole da una versione precedente (Nuovo.pak): Y lo rinomina in nuovo.pak e avvia
+# uso: --config tests/ui_sim/sim_config_nuovo.json --prepare (patch, update.pak originale, Nuovo.pak e stato della 1.8.0)
+. SNAP R . SNAP L Y . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP

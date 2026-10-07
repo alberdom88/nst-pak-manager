@@ -130,13 +130,20 @@ def main():
     if level and not level.lower().endswith(".pak") and "/" not in level and os.path.isdir(level):
         out_dir, level = level, None  # solo cartella di uscita, senza livello
 
+    name_warning = None
     if level and level.lower().endswith(".pak"):
-        found = levels_in_pak(level)
+        pak_path = level
+        found = levels_in_pak(pak_path)
         if not found:
-            sys.exit("%s non contiene un livello" % level)
+            sys.exit("%s non contiene un livello" % pak_path)
         if len(found) > 1:
             print("Il .pak contiene piu' livelli, uso il primo: %s" % ", ".join(found))
         level = found[0]
+        # Il gioco apre archives/<livello in minuscolo>.pak e la romfs distingue le maiuscole
+        expected = level.rsplit("/", 1)[-1] + ".pak"
+        if os.path.basename(pak_path) != expected:
+            name_warning = ("ATTENZIONE: nella cartella delle mod il file deve chiamarsi %s (in minuscolo),\n"
+                            "altrimenti il gioco non lo trova e resta sulla schermata di caricamento." % expected)
     if level:
         level = level.strip().strip("/").lower()
     if level and not re.match(r"^[a-z0-9_]+/[a-z0-9_]+/[a-z0-9_]+$", level):
@@ -177,6 +184,9 @@ def main():
         else:
             open(dest, "wb").close()
             print("  %s (vuoto: nel dump non c'e' update.pak)" % dest)
+    if name_warning:
+        print()
+        print(name_warning)
 
 
 if __name__ == "__main__":

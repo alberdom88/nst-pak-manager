@@ -60,6 +60,9 @@ bool pakLevelNames(const std::string& path, std::vector<std::string>& out);
 // Come sopra, ma con l'identificativo usato dal gioco per aprire il livello
 // (<gioco>/<cartella>/<livello> in minuscolo, es. crash1/l112_roadtonowhere/l112_roadtonowhere)
 bool pakLevelIds(const std::string& path, std::vector<std::string>& out);
+// Nome del .pak di un livello come lo cerca il gioco: la grafia dell'originale se il livello e' tra
+// gli originali, altrimenti tutto in minuscolo (sulla Switch archives/<livello>.pak e' minuscolo)
+std::string levelPakName(const std::string& level, const std::vector<std::string>& originals);
 // Argomenti di avvio per un livello: sostituisce {livello} nel modello
 std::string launchArguments(const std::string& pattern, const std::string& levelId);
 // File di configurazione di sviluppo letto dal gioco all'avvio (debug.xml): con
@@ -118,6 +121,9 @@ public:
     // registered = false se il livello non ha nulla da registrare (ha il nome di un livello originale).
     bool registerLevel(const std::string& pakName, bool& registered, std::string& err);
     std::string originalUpdatePath() const;
+    // Livello installato con le maiuscole (Custom_Level.pak, versioni fino alla 1.8.0): lo rinomina
+    // come lo cerca il gioco (custom_level.pak). fixedName riceve il nome da usare (anche se invariato).
+    bool fixLevelCase(const std::string& pakName, std::string& fixedName, std::string& err);
 
     // Rimuove il file installato e rimette il backup. In caso di successo
     // note puo' contenere un avviso (es. backup non piu' presente).
