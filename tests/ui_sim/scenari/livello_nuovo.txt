@@ -1,3 +1,4 @@
-# livello nuovo (convertito con --nuovo): Y nella scheda REMOTI lo scarica, crea update.pak e avvia nel livello
-# uso: --config tests/ui_sim/sim_config_nuovo.json --prepare (patch + copia dell'update.pak originale, vedi README)
-. SNAP Y . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
+# livello nuovo (convertito con --nuovo): A lo scarica, crea update.pak con la registrazione e avvia;
+# il livello giocato la volta prima (custom_level.pak) viene tolto
+# uso: --config tests/ui_sim/sim_config_nuovo.json --prepare 'A=sdmc:/atmosphere/contents/0100D1B006744000/romfs/archives && mkdir -p $A sdmc:/atmosphere/exefs_patches/nst_avvio_livello && echo x > sdmc:/atmosphere/exefs_patches/nst_avvio_livello/29E1A37D84227147A50A18D055FBB032.ips && echo vecchio > $A/custom_level.pak && echo "{\"livello\": \"custom_level.pak\", \"gioco\": \"auto\"}" > sdmc:/switch/nst-pak-manager/stato-0100D1B006744000.json'
+. SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

@@ -5,7 +5,8 @@ ui_sim.py - esegue l'interfaccia dell'app su PC e stampa le schermate.
 Compila main.cpp con un switch.h finto, avvia il server di prova, preme i
 tasti indicati in uno scenario e ricostruisce lo schermo 80x45 dalle sequenze
 ANSI. Ogni "SNAP" nello scenario stampa la schermata in quel momento
-(le righe evidenziate sono marcate con '>' a sinistra).
+(le righe evidenziate sono marcate con '>' a sinistra); alla fine stampa anche
+la schermata rimasta alla chiusura dell'app.
 
 Uso: python tests/ui_sim/ui_sim.py <scenario.txt> [--config file.json] [--curl-include DIR]
 """
@@ -136,6 +137,8 @@ def main():
         for n, s in enumerate(snaps, 1):
             print(f"===== SNAP {n} " + "=" * 60)
             print(s)
+        print("===== SCHERMO ALLA CHIUSURA " + "=" * 46)
+        print(screen.render())
         if out.stderr:
             print("STDERR:", out.stderr.decode(errors="replace"))
         print("===== FILE SU SD (dopo) " + "=" * 50)

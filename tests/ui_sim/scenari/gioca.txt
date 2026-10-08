@@ -1,3 +1,3 @@
-# Y nella scheda REMOTI: scarica il livello (nome dal file), chiede conferma senza patch e avvia nel livello
-. SNAP Y . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . SNAP
-A . SNAP
+# A gioca il primo livello (Custom_Level.pak): lo scarica, scrive debug.xml e avvia il gioco.
+# Senza patch per l'avvio diretto la schermata lo segnala (alla chiusura).
+. SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

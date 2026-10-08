@@ -1,4 +1,4 @@
-// core.cpp
+// core.cpp - sorgenti remote e preparazione del livello da giocare
 #include "core.hpp"
 
 #include <algorithm>
@@ -244,8 +244,6 @@ bool parseManifest(const std::string& json, const std::string& manifestUrl,
         } else if (cJSON_IsObject(item)) {
             f.name = jsonString(item, "name");
             f.url = jsonString(item, "url");
-            f.target = jsonString(item, "target");
-            if (!f.target.empty() && !isValidPakName(f.target)) f.target.clear();
             const cJSON* size = cJSON_GetObjectItemCaseSensitive(item, "size");
             if (cJSON_IsNumber(size) && size->valuedouble > 0) {
                 f.size = (uint64_t)size->valuedouble;
@@ -263,54 +261,87 @@ bool parseManifest(const std::string& json, const std::string& manifestUrl,
     return true;
 }
 
-std::vector<std::string> parseOriginals(const std::string& text) {
-    std::vector<std::string> out;
-    size_t start = 0;
-    while (start <= text.size()) {
-        size_t end = text.find('\n', start);
-        if (end == std::string::npos) end = text.size();
-        std::string l = text.substr(start, end - start);
-        start = end + 1;
-        while (!l.empty() && (l.back() == '\r' || l.back() == ' ' || l.back() == '\t')) l.pop_back();
-        size_t a = l.find_first_not_of(" \t");
-        if (a == std::string::npos || l[a] == '#') continue;
-        l = l.substr(a);
-        if (l.size() >= 3 && (unsigned char)l[0] == 0xEF && (unsigned char)l[1] == 0xBB && (unsigned char)l[2] == 0xBF)
-            l = l.substr(3);  // BOM di Blocco note
-        size_t slash = l.find_last_of("/\\");
-        if (slash != std::string::npos) l = l.substr(slash + 1);
-        if (!isValidPakName(l)) continue;
-        bool dup = false;
-        for (const std::string& o : out) dup = dup || util::toLower(o) == util::toLower(l);
-        if (!dup) out.push_back(l);
+bool pakLevelIds(const std::string& path, std::vector<std::string>& ids) {
+    ids.clear();
+    FILE* f = fopen(path.c_str(), "rb");
+    if (!f) return false;
+    unsigned char h[0x38];
+    bool ok = fread(h, 1, sizeof(h), f) == sizeof(h) && memcmp(h, PAK_MAGIC, 4) == 0;
+    uint32_t count = 0, tableSize = 0;
+    uint64_t tableOff = 0, fileSize = 0;
+    if (ok) {
+        memcpy(&count, h + 0x0C, 4);
+        memcpy(&tableOff, h + 0x28, 8);
+        memcpy(&tableSize, h + 0x30, 4);
+        ok = fseek(f, 0, SEEK_END) == 0;
+        long end = ftell(f);
+        fileSize = end > 0 ? (uint64_t)end : 0;
+        ok = ok && count > 0 && tableSize <= 64u * 1024 * 1024 && (uint64_t)count * 4 <= tableSize &&
+             tableOff + tableSize <= fileSize;
     }
-    std::sort(out.begin(), out.end(), [](const std::string& a, const std::string& b) {
-        return util::toLower(a) < util::toLower(b);
-    });
-    return out;
+    std::string table;
+    if (ok) {
+        table.resize(tableSize);
+        ok = fseek(f, (long)tableOff, SEEK_SET) == 0 && fread(&table[0], 1, tableSize, f) == tableSize;
+    }
+    fclose(f);
+    if (!ok) return false;
+
+    static const std::string prefix = "packages/generated/maps/";
+    static const std::string suffix = "_pkg.igz";
+    for (uint32_t i = 0; i < count; i++) {
+        uint32_t rel;
+        memcpy(&rel, table.data() + 4 * i, 4);
+        size_t a = rel;
+        size_t b = a < table.size() ? table.find('\0', a) : std::string::npos;  // percorso completo
+        size_t c = b == std::string::npos ? std::string::npos : table.find('\0', b + 1);  // percorso breve
+        if (c == std::string::npos) return false;
+        std::string shortPath = util::toLower(table.substr(b + 1, c - b - 1));
+        if (shortPath.compare(0, prefix.size(), prefix) != 0 || !util::endsWithCI(shortPath, suffix)) continue;
+        std::string rest = shortPath.substr(prefix.size());  // <gioco>/<L>/<L>_pkg.igz
+        size_t s1 = rest.find('/');
+        size_t s2 = s1 == std::string::npos ? s1 : rest.find('/', s1 + 1);
+        if (s2 == std::string::npos || rest.find('/', s2 + 1) != std::string::npos) continue;
+        std::string file = rest.substr(s2 + 1);
+        ids.push_back(rest.substr(0, s2 + 1) + file.substr(0, file.size() - suffix.size()));
+    }
+    return true;
 }
 
-// Livelli di un .pak: per ognuno nome (L112_RoadToNowhere) e identificativo (crash1/l112_.../l112_...)
-static bool pakLevels(const std::string& path, std::vector<std::string>& names, std::vector<std::string>& ids);
-
-bool pakLevelNames(const std::string& path, std::vector<std::string>& out) {
-    std::vector<std::string> ids;
-    return pakLevels(path, out, ids);
-}
-
-bool pakLevelIds(const std::string& path, std::vector<std::string>& out) {
-    std::vector<std::string> names;
-    return pakLevels(path, names, out);
-}
-
-std::string levelPakName(const std::string& level, const std::vector<std::string>& originals) {
-    const std::string name = level + ".pak";
-    for (const std::string& o : originals)
-        if (util::toLower(o) == util::toLower(name)) return o;  // grafia dell'originale
+std::string levelPakName(const std::string& level) {
     // Sulla Switch gli archivi dei livelli sono tutti in minuscolo (l112_roadtonowhere.pak) e il
-    // gioco li apre cosi': archives/<livello>.pak con l'identificativo in minuscolo. La romfs
-    // distingue maiuscole e minuscole, quindi Custom_Level.pak non verrebbe trovato.
-    return util::toLower(name);
+    // gioco li apre cosi': archives/<livello>.pak. La romfs distingue maiuscole e minuscole,
+    // quindi Custom_Level.pak non verrebbe trovato.
+    return util::toLower(level.substr(level.rfind('/') + 1) + ".pak");
+}
+
+const char* const GAMES[4] = {"auto", "crash1", "crash2", "crash3"};
+
+std::string normalizeGame(const std::string& game) {
+    std::string g = util::toLower(game);
+    for (const char* known : GAMES)
+        if (g == known) return g;
+    return "auto";
+}
+
+std::string nextGame(const std::string& game, int step) {
+    std::string g = normalizeGame(game);
+    int i = 0;
+    while (g != GAMES[i]) i++;
+    return GAMES[((i + step) % 4 + 4) % 4];
+}
+
+std::string gameLabel(const std::string& game) {
+    std::string g = normalizeGame(game);
+    if (g == "auto") return "Auto";
+    return "Crash " + g.substr(5);
+}
+
+std::string levelIdForGame(const std::string& levelId, const std::string& game) {
+    std::string g = normalizeGame(game);
+    size_t slash = levelId.find('/');
+    if (g == "auto" || slash == std::string::npos) return levelId;
+    return g + levelId.substr(slash);
 }
 
 std::string launchArguments(const std::string& pattern, const std::string& levelId) {
@@ -348,64 +379,6 @@ std::string debugXmlLevel(const std::string& xml) {
         p = xml.find("<MAP", end);
     }
     return "";
-}
-
-static bool pakLevels(const std::string& path, std::vector<std::string>& out, std::vector<std::string>& ids) {
-    out.clear();
-    ids.clear();
-    FILE* f = fopen(path.c_str(), "rb");
-    if (!f) return false;
-    unsigned char h[0x38];
-    bool ok = fread(h, 1, sizeof(h), f) == sizeof(h) && memcmp(h, PAK_MAGIC, 4) == 0;
-    uint32_t count = 0, tableSize = 0;
-    uint64_t tableOff = 0, fileSize = 0;
-    if (ok) {
-        memcpy(&count, h + 0x0C, 4);
-        memcpy(&tableOff, h + 0x28, 8);
-        memcpy(&tableSize, h + 0x30, 4);
-        ok = fseek(f, 0, SEEK_END) == 0;
-        long end = ftell(f);
-        fileSize = end > 0 ? (uint64_t)end : 0;
-        ok = ok && count > 0 && tableSize <= 64u * 1024 * 1024 && (uint64_t)count * 4 <= tableSize &&
-             tableOff + tableSize <= fileSize;
-    }
-    std::string table;
-    if (ok) {
-        table.resize(tableSize);
-        ok = fseek(f, (long)tableOff, SEEK_SET) == 0 && fread(&table[0], 1, tableSize, f) == tableSize;
-    }
-    fclose(f);
-    if (!ok) return false;
-
-    static const std::string prefix = "packages/generated/maps/";
-    static const std::string suffix = "_pkg.igz";
-    for (uint32_t i = 0; i < count; i++) {
-        uint32_t rel;
-        memcpy(&rel, table.data() + 4 * i, 4);
-        size_t a = rel;
-        size_t b = a < table.size() ? table.find('\0', a) : std::string::npos;  // percorso completo
-        size_t c = b == std::string::npos ? std::string::npos : table.find('\0', b + 1);  // percorso breve
-        if (c == std::string::npos) return false;
-        std::string shortPath = util::toLower(table.substr(b + 1, c - b - 1));
-        std::string original = table.substr(b + 1, c - b - 1);
-        if (shortPath.compare(0, prefix.size(), prefix) != 0 || !util::endsWithCI(shortPath, suffix)) continue;
-        std::string rest = original.substr(prefix.size());  // <gioco>/<L>/<L>_pkg.igz
-        size_t s1 = rest.find('/');
-        size_t s2 = s1 == std::string::npos ? s1 : rest.find('/', s1 + 1);
-        if (s2 == std::string::npos || rest.find('/', s2 + 1) != std::string::npos) continue;
-        std::string file = rest.substr(s2 + 1);
-        std::string level = file.substr(0, file.size() - suffix.size());
-        out.push_back(level);
-        ids.push_back(util::toLower(rest.substr(0, s2 + 1) + level));
-    }
-    return true;
-}
-
-bool loadOriginals(const std::string& path, std::vector<std::string>& out) {
-    std::string text;
-    if (!util::readFile(path, text)) return false;
-    out = parseOriginals(text);
-    return true;
 }
 
 static bool listHttp(const SourceConfig& src, std::vector<RemoteFile>& out, std::string& err) {
@@ -451,7 +424,7 @@ bool listSource(const SourceConfig& src, std::vector<RemoteFile>& out, std::stri
     return true;
 }
 
-// ---------------------------------------------------------------- manager
+// ---------------------------------------------------------------- preparazione del livello
 
 std::string appDirFor(const std::string& root) { return root + "/switch/nst-pak-manager"; }
 
@@ -464,8 +437,7 @@ Manager::Manager(const std::string& root, const Config& cfg) {
     root_ = root;
     modDir_ = root + dir;
     appDir_ = appDirFor(root);
-    backupDir_ = appDir_ + "/backup/" + cfg.titleId;
-    statePath_ = appDir_ + "/state-" + cfg.titleId + ".json";
+    statePath_ = appDir_ + "/stato-" + cfg.titleId + ".json";
 }
 
 std::string Manager::romfsDir() const {
@@ -499,49 +471,6 @@ bool Manager::directLaunchPatchInstalled() const {
     return false;
 }
 
-const InstalledFile* Manager::find(const std::string& name) const {
-    for (const InstalledFile& f : installed_)
-        if (f.name == name) return &f;
-    return nullptr;
-}
-
-std::vector<const InstalledFile*> Manager::installedFrom(const std::string& remoteName) const {
-    std::vector<const InstalledFile*> out;
-    for (const InstalledFile& f : installed_)
-        if (f.remote == remoteName) out.push_back(&f);
-    return out;
-}
-
-std::string Manager::rememberedTarget(const std::string& remoteName) const {
-    for (const auto& p : remembered_)
-        if (p.first == remoteName) return p.second;
-    return "";
-}
-
-std::string Manager::suggestTarget(const RemoteFile& file, const std::vector<std::string>& originals) const {
-    std::string t = rememberedTarget(file.name);
-    if (t.empty()) t = file.target;
-    if (t.empty()) t = file.name;
-    // Usa la grafia esatta dell'elenco degli originali, se c'e'
-    for (const std::string& o : originals)
-        if (util::toLower(o) == util::toLower(t)) return o;
-    // Una scelta esplicita (precedente o dal manifest) vale anche se non e' in elenco
-    if (t != file.name || !rememberedTarget(file.name).empty()) return t;
-    return "";
-}
-
-bool Manager::existsInModDir(const std::string& name) const {
-    return util::fileExists(util::joinPath(modDir_, name));
-}
-
-std::vector<std::string> Manager::externalFiles() const {
-    std::vector<std::string> out;
-    for (const std::string& n : util::listFiles(modDir_))
-        if (util::endsWithCI(n, ".pak") && !find(n)) out.push_back(n);
-    std::sort(out.begin(), out.end());
-    return out;
-}
-
 int Manager::cleanupPartials() {
     int n = 0;
     for (const std::string& name : util::listFiles(modDir_))
@@ -549,49 +478,23 @@ int Manager::cleanupPartials() {
     return n;
 }
 
-bool Manager::load(std::string& err, std::string& warning) {
-    warning.clear();
-    installed_.clear();
-    remembered_.clear();
+std::string Manager::originalUpdatePath() const { return appDir_ + "/originali/update.pak"; }
+
+bool Manager::load(std::string& err) {
+    lastLevel_.clear();
+    game_ = "auto";
     if (!util::mkdirs(appDir_)) {
         err = "impossibile creare " + appDir_;
         return false;
     }
-    std::string path = statePath_;
-    if (!util::fileExists(path) && util::fileExists(path + ".tmp")) path += ".tmp";
-    if (!util::fileExists(path)) return true;
-
     std::string data;
-    cJSON* root = nullptr;
-    if (util::readFile(path, data)) root = cJSON_Parse(data.c_str());
-    const cJSON* list = root ? cJSON_GetObjectItemCaseSensitive(root, "installed") : nullptr;
-    if (!root || !cJSON_IsArray(list)) {
-        cJSON_Delete(root);
-        std::string aside = statePath_ + ".corrotto";
-        for (int i = 1; util::fileExists(aside); i++) aside = statePath_ + ".corrotto" + std::to_string(i);
-        rename(path.c_str(), aside.c_str());
-        warning = "stato illeggibile, spostato in " + aside +
-                  ". I backup restano in " + backupDir_;
-        return true;
-    }
-    const cJSON* item;
-    cJSON_ArrayForEach(item, list) {
-        InstalledFile f;
-        f.name = jsonString(item, "name");
-        if (!isValidPakName(f.name)) continue;
-        f.remote = jsonString(item, "remote");
-        if (f.remote.empty()) f.remote = f.name;
-        f.source = jsonString(item, "source");
-        f.backup = jsonString(item, "backup");
-        const cJSON* size = cJSON_GetObjectItemCaseSensitive(item, "size");
-        if (cJSON_IsNumber(size)) f.size = (uint64_t)size->valuedouble;
-        installed_.push_back(f);
-    }
-    const cJSON* targets = cJSON_GetObjectItemCaseSensitive(root, "targets");
-    const cJSON* t;
-    cJSON_ArrayForEach(t, targets) {
-        if (cJSON_IsString(t) && t->string && isValidPakName(t->valuestring))
-            remembered_.push_back({t->string, t->valuestring});
+    if (!util::readFile(statePath_, data)) return true;
+    // Lo stato contiene solo comodita' (ultimo livello, gioco scelto): se e' illeggibile si riparte da zero
+    cJSON* root = cJSON_Parse(data.c_str());
+    if (root) {
+        std::string level = jsonString(root, "livello");
+        if (isValidPakName(level)) lastLevel_ = level;
+        game_ = normalizeGame(jsonString(root, "gioco"));
     }
     cJSON_Delete(root);
     return true;
@@ -599,19 +502,8 @@ bool Manager::load(std::string& err, std::string& warning) {
 
 bool Manager::save(std::string& err) {
     cJSON* root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "version", 1);
-    cJSON* list = cJSON_AddArrayToObject(root, "installed");
-    for (const InstalledFile& f : installed_) {
-        cJSON* o = cJSON_CreateObject();
-        cJSON_AddStringToObject(o, "name", f.name.c_str());
-        cJSON_AddStringToObject(o, "remote", f.remote.c_str());
-        cJSON_AddStringToObject(o, "source", f.source.c_str());
-        cJSON_AddNumberToObject(o, "size", (double)f.size);
-        cJSON_AddStringToObject(o, "backup", f.backup.c_str());
-        cJSON_AddItemToArray(list, o);
-    }
-    cJSON* targets = cJSON_AddObjectToObject(root, "targets");
-    for (const auto& p : remembered_) cJSON_AddStringToObject(targets, p.first.c_str(), p.second.c_str());
+    cJSON_AddStringToObject(root, "livello", lastLevel_.c_str());
+    cJSON_AddStringToObject(root, "gioco", game_.c_str());
     char* text = cJSON_Print(root);
     cJSON_Delete(root);
     bool ok = text && util::mkdirs(appDir_) && util::writeFileAtomic(statePath_, text);
@@ -620,11 +512,9 @@ bool Manager::save(std::string& err) {
     return ok;
 }
 
-std::string Manager::uniqueBackupName(const std::string& name) const {
-    std::string candidate = name;
-    for (int i = 1; util::fileExists(util::joinPath(backupDir_, candidate)); i++)
-        candidate = name + "." + std::to_string(i);
-    return candidate;
+bool Manager::setGame(const std::string& game, std::string& err) {
+    game_ = normalizeGame(game);
+    return save(err);
 }
 
 static bool hasPakMagic(const std::string& path) {
@@ -636,42 +526,20 @@ static bool hasPakMagic(const std::string& path) {
     return n == 4 && memcmp(magic, PAK_MAGIC, 4) == 0;
 }
 
-std::string Manager::autoTarget(const RemoteFile& file, const std::string& downloaded) const {
-    // Un livello si installa solo con il nome che ha dentro (come lo cerca il gioco)
-    std::vector<std::string> levels;
-    if (pakLevelNames(downloaded, levels) && !levels.empty()) return levelPakName(levels[0], originals_);
-    std::string suggested = suggestTarget(file, originals_);
-    return suggested.empty() ? file.name : suggested;
-}
-
-bool Manager::install(const RemoteFile& file, const std::string& wanted, const std::string& sourceName,
-                      const net::Progress& progress, std::string& err, std::string* installedAs) {
-    std::string target = wanted;
-    if (!target.empty() && !isValidPakName(target)) {
-        err = "nome dell'originale non valido: " + target;
-        return false;
-    }
-    if (!util::mkdirs(modDir_) || !util::mkdirs(backupDir_)) {
-        err = "impossibile creare le cartelle su SD";
-        return false;
-    }
+bool Manager::download(const RemoteFile& file, const net::Progress& progress, const std::string& tmp,
+                       std::string& err) {
     uint64_t freeBytes = 0;
     if (file.sizeKnown && util::freeSpace(modDir_, freeBytes) && freeBytes < file.size + FREE_SPACE_MARGIN) {
         err = "spazio insufficiente: servono " + util::formatSize(file.size) + ", liberi " +
               util::formatSize(freeBytes);
         return false;
     }
-
-    // Nome automatico: il .part prende il nome del file remoto
-    const std::string tmp = util::joinPath(modDir_, (target.empty() ? file.name : target) + ".part");
     util::removeFile(tmp);
-
-    // 1. Scarica in un file temporaneo: se qualcosa va storto non si tocca nulla
     uint64_t written = 0;
-    bool downloaded = file.megaNode.empty()
-                          ? net::download(file.url, tmp, file.sizeKnown ? file.size : 0, progress, written, err)
-                          : mega::download(file, tmp, progress, written, err);
-    if (!downloaded) return false;
+    bool ok = file.megaNode.empty()
+                  ? net::download(file.url, tmp, file.sizeKnown ? file.size : 0, progress, written, err)
+                  : mega::download(file, tmp, progress, written, err);
+    if (!ok) return false;
     if (file.sizeKnown && written != file.size) {
         util::removeFile(tmp);
         err = "download incompleto (" + util::formatSize(written) + " su " + util::formatSize(file.size) + ")";
@@ -682,222 +550,120 @@ bool Manager::install(const RemoteFile& file, const std::string& wanted, const s
         err = "il file scaricato non e' un .pak valido (link non diretto o pagina di errore?)";
         return false;
     }
-    if (target.empty()) {
-        target = autoTarget(file, tmp);
-        if (!isValidPakName(target)) {
-            util::removeFile(tmp);
-            err = "nome non valido ricavato dal file: " + target;
-            return false;
-        }
-    }
-    // Un livello si trova solo con il suo nome: rinominare il .pak non rinomina i file che contiene
-    std::vector<std::string> levels;
-    if (pakLevelNames(tmp, levels) && !levels.empty()) {
-        std::string want = util::toLower(target.substr(0, target.size() - 4));
-        std::string match;
-        for (const std::string& l : levels)
-            if (match.empty() && util::toLower(l) == want) match = l;
-        if (match.empty()) {
-            util::removeFile(tmp);
-            err = "dentro c'e' il livello '" + levels[0] + "', non '" + target.substr(0, target.size() - 4) +
-                  "': con questo nome il gioco non lo trova (schermo nero o crash). Nessuna modifica fatta.";
-            return false;
-        }
-        // Le maiuscole contano: il gioco apre archives/<livello in minuscolo>.pak
-        target = levelPakName(match, originals_);
-    }
-    if (installedAs) *installedAs = target;
-
-    if (!place(tmp, target, file.name, sourceName, written, err)) return false;
-    bool known = false;
-    for (auto& p : remembered_)
-        if (p.first == file.name) {
-            p.second = target;
-            known = true;
-        }
-    if (!known) remembered_.push_back({file.name, target});
-    if (!save(err)) {
-        err = "file installato, ma " + err;
-        return false;
-    }
     return true;
 }
 
-// Mette tmp al posto di target nella cartella mod (con il backup di un file non nostro)
-bool Manager::place(const std::string& tmp, const std::string& target, const std::string& remoteName,
-                    const std::string& sourceName, uint64_t written, std::string& err) {
-    const std::string dest = util::joinPath(modDir_, target);
-    if (!util::mkdirs(backupDir_)) {
-        util::removeFile(tmp);
-        err = "impossibile creare la cartella dei backup";
+bool Manager::prepare(const RemoteFile& file, const net::Progress& progress, Prepared& out, std::string& err) {
+    out = Prepared();
+    if (!isValidPakName(file.name)) {
+        err = "nome del file non valido: " + file.name;
         return false;
     }
-    // 2. Mette da parte il file esistente
-    InstalledFile* entry = nullptr;
-    for (InstalledFile& f : installed_)
-        if (util::toLower(f.name) == util::toLower(target)) entry = &f;
-    std::string backupName = entry ? entry->backup : "";
-    bool newBackup = false;
-    // Nostra installazione con un'altra grafia (Custom_Level.pak -> custom_level.pak): il file vecchio
-    // si toglie prima (su FAT e' lo stesso file di dest, altrove resterebbe accanto al nuovo)
-    if (entry && entry->name != target && util::fileExists(util::joinPath(modDir_, entry->name)) &&
-        !util::removeFile(util::joinPath(modDir_, entry->name))) {
-        util::removeFile(tmp);
-        err = "impossibile sostituire " + entry->name;
+    if (!util::mkdirs(modDir_)) {
+        err = "impossibile creare " + modDir_;
         return false;
-    }
-    if (util::fileExists(dest)) {
-        if (entry) {
-            // E' una nostra installazione precedente: il backup originale e' gia' salvato
-            if (!util::removeFile(dest)) {
-                util::removeFile(tmp);
-                err = "impossibile sostituire " + dest;
-                return false;
-            }
-        } else {
-            backupName = uniqueBackupName(target);
-            if (!util::moveFile(dest, util::joinPath(backupDir_, backupName))) {
-                util::removeFile(tmp);
-                err = "impossibile fare il backup di " + target;
-                return false;
-            }
-            newBackup = true;
-        }
     }
 
-    // 3. Mette al suo posto il file nuovo
+    // 1. Download in un file temporaneo: se qualcosa va storto non si tocca nulla
+    const std::string tmp = util::joinPath(modDir_, file.name + ".part");
+    if (!download(file, progress, tmp, err)) return false;
+
+    // 2. Il nome del .pak e' quello del livello che contiene (l'unico con cui il gioco lo trova)
+    std::vector<std::string> ids;
+    if (!pakLevelIds(tmp, ids) || ids.empty()) {
+        util::removeFile(tmp);
+        err = "il file non contiene un livello: non c'e' niente da avviare";
+        return false;
+    }
+    out.levelId = ids[0];
+    out.pakName = levelPakName(out.levelId);
+    const std::string dest = util::joinPath(modDir_, out.pakName);
+
+    // Si gioca un livello alla volta: quello installato la volta prima si toglie (se era al posto
+    // di un livello originale, torna l'originale)
+    if (!lastLevel_.empty() && util::toLower(lastLevel_) != out.pakName) {
+        const std::string old = util::joinPath(modDir_, lastLevel_);
+        if (util::fileExists(old) && util::removeFile(old)) out.removed = lastLevel_;
+    }
+    // Lo stesso livello con le maiuscole (versioni fino alla 1.8.0): il gioco non lo troverebbe
+    for (const std::string& f : util::listFiles(modDir_))
+        if (f != out.pakName && util::toLower(f) == out.pakName) util::removeFile(util::joinPath(modDir_, f));
+    if (util::fileExists(dest) && !util::removeFile(dest)) {
+        util::removeFile(tmp);
+        err = "impossibile sostituire " + dest;
+        return false;
+    }
     if (!util::moveFile(tmp, dest)) {
-        if (newBackup) util::moveFile(util::joinPath(backupDir_, backupName), dest);
         util::removeFile(tmp);
         err = "impossibile spostare il file scaricato in " + modDir_;
         return false;
     }
-
-    if (entry) {
-        // Stessa installazione con un'altra grafia (Custom_Level.pak -> custom_level.pak): su un file
-        // system che distingue le maiuscole il file vecchio e' ancora li'
-        entry->name = target;
-        entry->remote = remoteName;
-        entry->source = sourceName;
-        entry->size = written;
-    } else {
-        InstalledFile f;
-        f.name = target;
-        f.remote = remoteName;
-        f.source = sourceName;
-        f.size = written;
-        f.backup = backupName;
-        installed_.push_back(f);
-    }
-    return true;
-}
-
-bool Manager::fixLevelCase(const std::string& pakName, std::string& fixedName, std::string& err) {
-    fixedName = pakName;
-    const std::string path = util::joinPath(modDir_, pakName);
-    std::vector<std::string> levels;
-    if (pakName.size() <= 4 || !pakLevelNames(path, levels)) return true;
-    const std::string base = util::toLower(pakName.substr(0, pakName.size() - 4));
-    std::string want;
-    for (const std::string& l : levels)
-        if (want.empty() && util::toLower(l) == base) want = levelPakName(l, originals_);
-    if (want.empty() || want == pakName) return true;  // gia' giusto (o non e' il nome del livello)
-
-    // Su FAT i due nomi sono lo stesso file: si passa da un nome intermedio
-    const std::string tmp = path + ".rinomina";
-    const std::string dest = util::joinPath(modDir_, want);
-    util::removeFile(tmp);
-    if (!util::moveFile(path, tmp)) {
-        err = "impossibile rinominare " + pakName + " in " + want;
-        return false;
-    }
-    if (!util::moveFile(tmp, dest)) {
-        util::moveFile(tmp, path);
-        err = "impossibile rinominare " + pakName + " in " + want + (util::fileExists(dest) ? " (esiste gia')" : "");
-        return false;
-    }
-    for (InstalledFile& f : installed_)
-        if (f.name == pakName) f.name = want;
-    for (auto& p : remembered_)
-        if (p.second == pakName) p.second = want;
-    fixedName = want;
+    lastLevel_ = out.pakName;
     if (!save(err)) {
-        err = want + " rinominato, ma " + err;
+        err = "livello installato, ma " + err;
         return false;
     }
-    return true;
+
+    // 3. Registrazione dei livelli nuovi
+    if (!writeUpdate(out.pakName, out, err)) return false;
+
+    // 4. Avvio diretto
+    out.launchId = levelIdForGame(out.levelId, game_);
+    return setDirectLaunch(out.launchId, err);
 }
 
-std::string Manager::originalUpdatePath() const { return appDir_ + "/originali/update.pak"; }
-
-bool Manager::registerLevel(const std::string& pakName, bool& registered, std::string& err) {
-    registered = false;
+bool Manager::writeUpdate(const std::string& pakName, Prepared& out, std::string& err) {
+    const std::string dest = util::joinPath(modDir_, "update.pak");
     pak::Archive level;
-    if (!pak::read(util::joinPath(modDir_, pakName), level, err)) return false;
+    if (!pak::read(util::joinPath(modDir_, pakName), level, err)) {
+        err = pakName + ": " + err;
+        return false;
+    }
     std::vector<const pak::Entry*> files;
     for (const pak::Entry& e : level.entries)
         if (util::toLower(e.path).compare(0, 7, "update/") == 0 && e.path.size() > 7) files.push_back(&e);
-    if (files.empty()) return true;  // livello con il nome di uno originale: niente da registrare
+    if (files.empty()) {
+        // Livello con il nome di uno originale: non c'e' niente da registrare. Un update.pak rimasto
+        // da un livello nuovo giocato prima registrerebbe un livello che non c'e' piu'
+        if (util::fileExists(dest)) {
+            if (!util::removeFile(dest)) {
+                err = "impossibile togliere " + dest;
+                return false;
+            }
+            out.updateRemoved = true;
+        }
+        return true;
+    }
 
+    // Livello nuovo (convertito con --nuovo): i file update/ vanno in update.pak, insieme a quelli
+    // dell'update.pak originale del gioco se ce n'e' una copia (la versione 1.0.0 non ne ha)
     pak::Archive update;
     uint64_t baseSize = 0;
     const std::string base = originalUpdatePath();
-    if (!util::fileExists(base)) {
-        err = "per un livello nuovo serve una copia dell'update.pak originale del gioco in " + base +
-              " (dal dump RomFS: archives/update.pak). Se il gioco non ne ha uno, crea li' un file vuoto.";
-        return false;
-    }
     if (util::fileSize(base, baseSize) && baseSize > 0) {
-        if (!pak::read(base, update, err)) return false;
+        if (!pak::read(base, update, err)) {
+            err = "copia dell'update.pak originale illeggibile (" + base + "): " + err;
+            return false;
+        }
     } else {
-        update.version = level.version;  // il gioco non ha un update.pak: solo la registrazione
+        update.version = level.version;
     }
     for (const pak::Entry* e : files) {
         std::string data;
         if (!pak::extract(level, *e, data, err)) return false;
         pak::put(update, e->path.substr(7), data);
     }
-
-    const std::string tmp = util::joinPath(modDir_, "update.pak.part");
+    const std::string tmp = dest + ".part";
     util::removeFile(tmp);
-    if (!pak::write(update, tmp, err)) return false;
-    uint64_t written = 0;
-    util::fileSize(tmp, written);
-    if (!place(tmp, "update.pak", "registrazione di " + pakName, "generato", written, err)) return false;
-    if (!save(err)) {
-        err = "update.pak creato, ma " + err;
+    if (!pak::write(update, tmp, err)) {
+        util::removeFile(tmp);
         return false;
     }
-    registered = true;
+    if ((util::fileExists(dest) && !util::removeFile(dest)) || !util::moveFile(tmp, dest)) {
+        util::removeFile(tmp);
+        err = "impossibile scrivere " + dest;
+        return false;
+    }
+    out.registered = true;
     return true;
-}
-
-bool Manager::restore(const std::string& name, std::string& err, std::string& note) {
-    note.clear();
-    size_t idx = installed_.size();
-    for (size_t i = 0; i < installed_.size(); i++)
-        if (installed_[i].name == name) idx = i;
-    if (idx == installed_.size()) {
-        err = name + " non e' stato installato da questa app";
-        return false;
-    }
-    const InstalledFile& entry = installed_[idx];
-    const std::string dest = util::joinPath(modDir_, name);
-    if (!util::removeFile(dest)) {
-        err = "impossibile eliminare " + dest;
-        return false;
-    }
-    if (!entry.backup.empty()) {
-        std::string backupPath = util::joinPath(backupDir_, entry.backup);
-        if (util::fileExists(backupPath)) {
-            if (!util::moveFile(backupPath, dest)) {
-                err = "impossibile rimettere il backup " + backupPath;
-                return false;
-            }
-        } else {
-            note = "backup di " + name + " non trovato: file solo rimosso";
-        }
-    }
-    installed_.erase(installed_.begin() + (long)idx);
-    return save(err);
 }

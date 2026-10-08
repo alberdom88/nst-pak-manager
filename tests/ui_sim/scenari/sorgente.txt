@@ -1,0 +1,2 @@
+# - cambia sorgente (MEGA), L sceglie il gioco a ritroso (Crash 3)
+. MINUS . SNAP DOWN A . SNAP L . SNAP PLUS .

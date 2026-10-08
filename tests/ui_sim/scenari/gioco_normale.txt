@@ -1,0 +1,3 @@
+# avvio diretto rimasto attivo: l'intestazione mostra debug.xml, ZL lo toglie e avvia il gioco dal menu
+# uso: --prepare 'mkdir -p sdmc:/atmosphere/contents/0100D1B006744000/romfs && echo "<config><MAP filename=\"crash3/oichi/oichi\"/></config>" > sdmc:/atmosphere/contents/0100D1B006744000/romfs/debug.xml'
+. SNAP ZL .

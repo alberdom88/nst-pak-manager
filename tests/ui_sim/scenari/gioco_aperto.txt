@@ -1,0 +1,4 @@
+# un gioco aperto in background: avviso nell'elenco e A non scarica nulla
+GAME . . SNAP
+A . SNAP
+A . SNAP PLUS .

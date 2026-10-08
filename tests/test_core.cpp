@@ -1,4 +1,4 @@
-// Test del core su PC (Linux): sorgenti remote, installazione, backup, ripristino.
+// Test del core su PC (Linux): sorgenti remote e preparazione del livello da giocare.
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -153,16 +153,6 @@ int main(int argc, char** argv) {
         CHECK(c.launchArgs == "x -om {livello}");
     }
 
-    // ---------- elenco degli originali
-    {
-        std::vector<std::string> o = parseOriginals(
-            "\xEF\xBB\xBFupdate.pak\r\n# commento\n\n  archives/L101_NSanityBeach.pak \n"
-            "C:\\dump\\archives\\L102_Jungle.pak\nUPDATE.PAK\nnote.txt\n../x.pak");
-        CHECK(o.size() == 4);
-        CHECK(o.size() == 4 && o[0] == "L101_NSanityBeach.pak" && o[1] == "L102_Jungle.pak" &&
-              o[2] == "update.pak" && o[3] == "x.pak");
-    }
-
     // ---------- sorgente http: elenco cartella
     std::vector<RemoteFile> httpList;
     std::string err;
@@ -201,8 +191,7 @@ int main(int argc, char** argv) {
     manSrc.url = base + "/m/manifest.json";
     CHECK(listSource(manSrc, man, err));
     CHECK(man.size() == 5);
-    CHECK(byName(man, "custom_v2.pak") && byName(man, "custom_v2.pak")->target == "L101_NSanityBeach.pak");
-    CHECK(byName(man, "update.pak") && byName(man, "update.pak")->target.empty());
+    CHECK(byName(man, "custom_v2.pak") != nullptr);  // "target" del manifest: ignorato
     CHECK(byName(man, "update.pak") && byName(man, "update.pak")->url == base + "/m/files/update.pak" &&
           byName(man, "update.pak")->sizeKnown && byName(man, "update.pak")->size == 3000);
     CHECK(byName(man, "Nome con spazi.pak") &&
@@ -240,321 +229,183 @@ int main(int argc, char** argv) {
         CHECK(!listSource(missing, v, err) && err.find("sottocartella") != std::string::npos);
     }
 
-    // ---------- installazione / backup / ripristino
+    // ---------- nomi, gioco scelto, debug.xml
+    CHECK(levelPakName("Custom_Level") == "custom_level.pak");
+    CHECK(levelPakName("crash3/oichi_level2/oichi_level2") == "oichi_level2.pak");
+    CHECK(normalizeGame("Crash2") == "crash2" && normalizeGame("") == "auto" && normalizeGame("crash4") == "auto");
+    CHECK(nextGame("auto", 1) == "crash1" && nextGame("crash3", 1) == "auto");
+    CHECK(nextGame("auto", -1) == "crash3" && nextGame("crash1", -1) == "auto" && nextGame("xyz", 2) == "crash2");
+    CHECK(gameLabel("auto") == "Auto" && gameLabel("crash2") == "Crash 2" && gameLabel("?") == "Auto");
+    CHECK(levelIdForGame("crash3/oichi/oichi", "auto") == "crash3/oichi/oichi");
+    CHECK(levelIdForGame("crash3/oichi/oichi", "crash1") == "crash1/oichi/oichi");
+    CHECK(levelIdForGame("senza_cartella", "crash1") == "senza_cartella");
+    CHECK(launchArguments("nst -om {livello}", "crash1/a/a") == "nst -om crash1/a/a");
+    CHECK(launchArguments("{livello} {livello}", "a") == "a a");
+    CHECK(launchArguments("nst", "a") == "nst");
+    CHECK(debugXmlLevel(debugXml("crash1/a/a")) == "crash1/a/a");
+    CHECK(debugXmlLevel("<config><MAP checkpoint='x' filename='a/b/c'/></config>") == "a/b/c");
+    CHECK(debugXmlLevel("<config><INIT debugGameMode=\"1\"/></config>").empty());
+
+    // ---------- preparazione del livello
     Config cfg;
     Manager m(sd, cfg);
-    std::string warn;
-    CHECK(m.load(err, warn) && warn.empty());
+    CHECK(m.load(err) && m.game() == "auto" && m.lastLevel().empty());
     CHECK(m.modDir() == sd + "/atmosphere/contents/0100D1B006744000/romfs/archives");
-    util::mkdirs(m.modDir());
-    const std::string updDest = m.modDir() + "/update.pak";
-    spit(updDest, "MOD-PRECEDENTE");  // es. una mod gia' installata a mano
+    CHECK(m.romfsDir() + "/archives" == m.modDir());
+    const std::string mod = m.modDir();
+    auto modFiles = [&]() {
+        std::vector<std::string> v = util::listFiles(mod);
+        std::sort(v.begin(), v.end());
+        return v;
+    };
+    Prepared p;
 
-    uint64_t lastTotal = 0;
+    // un .pak che non e' un livello: errore, niente installato
+    CHECK(!m.prepare(*byName(httpList, "update.pak"), noProgress, p, err) &&
+          err.find("non contiene un livello") != std::string::npos);
+    CHECK(modFiles().empty() && !util::fileExists(m.directLaunchPath()));
+
+    // errori di download: nessuna modifica
+    RemoteFile bad;
+    bad.name = "livello.pak";
+    bad.url = base + "/fake/not_a_pak.pak";
+    CHECK(!m.prepare(bad, noProgress, p, err) && err.find("non e' un .pak") != std::string::npos);
+    const RemoteFile* wrong = byName(man, "wrong_size.pak");
+    CHECK(wrong && !m.prepare(*wrong, noProgress, p, err) && err.find("incompleto") != std::string::npos);
+    RemoteFile gone;
+    gone.name = "manca.pak";
+    gone.url = base + "/files/manca.pak";
+    CHECK(!m.prepare(gone, noProgress, p, err) && err.find("404") != std::string::npos);
+    RemoteFile evil;
+    evil.name = "../evil.pak";
+    evil.url = base + "/files/update.pak";
+    CHECK(!m.prepare(evil, noProgress, p, err));
+    RemoteFile slow;
+    slow.name = "lento.pak";
+    slow.url = base + "/fake/slow.pak";
+    net::Progress cancelSoon = [](uint64_t done, uint64_t) { return done < 100 * 1024; };
+    CHECK(!m.prepare(slow, cancelSoon, p, err) && err == "annullato");
+    RemoteFile huge = *byName(megaFiles, "L102_Jungle.pak");
+    huge.size = 1ull << 50;
+    CHECK(!m.prepare(huge, noProgress, p, err) && err.find("spazio insufficiente") != std::string::npos);
+    CHECK(modFiles().empty() && !util::fileExists(m.directLaunchPath()));
+
+    // livello con un nome remoto qualsiasi: installato con il nome che cerca il gioco
+    spit(mod + "/Custom_Level.pak", "INSTALLATO-DALLA-1.8.0");  // stesso livello, con le maiuscole
+    spit(mod + "/update.pak", "REGISTRAZIONE-DI-PRIMA");         // di un livello nuovo giocato prima
+    RemoteFile renamed = *byName(httpList, "Custom_Level.pak");
+    renamed.name = "Il mio livello v2.pak";
     int calls = 0;
-    net::Progress track = [&](uint64_t, uint64_t total) {
+    uint64_t lastTotal = 0;
+    net::Progress count = [&](uint64_t, uint64_t total) {
         calls++;
         lastTotal = total;
         return true;
     };
-    const RemoteFile* upd = byName(httpList, "update.pak");
-    CHECK(m.install(*upd, upd->name, "PC", track, err));
-    CHECK(calls > 0 && lastTotal == 3000);
-    CHECK(slurp(updDest).compare(0, 4, "IGA\x1a") == 0 && slurp(updDest).size() == 3000);
-    CHECK(slurp(m.backupDir() + "/update.pak") == "MOD-PRECEDENTE");
-    CHECK(m.find("update.pak") && m.find("update.pak")->backup == "update.pak");
+    CHECK(m.prepare(renamed, count, p, err));
+    CHECK(calls > 0 && lastTotal == renamed.size);
+    CHECK(p.pakName == "custom_level.pak" && p.levelId == "crash1/custom_level/custom_level" && p.launchId == p.levelId);
+    CHECK(!p.registered && p.updateRemoved && p.removed.empty());
+    CHECK(modFiles() == std::vector<std::string>{"custom_level.pak"});
+    std::vector<std::string> ids;
+    CHECK(pakLevelIds(mod + "/custom_level.pak", ids) && ids.size() == 1 && ids[0] == "crash1/custom_level/custom_level");
+    CHECK(pakLevelIds(mod + "/manca.pak", ids) == false);
+    CHECK(m.directLaunchLevel() == "crash1/custom_level/custom_level");
+    CHECK(slurp(m.directLaunchPath()).find("<MAP filename=\"crash1/custom_level/custom_level\"/>") != std::string::npos);
+    CHECK(m.lastLevel() == "custom_level.pak");
 
-    // reinstallo da un'altra sorgente: niente secondo backup
-    const RemoteFile* updMega = byName(megaFiles, "update.pak");
-    CHECK(m.install(*updMega, updMega->name, "MEGA", noProgress, err));
-    CHECK(slurp(updDest).size() == 5000 && slurp(updDest).compare(0, 19, "IGA\x1amega-update.pak") == 0);
-    CHECK(slurp(updDest).compare(4990, 10, slurp(updDest).substr(4990 - 15, 10)) == 0);  // decifrato fino in fondo
-    CHECK(util::listFiles(m.backupDir()).size() == 1);
-    CHECK(m.find("update.pak")->source == "MEGA" && m.find("update.pak")->backup == "update.pak");
+    // di nuovo: scarica sempre, anche se c'e' gia'
+    calls = 0;
+    CHECK(m.prepare(renamed, count, p, err) && calls > 0 && !p.updateRemoved && p.removed.empty());
+    CHECK(modFiles() == std::vector<std::string>{"custom_level.pak"});
 
-    // file nuovo, senza nulla da salvare; nome con spazi
-    CHECK(m.install(*byName(httpList, "Nome con spazi.pak"), "Nome con spazi.pak", "PC", noProgress, err));
-    CHECK(m.find("Nome con spazi.pak") && m.find("Nome con spazi.pak")->backup.empty());
-    CHECK(m.install(*byName(megaFiles, "L101_NSanityBeach.pak"), "L101_NSanityBeach.pak", "MEGA", noProgress, err));
-    CHECK(slurp(m.modDir() + "/L101_NSanityBeach.pak").find("mega-L101_NSanityBeach.pak", 69900 - 30) != std::string::npos);
-
-    // file remoto con un nome diverso dall'originale da sostituire
-    const std::vector<std::string> originals = {"L101_NSanityBeach.pak", "L102_Jungle.pak", "update.pak"};
-    const RemoteFile* custom = byName(man, "custom_v2.pak");
-    CHECK(m.suggestTarget(*custom, originals) == "L101_NSanityBeach.pak");      // dal manifest
-    CHECK(m.suggestTarget(*byName(httpList, "update.pak"), originals) == "update.pak");  // stesso nome
-    RemoteFile mixed = *custom;
-    mixed.target = "l101_nsanitybeach.pak";
-    CHECK(m.suggestTarget(mixed, originals) == "L101_NSanityBeach.pak");        // grafia dell'elenco
-    RemoteFile unknown;
-    unknown.name = "MioLivello.pak";
-    CHECK(m.suggestTarget(unknown, originals).empty());                          // da scegliere
-    spit(m.modDir() + "/L102_Jungle.pak", "ALTRA-MOD");
-    const RemoteFile* spazi = byName(httpList, "Nome con spazi.pak");
-    CHECK(m.install(*spazi, "L102_Jungle.pak", "PC", noProgress, err));
-    CHECK(slurp(m.modDir() + "/L102_Jungle.pak").size() == 2048);
-    CHECK(slurp(m.backupDir() + "/L102_Jungle.pak") == "ALTRA-MOD");
-    CHECK(m.find("L102_Jungle.pak") && m.find("L102_Jungle.pak")->remote == "Nome con spazi.pak");
-    CHECK(m.rememberedTarget("Nome con spazi.pak") == "L102_Jungle.pak");
-    CHECK(m.suggestTarget(*spazi, originals) == "L102_Jungle.pak");             // scelta ricordata
-    CHECK(m.installedFrom("Nome con spazi.pak").size() == 2);  // anche con il suo nome, installato sopra
-
-    // lo stato sopravvive al riavvio, abbinamenti compresi
+    // gioco scelto a mano: cambia solo l'identificativo in debug.xml
+    CHECK(m.setGame("crash3", err) && m.game() == "crash3");
+    CHECK(m.prepare(renamed, noProgress, p, err) && p.levelId == "crash1/custom_level/custom_level" &&
+          p.launchId == "crash3/custom_level/custom_level");
+    CHECK(m.directLaunchLevel() == "crash3/custom_level/custom_level");
     {
-        Manager m2(sd, cfg);
-        CHECK(m2.load(err, warn) && m2.installed().size() == 4);
-        CHECK(m2.find("L102_Jungle.pak") && m2.find("L102_Jungle.pak")->remote == "Nome con spazi.pak");
-        CHECK(m2.rememberedTarget("Nome con spazi.pak") == "L102_Jungle.pak");
+        Manager again(sd, cfg);
+        CHECK(again.load(err) && again.game() == "crash3" && again.lastLevel() == "custom_level.pak");
     }
-    std::string note0;
-    CHECK(m.restore("L102_Jungle.pak", err, note0));
-    CHECK(slurp(m.modDir() + "/L102_Jungle.pak") == "ALTRA-MOD");
-    CHECK(m.rememberedTarget("Nome con spazi.pak") == "L102_Jungle.pak");      // il ricordo resta
+    CHECK(m.setGame("qualcosa", err) && m.game() == "auto");
 
-    // file esterni
-    spit(m.modDir() + "/altra_mod.pak", "X");
-    std::vector<std::string> ext = m.externalFiles();
-    CHECK(ext.size() == 2 && ext[0] == "L102_Jungle.pak" && ext[1] == "altra_mod.pak");
-
-    // errori: nessuna modifica ai file presenti
-    std::string before = slurp(updDest);
-    RemoteFile bad;
-    bad.name = "update.pak";
-    bad.url = base + "/fake/not_a_pak.pak";
-    CHECK(!m.install(bad, bad.name, "PC", noProgress, err) && err.find("non e' un .pak") != std::string::npos);
-    CHECK(slurp(updDest) == before && !util::fileExists(updDest + ".part"));
-    const RemoteFile* wrong = byName(man, "wrong_size.pak");
-    CHECK(wrong && !m.install(*wrong, wrong->name, "PC", noProgress, err) && err.find("incompleto") != std::string::npos);
-    CHECK(!util::fileExists(m.modDir() + "/wrong_size.pak"));
-    RemoteFile gone;
-    gone.name = "update.pak";
-    gone.url = base + "/files/manca.pak";
-    CHECK(!m.install(gone, gone.name, "PC", noProgress, err) && err.find("404") != std::string::npos);
-    CHECK(slurp(updDest) == before);
-    RemoteFile evil;
-    evil.name = "../evil.pak";
-    evil.url = base + "/files/update.pak";
-    CHECK(!m.install(evil, evil.name, "PC", noProgress, err));
-    CHECK(!m.install(*upd, "../evil.pak", "PC", noProgress, err));
-    CHECK(!m.install(*upd, "nome.txt", "PC", noProgress, err));
-
-    // annullamento a meta' download
-    RemoteFile slow;
-    slow.name = "update.pak";
-    slow.url = base + "/fake/slow.pak";
-    net::Progress cancelSoon = [](uint64_t done, uint64_t) { return done < 100 * 1024; };
-    CHECK(!m.install(slow, slow.name, "PC", cancelSoon, err) && err == "annullato");
-    CHECK(slurp(updDest) == before && !util::fileExists(updDest + ".part"));
-
-    // spazio insufficiente (dimensione dichiarata enorme)
-    RemoteFile huge = *byName(megaFiles, "L102_Jungle.pak");
-    huge.size = 1ull << 50;
-    CHECK(!m.install(huge, huge.name, "MEGA", noProgress, err) && err.find("spazio insufficiente") != std::string::npos);
-
-    // ripristino
-    std::string note;
-    CHECK(m.restore("update.pak", err, note) && note.empty());
-    CHECK(slurp(updDest) == "MOD-PRECEDENTE");
-    CHECK(!util::fileExists(m.backupDir() + "/update.pak"));
-    CHECK(m.restore("L101_NSanityBeach.pak", err, note));
-    CHECK(!util::fileExists(m.modDir() + "/L101_NSanityBeach.pak"));
-    CHECK(!m.restore("altra_mod.pak", err, note));
-    CHECK(util::fileExists(m.modDir() + "/altra_mod.pak"));
-
-    // backup cancellato a mano: il ripristino rimuove solo il file
-    CHECK(m.install(*upd, upd->name, "PC", noProgress, err));
-    util::removeFile(m.backupDir() + "/update.pak");
-    CHECK(m.restore("update.pak", err, note) && !note.empty());
-    CHECK(!util::fileExists(updDest));
-
-    // stato perso: il file gia' presente viene salvato con un nome nuovo
-    spit(updDest, "MOD-PRECEDENTE");
-    CHECK(m.install(*upd, upd->name, "PC", noProgress, err));
+    // stato illeggibile: si riparte da zero
+    spit(m.appDir() + "/stato-0100D1B006744000.json", "{ rotto");
     {
-        std::string state = m.appDir() + "/state-0100D1B006744000.json";
-        util::removeFile(state);
-        Manager m3(sd, cfg);
-        CHECK(m3.load(err, warn) && m3.installed().empty());
-        CHECK(m3.install(*updMega, updMega->name, "MEGA", noProgress, err));
-        CHECK(m3.find("update.pak")->backup == "update.pak.1");
-        CHECK(slurp(m.backupDir() + "/update.pak") == "MOD-PRECEDENTE");
-        CHECK(slurp(m.backupDir() + "/update.pak.1").size() == 3000);
-        // stato corrotto: messo da parte, l'app continua
-        spit(state, "{ non e' json");
-        Manager m4(sd, cfg);
-        CHECK(m4.load(err, warn) && !warn.empty() && m4.installed().empty());
-        CHECK(util::fileExists(state + ".corrotto"));
+        Manager broken(sd, cfg);
+        CHECK(broken.load(err) && broken.game() == "auto" && broken.lastLevel().empty());
     }
+    CHECK(m.setGame("auto", err));  // riscrive lo stato con l'ultimo livello
 
-    // livello con un nome interno diverso dal nome di destinazione
-    {
-        const RemoteFile* custom = byName(httpList, "Custom_Level.pak");
-        CHECK(custom != nullptr);
-        std::string l101 = m.modDir() + "/L101_NSanityBeach.pak";
-        bool hadL101 = util::fileExists(l101);
-        std::string beforeL101 = slurp(l101);
-        CHECK(!m.install(*custom, "L101_NSanityBeach.pak", "PC", noProgress, err));
-        CHECK(err.find("Custom_Level") != std::string::npos && err.find("Nessuna modifica") != std::string::npos);
-        CHECK(util::fileExists(l101) == hadL101 && slurp(l101) == beforeL101);
-        CHECK(!util::fileExists(l101 + ".part"));
-        std::string as;
-        CHECK(m.install(*custom, "Custom_Level.PAK", "PC", noProgress, err, &as));  // stesso livello: OK
-        CHECK(as == "custom_level.pak");  // come lo cerca il gioco: minuscolo
-        CHECK(util::fileExists(m.modDir() + "/custom_level.pak") && !util::fileExists(m.modDir() + "/Custom_Level.PAK"));
-        std::vector<std::string> lv;
-        CHECK(pakLevelNames(m.modDir() + "/custom_level.pak", lv) && lv.size() == 1 && lv[0] == "Custom_Level");
-        CHECK(pakLevelNames(updDest, lv) == false || lv.empty());  // file senza elenco valido: nessun livello
-        std::vector<std::string> ids;
-        CHECK(pakLevelIds(m.modDir() + "/custom_level.pak", ids) && ids.size() == 1 &&
-              ids[0] == "crash1/custom_level/custom_level");
-        CHECK(launchArguments("nst -om {livello}", ids[0]) == "nst -om crash1/custom_level/custom_level");
-        CHECK(launchArguments("{livello} {livello}", "a") == "a a");
-        CHECK(launchArguments("nst", "a") == "nst");
-        // avvio diretto con debug.xml
-        CHECK(debugXmlLevel(debugXml(ids[0])) == ids[0]);
-        CHECK(debugXmlLevel("<config><MAP checkpoint='x' filename='a/b/c'/></config>") == "a/b/c");
-        CHECK(debugXmlLevel("<config><INIT debugGameMode=\"1\"/></config>").empty());
-        CHECK(m.romfsDir() + "/archives" == m.modDir());
-        CHECK(m.directLaunchLevel().empty());
-        CHECK(m.setDirectLaunch(ids[0], err) && m.directLaunchLevel() == ids[0]);
-        CHECK(util::fileExists(m.romfsDir() + "/debug.xml"));
-        m.clearDirectLaunch();
-        CHECK(m.directLaunchLevel().empty() && !util::fileExists(m.romfsDir() + "/debug.xml"));
-        CHECK(!m.directLaunchPatchInstalled());
-        util::mkdirs(sd + DIRECT_LAUNCH_PATCH_DIR);
-        spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/LEGGIMI.txt", "x");
-        CHECK(!m.directLaunchPatchInstalled());
-        spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/29E1A37D84227147A50A18D055FBB032.ips", "IPS32EEOF");
-        CHECK(m.directLaunchPatchInstalled());
-        std::string note;
-        CHECK(m.restore("custom_level.pak", err, note));
-    }
-
-    // nome del .pak di un livello: grafia dell'originale, altrimenti minuscolo
-    CHECK(levelPakName("Custom_Level", {}) == "custom_level.pak");
-    CHECK(levelPakName("L112_RoadToNowhere", {"l112_roadtonowhere.pak"}) == "l112_roadtonowhere.pak");
-    CHECK(levelPakName("l101_nsanitybeach", {"L101_NSanityBeach.pak"}) == "L101_NSanityBeach.pak");
-
-    // nome automatico (target vuoto): per un livello quello che ha dentro, altrimenti suggerito o remoto
-    {
-        const RemoteFile* custom = byName(httpList, "Custom_Level.pak");
-        RemoteFile renamed = *custom;
-        renamed.name = "Il mio livello v2.pak";  // nome qualsiasi sulla sorgente
-        std::string as;
-        CHECK(m.install(renamed, "", "PC", noProgress, err, &as) && as == "custom_level.pak");
-        CHECK(util::fileExists(m.modDir() + "/custom_level.pak") && !util::fileExists(m.modDir() + "/Il mio livello v2.pak.part"));
-        CHECK(m.find("custom_level.pak") && m.find("custom_level.pak")->remote == "Il mio livello v2.pak");
-        std::string note;
-        // installato con le maiuscole da una versione precedente: fixLevelCase lo rinomina
-        std::string fixed;
-        CHECK(m.fixLevelCase("custom_level.pak", fixed, err) && fixed == "custom_level.pak");  // gia' giusto
-        CHECK(m.restore("custom_level.pak", err, note));
-        {
-            // stato scritto dalla 1.8.0: Custom_Level.pak installato dall'app
-            Manager old(sd + "/vecchio", cfg);
-            CHECK(old.load(err, warn));
-            util::mkdirs(old.modDir());
-            CHECK(old.install(renamed, "", "PC", noProgress, err, &as) && as == "custom_level.pak");
-            std::string st = slurp(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json");
-            size_t at;
-            while ((at = st.find("custom_level.pak")) != std::string::npos) st.replace(at, 16, "Custom_Level.pak");
-            spit(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json", st);
-            CHECK(util::moveFile(old.modDir() + "/custom_level.pak", old.modDir() + "/Custom_Level.pak"));
-            Manager m18(sd + "/vecchio", cfg);
-            CHECK(m18.load(err, warn) && m18.find("Custom_Level.pak"));
-            CHECK(m18.fixLevelCase("Custom_Level.pak", fixed, err) && fixed == "custom_level.pak");
-            CHECK(util::fileExists(m18.modDir() + "/custom_level.pak") && !util::fileExists(m18.modDir() + "/Custom_Level.pak"));
-            CHECK(!util::fileExists(m18.modDir() + "/Custom_Level.pak.rinomina"));
-            CHECK(m18.find("custom_level.pak") && !m18.find("Custom_Level.pak"));
-            Manager reload(sd + "/vecchio", cfg);
-            CHECK(reload.load(err, warn) && reload.find("custom_level.pak") && reload.rememberedTarget("Il mio livello v2.pak") == "custom_level.pak");
-            // reinstallazione sopra una voce con l'altra grafia: una sola voce, un solo file
-            CHECK(util::moveFile(reload.modDir() + "/custom_level.pak", reload.modDir() + "/Custom_Level.pak"));
-            st = slurp(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json");
-            while ((at = st.find("custom_level.pak")) != std::string::npos) st.replace(at, 16, "Custom_Level.pak");
-            spit(sd + "/vecchio/switch/nst-pak-manager/state-0100D1B006744000.json", st);
-            Manager again(sd + "/vecchio", cfg);
-            CHECK(again.load(err, warn));
-            CHECK(again.install(renamed, "", "PC", noProgress, err, &as) && as == "custom_level.pak");
-            CHECK(again.installed().size() == 1 && again.find("custom_level.pak"));
-            CHECK(util::fileExists(again.modDir() + "/custom_level.pak") && !util::fileExists(again.modDir() + "/Custom_Level.pak"));
-            // un file esterno (non installato dall'app) con le maiuscole: rinominato lo stesso
-            std::string levelData = slurp(again.modDir() + "/custom_level.pak");
-            CHECK(again.restore("custom_level.pak", err, note) && again.installed().empty());
-            spit(again.modDir() + "/Custom_Level.pak", levelData);
-            CHECK(again.fixLevelCase("Custom_Level.pak", fixed, err) && fixed == "custom_level.pak");
-            CHECK(slurp(again.modDir() + "/custom_level.pak") == levelData && again.installed().empty());
-            // un .pak che non e' un livello resta com'e'
-            spit(again.modDir() + "/Altro.pak", "PAK?");
-            CHECK(again.fixLevelCase("Altro.pak", fixed, err) && fixed == "Altro.pak" && util::fileExists(again.modDir() + "/Altro.pak"));
-        }
-        m.setOriginals({"CUSTOM_LEVEL.pak", "update.pak"});
-        CHECK(m.install(*custom, "", "PC", noProgress, err, &as) && as == "CUSTOM_LEVEL.pak");  // grafia dell'elenco
-        CHECK(m.restore("CUSTOM_LEVEL.pak", err, note));
-        // file che non e' un livello: l'ultima scelta fatta per lui (qui L102_Jungle.pak), altrimenti il suo nome
-        CHECK(m.rememberedTarget("Nome con spazi.pak") == "L102_Jungle.pak");
-        CHECK(m.install(*byName(httpList, "Nome con spazi.pak"), "", "PC", noProgress, err, &as) && as == "L102_Jungle.pak");
-        CHECK(m.restore("L102_Jungle.pak", err, note));
-        RemoteFile fresh = *byName(httpList, "Nome con spazi.pak");
-        fresh.name = "Mai visto.pak";
-        CHECK(m.install(fresh, "", "PC", noProgress, err, &as) && as == "Mai visto.pak");
-        CHECK(m.restore("Mai visto.pak", err, note));
-        CHECK(m.install(*byName(man, "custom_v2.pak"), "", "PC", noProgress, err, &as) && as == "L101_NSanityBeach.pak");  // dal manifest
-        CHECK(m.restore("L101_NSanityBeach.pak", err, note));
-        m.setOriginals({});
-    }
+    // avvio diretto e patch
+    m.clearDirectLaunch();
+    CHECK(m.directLaunchLevel().empty() && !util::fileExists(m.directLaunchPath()));
+    CHECK(m.setDirectLaunch("crash1/a/a", err) && m.directLaunchLevel() == "crash1/a/a");
+    CHECK(!m.directLaunchPatchInstalled());
+    util::mkdirs(sd + DIRECT_LAUNCH_PATCH_DIR);
+    spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/LEGGIMI.txt", "x");
+    CHECK(!m.directLaunchPatchInstalled());
+    spit(sd + DIRECT_LAUNCH_PATCH_DIR + "/29E1A37D84227147A50A18D055FBB032.ips", "IPS32EEOF");
+    CHECK(m.directLaunchPatchInstalled());
 
     // download interrotti
-    spit(m.modDir() + "/vecchio.pak.part", "x");
-    CHECK(m.cleanupPartials() == 1 && !util::fileExists(m.modDir() + "/vecchio.pak.part"));
+    spit(mod + "/vecchio.pak.part", "x");
+    CHECK(m.cleanupPartials() == 1 && !util::fileExists(mod + "/vecchio.pak.part"));
 
-    // ---------- livello nuovo: l'app crea update.pak (pak.cpp + Manager::registerLevel)
+    // ---------- livello nuovo: l'app crea update.pak (pak.cpp); il livello di prima si toglie
     if (argc > 3) {
         const std::string pakDir = argv[3];  // archivi creati da tests/crea_pak_prova.py
-        pak::Archive base;
-        CHECK(pak::read(pakDir + "/base_update.pak", base, err) && base.version == 12 && base.entries.size() == 6);
+        pak::Archive basePak;
+        CHECK(pak::read(pakDir + "/base_update.pak", basePak, err) && basePak.version == 12 && basePak.entries.size() == 6);
         int compressed = 0;
-        for (const pak::Entry& e : base.entries) {
+        for (const pak::Entry& e : basePak.entries) {
             compressed += e.compression != 0;
             CHECK(e.hash == pak::hashPath(e.path));
         }
         CHECK(compressed == 5);
         std::string data;
-        CHECK(!pak::extract(base, base.entries[0].compression ? base.entries[0] : base.entries[1], data, err) ||
-              base.entries[0].compression == 0);  // i file compressi non si estraggono
-        CHECK(pak::write(base, pakDir + "/riscritto.pak", err));  // copia identica (verificata da verifica_pak.py)
+        CHECK(!pak::extract(basePak, basePak.entries[0].compression ? basePak.entries[0] : basePak.entries[1], data, err) ||
+              basePak.entries[0].compression == 0);  // i file compressi non si estraggono
+        CHECK(pak::write(basePak, pakDir + "/riscritto.pak", err));  // copia identica (verificata da verifica_pak.py)
 
-        Manager mr(sd + "/reg", cfg);
-        CHECK(mr.load(err, warn));
-        util::mkdirs(mr.modDir());
-        spit(mr.modDir() + "/Custom_Level.pak", slurp(pakDir + "/Custom_Level.pak"));
-        bool reg = true;
-        CHECK(!mr.registerLevel("Custom_Level.pak", reg, err) && !reg && err.find("update.pak originale") != std::string::npos);
-        util::mkdirs(mr.appDir() + "/originali");
-        spit(mr.originalUpdatePath(), slurp(pakDir + "/base_update.pak"));
-        spit(mr.modDir() + "/update.pak", "MOD-UPDATE-A-MANO");  // un update.pak gia' presente: va in backup
-        CHECK(mr.registerLevel("Custom_Level.pak", reg, err) && reg);
-        CHECK(mr.find("update.pak") && mr.find("update.pak")->source == "generato" &&
-              mr.find("update.pak")->backup == "update.pak" && mr.find("update.pak")->remote == "registrazione di Custom_Level.pak");
-        CHECK(slurp(mr.backupDir() + "/update.pak") == "MOD-UPDATE-A-MANO");
-        CHECK(!util::fileExists(mr.modDir() + "/update.pak.part"));
+        // il gioco (1.0.0) non ha update.pak: nessuna copia dell'originale, update.pak con la sola registrazione
+        RemoteFile nuovo;
+        nuovo.name = "Nuovo.pak";
+        nuovo.url = base + "/nuovo/Nuovo.pak";
+        CHECK(!util::fileExists(m.originalUpdatePath()));
+        CHECK(m.prepare(nuovo, noProgress, p, err));
+        CHECK(p.pakName == "nuovo.pak" && p.levelId == "crash1/nuovo/nuovo" && p.registered && !p.updateRemoved);
+        CHECK(p.removed == "custom_level.pak");  // si gioca un livello alla volta
+        CHECK(modFiles() == (std::vector<std::string>{"nuovo.pak", "update.pak"}));
         pak::Archive merged;
-        CHECK(pak::read(mr.modDir() + "/update.pak", merged, err) && merged.entries.size() == 7);
+        CHECK(pak::read(mod + "/update.pak", merged, err) && merged.entries.size() == 2);
+        CHECK(m.directLaunchLevel() == "crash1/nuovo/nuovo");
+
+        // con la copia dell'update.pak originale: unione
+        util::mkdirs(m.appDir() + "/originali");
+        spit(m.originalUpdatePath(), slurp(pakDir + "/base_update.pak"));
+        RemoteFile reg;
+        reg.name = "Custom_Level.pak";
+        reg.url = base + "/reg/Custom_Level.pak";
+        CHECK(m.prepare(reg, noProgress, p, err));
+        CHECK(p.pakName == "custom_level.pak" && p.registered && p.removed == "nuovo.pak");
+        CHECK(modFiles() == (std::vector<std::string>{"custom_level.pak", "update.pak"}));
+        CHECK(!util::fileExists(mod + "/update.pak.part"));
+        CHECK(pak::read(mod + "/update.pak", merged, err) && merged.entries.size() == 7);
         for (const pak::Entry& e : merged.entries)
             if (e.path == "maps/crash1/custom_level/custom_level_zoneinfo.igz") {
                 CHECK(pak::extract(merged, e, data, err) && data.size() == 2600 && data.compare(0, 11, "zone-nuova:") == 0);
             }
-        spit(pakDir + "/unito.pak", slurp(mr.modDir() + "/update.pak"));  // controllato da verifica_pak.py
-        // seconda registrazione: sostituisce la nostra, il backup resta quello di prima
-        CHECK(mr.registerLevel("Custom_Level.pak", reg, err) && reg && mr.find("update.pak")->backup == "update.pak");
-        // un .pak senza file update/: niente da registrare
-        CHECK(mr.registerLevel("update.pak", reg, err) && !reg);
-        // il gioco non ha update.pak: file vuoto come originale, update.pak con la sola registrazione
-        spit(mr.originalUpdatePath(), "");
-        CHECK(mr.registerLevel("Custom_Level.pak", reg, err) && reg);
-        CHECK(pak::read(mr.modDir() + "/update.pak", merged, err) && merged.entries.size() == 2);
-        std::string note;
-        CHECK(mr.restore("update.pak", err, note) && slurp(mr.modDir() + "/update.pak") == "MOD-UPDATE-A-MANO");
+        spit(pakDir + "/unito.pak", slurp(mod + "/update.pak"));  // controllato da verifica_pak.py
+
+        // copia dell'originale rovinata: errore chiaro
+        spit(m.originalUpdatePath(), "NON E' UN PAK");
+        CHECK(!m.prepare(reg, noProgress, p, err) && err.find("update.pak originale") != std::string::npos);
+
+        // un livello con il nome di uno originale dopo uno nuovo: update.pak tolto
+        CHECK(m.prepare(renamed, noProgress, p, err) && p.updateRemoved && !p.registered);
+        CHECK(modFiles() == std::vector<std::string>{"custom_level.pak"});
     }
 
     net::shutdown();

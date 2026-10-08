@@ -1,0 +1,3 @@
+# R R: gioco scelto a mano (Crash 2), poi A: debug.xml con crash2/... e avviso; la scelta resta nello stato
+# uso: --prepare 'mkdir -p sdmc:/atmosphere/exefs_patches/nst_avvio_livello && echo x > sdmc:/atmosphere/exefs_patches/nst_avvio_livello/29E1A37D84227147A50A18D055FBB032.ips'
+. R . SNAP R . SNAP A . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

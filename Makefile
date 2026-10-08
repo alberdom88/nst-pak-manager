@@ -11,7 +11,7 @@ endif
 
 APP_TITLE	:=	NST Pak Manager
 APP_AUTHOR	:=	Domenico
-APP_VERSION	:=	1.8.1
+APP_VERSION	:=	2.0
 
 TOPDIR		?=	$(CURDIR)
 include $(DEVKITPRO)/libnx/switch_rules

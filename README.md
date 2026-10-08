@@ -1,9 +1,9 @@
 # NST Pak Manager
 
-App homebrew per Nintendo Switch (Atmosphère) che scarica file `.pak` da una cartella
-remota (MEGA o il PC di casa) e li installa come mod di **Crash Bandicoot N. Sane
-Trilogy**, con backup e ripristino. Può avviare il gioco direttamente dentro un livello,
-come il tasto *Play* dell'editor sul PC, anche per i livelli nuovi con un nome qualsiasi.
+App homebrew per Nintendo Switch (Atmosphère) per giocare i livelli personalizzati di
+**Crash Bandicoot N. Sane Trilogy**. Scegli un livello da una cartella remota (MEGA o il PC
+di casa) e premi **A**: l'app lo scarica, crea `update.pak` se serve, scrive `debug.xml` e
+avvia il gioco già dentro il livello, come il tasto *Play* dell'editor sul PC.
 
 I livelli fatti con Crash NST Maker sul PC sono nel formato della versione PC: prima
 vanno convertiti per la Switch con il convertitore
@@ -12,7 +12,7 @@ vanno convertiti per la Switch con il convertitore
 
 - [Procedura completa](#procedura-completa)
 - [Come funziona](#come-funziona)
-- [Sorgenti](#sorgenti) · [Comandi](#comandi) · [Se il livello non funziona](#se-il-livello-non-funziona)
+- [Sorgenti](#sorgenti) · [Comandi](#comandi) · [Se il livello non funziona](#se-il-livello-non-funziona) · [Aggiornare dalla 1.8](#aggiornare-dalla-18)
 - [Strumenti per il PC](#strumenti-per-il-pc) · [Compilare](#compilare)
 
 ## Procedura completa
@@ -38,28 +38,23 @@ vanno convertiti per la Switch con il convertitore
 1. **App.** Scarica l'artifact **nst-pak-manager-sd** dalla scheda Actions di questo
    repository (o compila, vedi [Compilare](#compilare)) e copia il contenuto nella radice
    della SD: l'app finisce in `sdmc:/switch/nst-pak-manager/`.
-2. **Patch per l'avvio diretto e copia dell'`update.pak` originale.** Dal PC, nella cartella
-   di questo repository:
+2. **Patch per l'avvio diretto.** Dal PC, nella cartella di questo repository:
    ```
    python tools\crea_avvio_livello.py "%APPDATA%\eden\dump\0100D1B006744000" --romfs "%APPDATA%\eden\dump\0100D1B006744000"
    ```
    Copia il contenuto di `avvio_livello\sd\` nella radice della SD. Contiene:
    - `atmosphere/exefs_patches/nst_avvio_livello/<ID build>.ips`: la patch (4 byte) che
      permette al gioco di leggere `debug.xml` ([perché](#avvio-diretto-nel-livello));
-   - `switch/nst-pak-manager/originali/update.pak`: la copia dell'`update.pak` originale,
-     su cui l'app costruisce la registrazione dei livelli nuovi.
+   - `switch/nst-pak-manager/originali/update.pak`: la copia dell'`update.pak` originale
+     (`--romfs`), su cui l'app costruisce la registrazione dei livelli nuovi. La versione
+     1.0.0 del gioco non ha un `update.pak`: in quel caso è un file vuoto, e l'app scrive un
+     `update.pak` con la sola registrazione (lo fa anche se la copia manca).
 
    La patch vale per una versione precisa del gioco: se aggiorni il gioco, rifai i dump e
    questo passo.
 3. **Configurazione.** Avvia l'app dall'Homebrew Menu: al primo avvio crea
    `sdmc:/switch/nst-pak-manager/config.json`. Aprilo dal PC (o via FTP), metti il link
    della tua cartella MEGA (vedi [Sorgenti](#sorgenti)) e riavvia l'app.
-4. *(Facoltativo)* `originali.txt`, l'elenco dei `.pak` del gioco: serve solo per la
-   scelta a mano dell'originale (tasto B) e per scrivere i nomi con le maiuscole giuste.
-   ```
-   python tools\list_originals.py "%APPDATA%\eden\dump\0100D1B006744000\romfs"
-   ```
-   e copia `originali.txt` in `sdmc:/switch/nst-pak-manager/`.
 
 ### Per ogni livello
 
@@ -81,11 +76,10 @@ vanno convertiti per la Switch con il convertitore
    sulla Switch il gioco cerca i livelli solo così.
 3. **Caricalo** nella cartella MEGA (o nella cartella del PC). Basta il livello:
    `update.pak` lo crea l'app.
-4. **Sulla Switch**: apri l'app, scheda REMOTI, premi **Y** sul livello. L'app lo scarica,
-   lo installa con il suo nome, registra il livello se è nuovo e avvia il gioco già dentro.
+4. **Sulla Switch**: apri l'app e premi **A** sul livello. L'app lo scarica, crea
+   `update.pak` se il livello è nuovo, scrive `debug.xml` e avvia il gioco già dentro.
 
-Per tornare al gioco normale: **ZL** avvia il gioco dal menu e spegne l'avvio diretto;
-**X** nella scheda INSTALLATI rimette gli originali.
+Per tornare al gioco normale: **ZL** toglie `debug.xml` e avvia il gioco dal menu.
 
 ### Provare un livello su Eden
 
@@ -118,62 +112,36 @@ Tieni un solo `update.pak` tra le mod attive. Per tornare al gioco normale togli
 
 ## Come funziona
 
-### Installazione e backup
+### Cosa fa A
 
-I file originali del gioco stanno dentro il gioco stesso e **non vengono mai toccati**.
-Atmosphère (LayeredFS) carica al loro posto i file che trova in:
+1. **Scarica sempre il livello**, anche se sulla SD ce n'è già uno con lo stesso nome. Il
+   download va prima in un file `.part`; l'app controlla dimensione e firma del file
+   (`IGA\x1A`), così una pagina di errore o un link sbagliato non finisce nella cartella
+   del gioco. **B** durante il download annulla.
+2. **Installa il livello** in `sdmc:/atmosphere/contents/0100D1B006744000/romfs/archives/`,
+   dove Atmosphère (LayeredFS) lo carica al posto dei file del gioco, che non vengono mai
+   toccati. Il nome è quello del livello che il file contiene, in minuscolo come tutti gli
+   archivi della Switch: `custom_level.pak` per il livello `Custom_Level`,
+   `l112_roadtonowhere.pak` per un livello che sostituisce Road to Nowhere, comunque si
+   chiami il file su MEGA o sul PC. È l'unico nome con cui il gioco lo trova. Un `.pak` che
+   non contiene un livello viene rifiutato.
+3. **Crea `update.pak`** se il livello è nuovo (vedi sotto); se non lo è, toglie
+   l'`update.pak` lasciato da un livello nuovo giocato prima.
+4. **Scrive `debug.xml`** con il livello da aprire e **avvia il gioco**.
 
-```
-sdmc:/atmosphere/contents/0100D1B006744000/romfs/archives/
-```
+Si gioca **un livello alla volta**: il livello installato la volta prima viene tolto. Se
+sostituiva un livello originale, il gioco torna a usare l'originale. L'ultimo livello e il
+gioco scelto sono in `sdmc:/switch/nst-pak-manager/stato-0100D1B006744000.json`.
 
-L'app scrive lì i file scaricati. Se in quella cartella c'era già un file con lo stesso
-nome (per esempio una mod installata a mano), prima lo sposta in
-`sdmc:/switch/nst-pak-manager/backup/0100D1B006744000/`. **Ripristina** (X nella scheda
-INSTALLATI) toglie il file installato dall'app e rimette quello salvato; se non c'era
-nulla da salvare il gioco torna a usare il suo originale.
-
-- Il download va prima in un file `.part`: se si interrompe o fallisce, i file esistenti
-  restano come prima.
-- Prima di installare l'app controlla dimensione e firma del file (`IGA\x1A`), così una
-  pagina di errore o un link sbagliato non finisce nella cartella del gioco.
-- Reinstallare un file già installato dall'app non sovrascrive il backup originale.
-- Lo stato (installazioni e scelte) è in `sdmc:/switch/nst-pak-manager/state-0100D1B006744000.json`.
-
-**Chiudi Crash prima di installare o ripristinare**: se il gioco è aperto in background
-l'app mostra un avviso.
-
-### Nome di installazione
-
-Non serve dire all'app quale file sostituire: il nome lo prende dal file scaricato.
-
-- **Livello**: viene installato con il nome del livello che ha dentro, in minuscolo come
-  tutti gli archivi della Switch: `l112_roadtonowhere.pak`, oppure `custom_level.pak` per il
-  livello `Custom_Level`, comunque si chiami su MEGA o sul PC. È l'unico nome con cui il
-  gioco lo trova: cerca `archives/<livello in minuscolo>.pak` e la romfs distingue le
-  maiuscole. Un livello installato con le maiuscole da una versione precedente (fino alla
-  1.8.0) viene rinominato da solo quando lo avvii.
-- **Altri file** (per esempio `update.pak`): l'ultima scelta fatta per quel file, poi il
-  campo `target` del manifest, poi il nome stesso del file.
-
-Per i casi particolari **B** apre l'elenco degli originali per scegliere a mano:
-
-- il cursore parte dall'originale suggerito, segnato con `*`;
-- **Y** apre la tastiera per cercare (es. `jungle`), **X** toglie il filtro;
-- la prima voce permette di scrivere il nome a mano, la seconda di tenere il nome del file;
-- accanto agli originali vedi `ora: <file>` se li hai già sostituiti con l'app, oppure
-  `mod esterna` se nella cartella c'è un file messo a mano (finirà nel backup).
-
-Un livello scelto a mano con un nome diverso dal suo viene comunque bloccato: il gioco
-non lo troverebbe.
+**Chiudi Crash prima di giocare un livello**: se il gioco è aperto in background l'app
+mostra un avviso e non scarica nulla.
 
 ### Avvio diretto nel livello
 
-**Y** nella scheda REMOTI, **Y** nella schermata del risultato dopo un'installazione o
-**ZR** nella scheda INSTALLATI avviano il gioco già dentro il livello. L'app legge dal
-`.pak` il nome del livello (per esempio `crash1/l112_roadtonowhere/l112_roadtonowhere`) e
-lo scrive in `atmosphere/contents/0100D1B006744000/romfs/debug.xml`, il file di
-configurazione di sviluppo che il gioco legge all'avvio:
+L'app legge dal `.pak` l'identificativo del livello (per esempio
+`crash1/l112_roadtonowhere/l112_roadtonowhere`) e lo scrive in
+`atmosphere/contents/0100D1B006744000/romfs/debug.xml`, il file di configurazione di
+sviluppo che il gioco legge all'avvio:
 
 ```xml
 <config>
@@ -185,30 +153,33 @@ Con quel file il gioco carica il livello invece del menu, come con l'opzione `-o
 La versione in commercio però lo ignora: la funzione che ne permette la lettura
 (`CConfigSystem::InFinal`) risponde sempre "no". La patch creata da
 `tools/crea_avvio_livello.py` (passo 2 della preparazione) la fa rispondere "sì". Senza
-`debug.xml` la patch non cambia nulla; se la patch manca, l'app lo segnala prima di avviare.
+`debug.xml` la patch non cambia nulla; se la patch manca, l'app lo segnala.
 
+- **Gioco (L/R)**: la prima parte dell'identificativo indica il gioco del livello. Con
+  **Auto** (predefinito) l'app usa quella scritta nel livello. Con **Crash 1**, **Crash 2**
+  o **Crash 3** la sostituisce in `debug.xml` (`crash3/...` diventa `crash1/...`); il
+  livello resta com'è, quindi se il gioco scelto non è il suo il gioco potrebbe non
+  trovarlo (l'app lo segnala). Il gioco di un livello si decide nell'editor e nel
+  convertitore.
 - L'avvio diretto resta attivo finché c'è `debug.xml`: anche avviando Crash dal menu HOME
-  si entra nel livello. L'intestazione dell'app mostra `avvio diretto: ...`.
-- **ZL** (o A nella schermata del risultato) avvia il gioco dal menu e cancella
-  `debug.xml`. Anche il ripristino dell'originale di quel livello lo cancella.
+  si entra nel livello. L'intestazione dell'app mostra `debug.xml: ...`.
+- **ZL** cancella `debug.xml` e avvia il gioco dal menu.
 - In più l'app passa al gioco l'opzione `-om <livello>` come argomento di avvio (servizio
   `ldr:shel` di Atmosphère). Il formato si cambia in `config.json` con `launch_args`; con
   `"launch_args": ""` non viene usata.
 
-### Livelli nuovi (con il loro nome)
+### Livelli nuovi (update.pak)
 
 Un livello con un nome nuovo (per esempio `Custom_Level`) il gioco non lo conosce: va
 registrato in `update.pak`, come fa l'editor sul PC quando premi *Play*. Il convertitore
 con `--nuovo` mette i file della registrazione nell'archivio del livello (cartella interna
-`update/`); quando avvii il livello, l'app li unisce alla copia dell'`update.pak` originale
-(`sdmc:/switch/nst-pak-manager/originali/update.pak`) e installa il risultato come
-`update.pak`, con il backup.
+`update/`). L'app li mette in `update.pak`, uniti alla copia dell'`update.pak` originale
+(`sdmc:/switch/nst-pak-manager/originali/update.pak`) se c'è e non è vuota; altrimenti
+`update.pak` contiene solo la registrazione, come serve alla versione 1.0.0 del gioco, che
+non ne ha uno.
 
-- Puoi tenere installati più livelli nuovi: a ogni avvio diretto l'app registra quello scelto.
-- Nella scheda INSTALLATI l'`update.pak` creato compare come
-  `update.pak <- registrazione di ...`: X lo toglie e rimette l'originale.
-- Se manca la copia dell'`update.pak` originale, l'app lo dice e non avvia il gioco. Se il
-  gioco non ha un `update.pak`, in `originali/` basta un file vuoto con quel nome.
+L'app considera suo l'`update.pak` nella cartella delle mod: lo sovrascrive per un livello
+nuovo e lo toglie per un livello che non ne ha bisogno.
 
 ## Sorgenti
 
@@ -254,8 +225,7 @@ Se Windows chiede il permesso del firewall, consenti l'accesso sulla rete privat
 
 Per un hosting che non mostra l'elenco della cartella, crea un manifest con
 `python tools/make_manifest.py <cartella>`, caricalo insieme ai `.pak` e usa il suo URL.
-Formato (`url`, `size` e `target` facoltativi; `url` può essere relativo; `target` è
-l'originale proposto per i file che non sono livelli):
+Formato (`url` e `size` facoltativi; `url` può essere relativo):
 
 ```json
 { "files": [ { "name": "MioLivello_v2.pak", "size": 123456789 },
@@ -276,42 +246,39 @@ Se una sorgente HTTPS dà errori di certificato, scarica `cacert.pem` da
 
 ## Comandi
 
-| Tasto | Scheda REMOTI | Scheda INSTALLATI |
-|---|---|---|
-| Su / Giù | sposta il cursore | sposta il cursore |
-| Sinistra / Destra | pagina precedente / successiva | idem |
-| A | seleziona / togli dalla selezione (nome automatico) | seleziona / deseleziona |
-| Y | **gioca**: scarica il file (se serve), registra il livello se è nuovo e avvia il gioco dentro | seleziona tutto / niente |
-| X | installa i selezionati (o quello sotto il cursore) | ripristina i selezionati |
-| B | scegli a mano l'originale da sostituire | |
-| ZR | ricarica l'elenco (e `originali.txt`) | avvia il gioco dentro il livello di quel file |
-| L / R | vai a REMOTI / INSTALLATI | |
-| - | cambia sorgente | |
-| ZL | chiude l'app e avvia il gioco dal menu (spegne l'avvio diretto) | |
-| + | esci | |
-| B (durante il download) | annulla | |
-
-Nella scheda REMOTI **I** indica un file già installato dall'app, con tra parentesi il
-nome con cui è installato. Nella scheda INSTALLATI ogni riga mostra
-`nome installato <- file scaricato`.
+| Tasto | Azione |
+|---|---|
+| Su / Giù | sposta il cursore |
+| Sinistra / Destra | pagina precedente / successiva |
+| A | **gioca**: scarica il livello, crea `update.pak` se serve, scrive `debug.xml` e avvia il gioco |
+| L / R | gioco per `debug.xml`: Auto, Crash 1, Crash 2, Crash 3 |
+| ZR | ricarica l'elenco |
+| - | cambia sorgente |
+| ZL | toglie `debug.xml` e avvia il gioco dal menu |
+| + | esci |
+| B (durante il download) | annulla |
 
 ## Se il livello non funziona
 
 - **Il gioco si apre dal menu invece che nel livello**: manca la patch (l'app lo segnala) o
-  è per un'altra versione del gioco; rifai i dump e il passo 2 della preparazione.
+  è per un'altra versione del gioco; rifai i dump e il passo 2 della preparazione. Se hai
+  scelto a mano un gioco diverso da quello del livello (L/R), torna ad **Auto**.
 - **Il gioco resta sulla schermata di caricamento**, nell'ordine:
   1. nome del file con le maiuscole: il livello deve chiamarsi come dentro, in minuscolo
-     (`custom_level.pak`). Dalla 1.8.1 l'app lo rinomina da sola quando lo avvii; su Eden
-     rinominalo a mano;
+     (`custom_level.pak`). L'app lo installa sempre così; su Eden rinominalo a mano;
   2. versione del gioco diversa da quella del dump: la copia in `originali/update.pak` e
      i file di registrazione del livello vengono dal dump, quindi devono essere della stessa
      versione installata sulla Switch (HOME → icona di Crash → **+**, la versione è in alto);
   3. il livello stesso: provalo su Eden con gli stessi file. Se si blocca anche lì, allega il
      rapporto della conversione.
-- **"Livello nuovo non registrato"**: manca `switch/nst-pak-manager/originali/update.pak`.
+- **"il file non contiene un livello"**: il `.pak` non ha il pacchetto di un livello
+  (`packages/generated/maps/...`): l'app serve solo per i livelli.
+- **"copia dell'update.pak originale illeggibile"**: rifai la copia con il passo 2 della
+  preparazione, oppure cancella `switch/nst-pak-manager/originali/update.pak` se il gioco è
+  la versione 1.0.0.
 - **Schermo nero o crash**: quasi sempre il `.pak` è ancora nel formato PC, o è stato
   rinominato. Rinominare il `.pak` non rinomina il livello che contiene (l'app installa
-  comunque con il nome giusto e blocca le scelte a mano sbagliate). Il `.pak` si controlla
+  comunque con il nome giusto). Il `.pak` si controlla
   dal PC con `tools/controlla_pak.py`, che lo confronta con gli originali del dump RomFS:
 
   ```
@@ -323,6 +290,14 @@ nome con cui è installato. Nella scheda INSTALLATI ogni riga mostra
   [convertitore](https://github.com/alberdom88/Crash-NST-Level-Editor-switch-conversion/blob/main/README_SWITCH.md),
   il cui rapporto di conversione dice anche cosa non è stato possibile convertire.
 
+## Aggiornare dalla 1.8
+
+La 2.0 non usa più installazioni, backup e `originali.txt` delle versioni precedenti.
+I file installati dalla 1.8 restano nella cartella delle mod finché non giochi un altro
+livello con la 2.0 (che toglie `update.pak` e i livelli con lo stesso nome) o non li
+cancelli a mano. Le eventuali mod salvate dalla 1.8 sono ancora in
+`sdmc:/switch/nst-pak-manager/backup/`.
+
 ## Strumenti per il PC
 
 Nella cartella `tools/` (Python 3, solo libreria standard):
@@ -330,7 +305,6 @@ Nella cartella `tools/` (Python 3, solo libreria standard):
 | Script | A cosa serve |
 |---|---|
 | `crea_avvio_livello.py` | patch per l'avvio diretto, copia dell'`update.pak` originale (`--romfs`) e `debug.xml` per Eden |
-| `list_originals.py` | crea `originali.txt` dal dump RomFS |
 | `make_manifest.py` | crea `manifest.json` per un hosting senza elenco dei file |
 | `controlla_pak.py` | confronta un `.pak` con gli originali Switch (formato, nomi, contenuto) |
 | `analizza_avvio.py`, `cerca_opzioni.py` | analisi dell'eseguibile Switch (opzioni di avvio, configurazione) |
@@ -362,7 +336,7 @@ make
 sh tests/run_tests.sh
 ```
 
-Compila la logica dell'app (download, installazione, backup, MEGA, archivi `.pak`) per
+Compila la logica dell'app (download, preparazione del livello, MEGA, archivi `.pak`) per
 Linux (serve `libcurl4-openssl-dev`) e la prova contro un server locale che simula
 cartella web, manifest e API di MEGA (con file cifrati come quelli veri). Gli `update.pak`
 scritti dall'app vengono riletti e decompressi con un lettore indipendente in Python.
@@ -371,14 +345,14 @@ Si può provare anche l'interfaccia, con un `switch.h` finto che legge i tasti d
 scenario e stampa le schermate:
 
 ```
-python tests/ui_sim/ui_sim.py tests/ui_sim/scenari/completo.txt --config tests/ui_sim/sim_config.json
+python tests/ui_sim/ui_sim.py tests/ui_sim/scenari/gioca.txt --config tests/ui_sim/sim_config.json
 ```
 
 ## Struttura
 
 ```
 source/main.cpp   interfaccia (console libnx, solo Switch)
-source/core.*     configurazione, sorgenti, installazione, backup, avvio diretto, registrazione
+source/core.*     configurazione, sorgenti, preparazione del livello, update.pak, debug.xml
 source/net.*      download con libcurl
 source/mega.*     cartelle MEGA: elenco, AES e decifratura dei download
 source/pak.*      archivi .pak: lettura e scrittura (update.pak dei livelli nuovi)

@@ -14,6 +14,8 @@ g++ -std=gnu++17 -O1 -Wall -Wextra -fno-exceptions -fno-rtti -I"$CURL_INC" \
 
 mkdir -p "$WORK/www" "$WORK/sd"
 python3 tests/crea_pak_prova.py "$WORK/pak"
+# livello nuovo servito dal server di prova (registrazione unita a base_update.pak)
+mkdir -p "$WORK/www/reg" && cp "$WORK/pak/Custom_Level.pak" "$WORK/www/reg/"
 python3 tests/server.py "$WORK/www" $PORT &
 SERVER=$!
 trap 'kill $SERVER 2>/dev/null; rm -rf "$WORK"' EXIT
